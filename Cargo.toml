@@ -3,10 +3,22 @@ members = [".", "xtask"]
 resolver = "2"
 default-members = ["."]
 
-[package]
-name = "npltz"
+[workspace.package]
 version = "0.1.0"
 edition = "2024"
+description = "Nepali Patro in your terminal"
+license = "MIT"
+categories = ["command-line-utilities"]
+keywords = ["nepali", "calendar", "bikram-sambat", "tui", "terminal"]
+
+[package]
+name = "npltz"
+version.workspace = true
+edition.workspace = true
+description.workspace = true
+license.workspace = true
+categories.workspace = true
+keywords.workspace = true
 
 [dependencies]
 ratatui = "0.30"
