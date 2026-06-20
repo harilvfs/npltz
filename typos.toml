@@ -3,6 +3,7 @@
 [default]
 [default.extend-words]
 ratatui = "ratatui"
+nd = "nd"
 
 [files]
 extend-exclude = []
