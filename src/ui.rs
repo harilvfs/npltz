@@ -61,30 +61,21 @@ fn render_calendar_popup(frame: &mut Frame, area: Rect, app: &App) {
     ])
     .areas(inner);
 
-    // Day headers
+    let cell_w = 10usize;
+
     let hdr = Style::default()
         .fg(app.theme.secondary)
         .add_modifier(Modifier::BOLD);
     let header_line = Line::from(
         DAY_HEADER
             .iter()
-            .enumerate()
-            .flat_map(|(i, &name)| {
-                let mut spans = vec![Span::styled(name, hdr)];
-                if i < 6 {
-                    spans.push(Span::raw(" "));
-                }
-                spans
-            })
+            .map(|&name| Span::styled(format!("{:^w$}", name, w = cell_w), hdr))
             .collect::<Vec<_>>(),
     );
     frame.render_widget(
         Paragraph::new(header_line).alignment(Alignment::Center),
         header_area,
     );
-
-    // Calendar grid
-    let cell_w = 6usize;
     let mut grid_lines: Vec<Line> = Vec::new();
     for row in &app.calendar_rows {
         let mut spans = Vec::new();
@@ -111,13 +102,13 @@ fn render_calendar_popup(frame: &mut Frame, area: Rect, app: &App) {
             }
         }
         grid_lines.push(Line::from(spans));
+        grid_lines.push(Line::from(""));
     }
     frame.render_widget(
         Paragraph::new(grid_lines).alignment(Alignment::Center),
         grid_area,
     );
 
-    // Info section
     let now = chrono::Local::now();
     let label = Style::default()
         .fg(app.theme.secondary)
@@ -153,7 +144,6 @@ fn render_calendar_popup(frame: &mut Frame, area: Rect, app: &App) {
         info_area,
     );
 
-    // Navigation line
     let nav_style = Style::default().fg(app.theme.secondary);
     let nav = Line::from(vec![Span::styled(
         "  <-  |  ->  |  t: today  |  q: quit",
@@ -162,7 +152,6 @@ fn render_calendar_popup(frame: &mut Frame, area: Rect, app: &App) {
     .alignment(Alignment::Center);
     frame.render_widget(nav, nav_area);
 
-    // Render block on top
     frame.render_widget(block, area);
 }
 
