@@ -156,26 +156,11 @@ fn render_calendar_popup(frame: &mut Frame, area: Rect, app: &App) {
 }
 
 fn render_status_bar(frame: &mut Frame, area: Rect, app: &App) {
-    let now = chrono::Local::now();
-    let time_str = now.format("%I:%M:%S %p").to_string();
-
-    let left = format!(" npltz v{} ", env!("CARGO_PKG_VERSION"));
-    let right = format!(" {} ", time_str);
-
-    let bar = Paragraph::new(Line::from(vec![
-        Span::styled(
-            left,
-            Style::default().fg(app.theme.bg).bg(app.theme.primary),
-        ),
-        Span::styled(
-            "  ",
-            Style::default().fg(app.theme.bg).bg(app.theme.primary),
-        ),
-        Span::styled(
-            right,
-            Style::default().fg(app.theme.bg).bg(app.theme.secondary),
-        ),
-    ]));
-
+    let text = format!(" npltz v{} ", env!("CARGO_PKG_VERSION"));
+    let bar = Paragraph::new(Line::from(vec![Span::styled(
+        text,
+        Style::default().fg(app.theme.bg).bg(app.theme.primary),
+    )]))
+    .alignment(Alignment::Center);
     frame.render_widget(bar, area);
 }
