@@ -21,7 +21,7 @@ fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
     }
 }
 
-const DAY_HEADER: [&str; 7] = ["Ait", "Som", "Mgl", "Bud", "Bih", "Suk", "San"];
+const DAY_HEADER: [&str; 7] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 pub fn render(frame: &mut Frame, app: &App) {
     let area = frame.area();
@@ -123,19 +123,6 @@ fn render_calendar_popup(frame: &mut Frame, area: Rect, app: &App) {
         .fg(app.theme.secondary)
         .add_modifier(Modifier::BOLD);
 
-    let battery_str = match app.battery.percentage {
-        Some(pct) => {
-            let s = match app.battery.status.as_deref() {
-                Some("Charging") => "Charging",
-                Some("Discharging") => "Discharging",
-                Some("Full") => "Full",
-                _ => "Unknown",
-            };
-            format!("{}% ({})", pct, s)
-        }
-        None => "N/A".into(),
-    };
-
     let today_str = app
         .today
         .as_ref()
@@ -156,10 +143,6 @@ fn render_calendar_popup(frame: &mut Frame, area: Rect, app: &App) {
                     .fg(app.theme.warning)
                     .add_modifier(Modifier::BOLD),
             ),
-        ]),
-        Line::from(vec![
-            Span::styled("Battery:", label),
-            Span::raw(format!(" {}", battery_str)),
         ]),
     ];
 
@@ -184,16 +167,11 @@ fn render_calendar_popup(frame: &mut Frame, area: Rect, app: &App) {
 }
 
 fn render_status_bar(frame: &mut Frame, area: Rect, app: &App) {
-    let battery_str = match app.battery.percentage {
-        Some(pct) => format!("Bat: {}%", pct),
-        None => "Bat: N/A".into(),
-    };
-
     let now = chrono::Local::now();
     let time_str = now.format("%I:%M:%S %p").to_string();
 
     let left = format!(" npltz v{} ", env!("CARGO_PKG_VERSION"));
-    let right = format!(" {} | {} ", time_str, battery_str);
+    let right = format!(" {} ", time_str);
 
     let bar = Paragraph::new(Line::from(vec![
         Span::styled(

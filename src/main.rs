@@ -1,5 +1,4 @@
 mod app;
-mod battery;
 mod calendar;
 mod theme;
 mod ui;

@@ -1,4 +1,3 @@
-use crate::battery::BatteryInfo;
 use crate::calendar::{
     self, NepaliDate, english_month_name, get_days_in_month, month_ad_range, month_start_weekday,
 };
@@ -7,7 +6,6 @@ use chrono::{Datelike, Local};
 
 pub struct App {
     pub should_quit: bool,
-    pub battery: BatteryInfo,
     pub theme: Theme,
 
     pub today: Option<NepaliDate>,
@@ -33,7 +31,6 @@ impl App {
     pub fn new() -> Self {
         let mut app = App {
             should_quit: false,
-            battery: BatteryInfo::default(),
             theme: Theme::default(),
             today: None,
             view_year: 2081,
@@ -49,7 +46,6 @@ impl App {
 
     pub fn update(&mut self) {
         let now = Local::now();
-        self.battery = crate::battery::get_battery_info();
         self.today = calendar::ad_to_bs(now.year(), now.month(), now.day());
 
         if let Some(ref nd) = self.today {
