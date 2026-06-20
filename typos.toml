@@ -1,0 +1,8 @@
+# typos.toml - Configuration file for typos spellchecker
+
+[default]
+[default.extend-words]
+ratatui = "ratatui"
+
+[files]
+extend-exclude = []
