@@ -26,3 +26,8 @@ crossterm = "0.29"
 chrono = "0.4.45"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+
+[profile.release]
+opt-level = "z"
+debug = false
+lto = true

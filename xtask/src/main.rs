@@ -26,19 +26,9 @@ fn main() -> anyhow::Result<()> {
 }
 
 fn ci(sh: &xshell::Shell) -> anyhow::Result<()> {
-    println!("→ cargo fmt --all --check");
     xshell::cmd!(sh, "cargo fmt --all --check").run()?;
-
-    println!("→ cargo clippy --workspace -- -D warnings");
     xshell::cmd!(sh, "cargo clippy --workspace -- -D warnings").run()?;
-
-    println!("→ cargo check --workspace");
     xshell::cmd!(sh, "cargo check --workspace").run()?;
-
-    println!("→ cargo test --workspace");
     xshell::cmd!(sh, "cargo test --workspace").run()?;
-
-    println!();
-    println!("All CI checks passed.");
     Ok(())
 }
