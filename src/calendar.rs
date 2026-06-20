@@ -6,20 +6,13 @@ const MONTH_NAMES: &[&str] = &[
     "Magh", "Falgun", "Chaitra",
 ];
 
-const DAY_NAMES: &[&str] = &[
-    "Aaitabar",
-    "Sombar",
-    "Mangalbar",
-    "Budhabar",
-    "Bihibar",
-    "Shukrabar",
-    "Shanibar",
-];
+const DAY_NAMES: &[&str] =
+    &["Aaitabar", "Sombar", "Mangalbar", "Budhabar", "Bihibar", "Shukrabar", "Shanibar"];
 
 pub struct NepaliDate {
-    pub year: i32,
-    pub month: u32,
-    pub day: u32,
+    pub year:    i32,
+    pub month:   u32,
+    pub day:     u32,
     pub weekday: usize,
 }
 
@@ -33,21 +26,15 @@ impl NepaliDate {
     }
 
     pub fn format_long(&self) -> String {
-        format!(
-            "{} {}, {} {}",
-            self.day_name(),
-            self.day,
-            self.month_name(),
-            self.year
-        )
+        format!("{} {}, {} {}", self.day_name(), self.day, self.month_name(), self.year)
     }
 }
 
 #[derive(Deserialize)]
 struct YearData {
-    year: i32,
+    year:       i32,
     #[serde(deserialize_with = "parse_months")]
-    months: [u32; 12],
+    months:     [u32; 12],
     total_days: u32,
 }
 

@@ -6,20 +6,20 @@ use chrono::{Datelike, Local};
 
 pub struct App {
     pub should_quit: bool,
-    pub theme: Theme,
+    pub theme:       Theme,
 
-    pub today: Option<NepaliDate>,
-    pub view_year: i32,
-    pub view_month: u32,
+    pub today:            Option<NepaliDate>,
+    pub view_year:        i32,
+    pub view_month:       u32,
     pub initial_view_set: bool,
 
-    pub ad_range_str: String,
+    pub ad_range_str:  String,
     pub calendar_rows: Vec<CalendarRow>,
-    pub today_key: Option<(i32, u32, u32)>,
+    pub today_key:     Option<(i32, u32, u32)>,
 }
 
 pub struct CalendarCell {
-    pub day: u32,
+    pub day:      u32,
     pub is_today: bool,
 }
 
@@ -30,15 +30,15 @@ pub struct CalendarRow {
 impl App {
     pub fn new() -> Self {
         let mut app = App {
-            should_quit: false,
-            theme: Theme::default(),
-            today: None,
-            view_year: 2081,
-            view_month: 1,
+            should_quit:      false,
+            theme:            Theme::default(),
+            today:            None,
+            view_year:        2081,
+            view_month:       1,
             initial_view_set: false,
-            ad_range_str: String::new(),
-            calendar_rows: Vec::new(),
-            today_key: None,
+            ad_range_str:     String::new(),
+            calendar_rows:    Vec::new(),
+            today_key:        None,
         };
         app.update();
         app
@@ -120,9 +120,7 @@ impl App {
             current_cells.push(Some(CalendarCell { day, is_today }));
 
             if current_cells.len() == 7 {
-                rows.push(CalendarRow {
-                    cells: current_cells,
-                });
+                rows.push(CalendarRow { cells: current_cells });
                 current_cells = Vec::new();
             }
         }
@@ -131,9 +129,7 @@ impl App {
             while current_cells.len() < 7 {
                 current_cells.push(None);
             }
-            rows.push(CalendarRow {
-                cells: current_cells,
-            });
+            rows.push(CalendarRow { cells: current_cells });
         }
 
         self.calendar_rows = rows;
