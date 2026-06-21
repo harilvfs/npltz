@@ -1,0 +1,266 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_version:
+        description: 'Release tag (e.g., v1.1.1)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up version variables
+        run: |
+          VERSION=$(echo "${{ github.event.inputs.tag_version }}" | sed 's/^v//')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Update Cargo.toml version
+        run: |
+          sed -i "/\[workspace.package\]/,/^\[/ s/^version = \".*\"/version = \"$VERSION\"/" Cargo.toml
+
+      - name: Install Rust (nightly) with MUSL targets
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: nightly-2025-12-31
+          targets: x86_64-unknown-linux-musl,aarch64-unknown-linux-musl
+
+      - name: Install rust-src
+        run: rustup component add rust-src --toolchain nightly-2025-12-31
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v5
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-registry-
+
+      - name: Cache Cargo index
+        uses: actions/cache@v5
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-index-
+
+      - name: Run cargo build to update Cargo.lock
+        run: cargo build --release
+
+      - name: Commit version changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add Cargo.toml Cargo.lock
+          git commit -m "chore(release): bump version"
+          git push
+
+      - name: Install musl-tools
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+
+      - name: Install cross-rs for cross-compilation
+        run: cargo install cross
+
+      - name: Build x86_64 binary
+        run: |
+          cargo build \
+            --release \
+            --verbose \
+            --target-dir=build \
+            --target=x86_64-unknown-linux-musl
+
+      - name: Build aarch64 binary (with cross)
+        run: |
+          cross build \
+            --release \
+            --verbose \
+            --target-dir=build \
+            --target=aarch64-unknown-linux-musl
+
+      - name: Generate completions
+        run: |
+          mkdir -p completions
+          ./build/x86_64-unknown-linux-musl/release/npltz completions bash > completions/npltz.bash
+          ./build/x86_64-unknown-linux-musl/release/npltz completions zsh > completions/npltz.zsh
+          ./build/x86_64-unknown-linux-musl/release/npltz completions fish > completions/npltz.fish
+
+      - name: Generate manpage
+        run: cargo xtask man
+
+      - name: Upload completions as artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: completions
+          path: completions/
+          retention-days: 1
+
+      - name: Package x86_64 release archive
+        run: |
+          DIR="npltz-x86_64-unknown-linux-musl"
+          mkdir -p "$DIR/completions" "$DIR/man"
+          cp build/x86_64-unknown-linux-musl/release/npltz "$DIR/"
+          cp completions/* "$DIR/completions/"
+          cp man/npltz.1 "$DIR/man/"
+          tar -czf "${DIR}.tar.gz" "$DIR"
+          sha256sum "${DIR}.tar.gz" > "${DIR}.tar.gz.sha256"
+          echo "ARCHIVE_X86_64=${DIR}.tar.gz" >> $GITHUB_ENV
+          echo "ARCHIVE_X86_64_SHA=${DIR}.tar.gz.sha256" >> $GITHUB_ENV
+
+      - name: Package aarch64 release archive
+        run: |
+          DIR="npltz-aarch64-unknown-linux-musl"
+          mkdir -p "$DIR/completions" "$DIR/man"
+          cp build/aarch64-unknown-linux-musl/release/npltz "$DIR/"
+          cp completions/* "$DIR/completions/"
+          cp man/npltz.1 "$DIR/man/"
+          tar -czf "${DIR}.tar.gz" "$DIR"
+          sha256sum "${DIR}.tar.gz" > "${DIR}.tar.gz.sha256"
+          echo "ARCHIVE_AARCH64=${DIR}.tar.gz" >> $GITHUB_ENV
+          echo "ARCHIVE_AARCH64_SHA=${DIR}.tar.gz.sha256" >> $GITHUB_ENV
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: linux-archives
+          path: |
+            npltz-*.tar.gz
+            npltz-*.tar.gz.sha256
+          retention-days: 1
+
+      - name: Generate changelog
+        uses: orhun/git-cliff-action@v4
+        with:
+          version: "v2.9.1"
+          config: cliff.toml
+          args: --unreleased --strip header
+        env:
+          OUTPUT: BODY.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ github.event.inputs.tag_version }}
+          name: ${{ github.event.inputs.tag_version }}
+          draft: false
+          prerelease: true
+          generate_release_notes: false
+          body_path: BODY.md
+
+      - name: Upload Linux assets
+        run: |
+          gh release upload ${{ github.event.inputs.tag_version }} \
+            ${{ env.ARCHIVE_X86_64 }} \
+            ${{ env.ARCHIVE_X86_64_SHA }} \
+            ${{ env.ARCHIVE_AARCH64 }} \
+            ${{ env.ARCHIVE_AARCH64_SHA }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  android:
+    runs-on: ubuntu-latest
+    needs: release
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Install Rust (nightly) with Android targets
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: nightly-2025-12-31
+          targets: aarch64-linux-android,armv7-linux-androideabi
+
+      - name: Install rust-src
+        run: rustup component add rust-src --toolchain nightly-2025-12-31
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v5
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-android-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-registry-android-
+
+      - name: Cache Cargo index
+        uses: actions/cache@v5
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-android-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-index-android-
+
+      - name: Install cross
+        run: cargo install cross
+
+      - name: Download completions
+        uses: actions/download-artifact@v7
+        with:
+          name: completions
+          path: completions/
+
+      - name: Build aarch64 Android binary
+        run: |
+          cross build \
+            --release \
+            --target-dir=build \
+            --target=aarch64-linux-android
+
+      - name: Build armv7 Android binary
+        run: |
+          cross build \
+            --release \
+            --target-dir=build \
+            --target=armv7-linux-androideabi
+
+      - name: Package aarch64 Android archive
+        run: |
+          DIR="npltz-aarch64-linux-android"
+          mkdir -p "$DIR/completions" "$DIR/man"
+          cp build/aarch64-linux-android/release/npltz "$DIR/"
+          cp completions/* "$DIR/completions/"
+          cp man/npltz.1 "$DIR/man/"
+          tar -czf "${DIR}.tar.gz" "$DIR"
+          sha256sum "${DIR}.tar.gz" > "${DIR}.tar.gz.sha256"
+          echo "ARCHIVE_AARCH64_ANDROID=${DIR}.tar.gz" >> $GITHUB_ENV
+          echo "ARCHIVE_AARCH64_ANDROID_SHA=${DIR}.tar.gz.sha256" >> $GITHUB_ENV
+
+      - name: Package armv7 Android archive
+        run: |
+          DIR="npltz-armv7-linux-androideabi"
+          mkdir -p "$DIR/completions" "$DIR/man"
+          cp build/armv7-linux-androideabi/release/npltz "$DIR/"
+          cp completions/* "$DIR/completions/"
+          cp man/npltz.1 "$DIR/man/"
+          tar -czf "${DIR}.tar.gz" "$DIR"
+          sha256sum "${DIR}.tar.gz" > "${DIR}.tar.gz.sha256"
+          echo "ARCHIVE_ARMV7_ANDROID=${DIR}.tar.gz" >> $GITHUB_ENV
+          echo "ARCHIVE_ARMV7_ANDROID_SHA=${DIR}.tar.gz.sha256" >> $GITHUB_ENV
+
+      - name: Upload Android archives as artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-archives
+          path: |
+            npltz-*.tar.gz
+            npltz-*.tar.gz.sha256
+          retention-days: 1
+
+      - name: Upload Android assets
+        run: |
+          gh release upload ${{ github.event.inputs.tag_version }} \
+            ${{ env.ARCHIVE_AARCH64_ANDROID }} \
+            ${{ env.ARCHIVE_AARCH64_ANDROID_SHA }} \
+            ${{ env.ARCHIVE_ARMV7_ANDROID }} \
+            ${{ env.ARCHIVE_ARMV7_ANDROID_SHA }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
