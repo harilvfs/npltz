@@ -10,7 +10,7 @@ use app::App;
 use calendar::NepaliDate;
 use chrono::{Datelike, Local, NaiveDate};
 use clap::builder::styling::{AnsiColor, Style};
-use clap::{Parser, Subcommand};
+use clap::{ArgAction, CommandFactory, Parser, Subcommand};
 use config::Config;
 use crossterm::event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode};
 use crossterm::execute;
@@ -32,8 +32,17 @@ fn styles() -> clap::builder::Styles {
 }
 
 #[derive(Parser)]
-#[command(name = "npltz", about = "Nepali Patro in your terminal", styles = styles(), version)]
+#[command(name = "npltz", about = "Nepali Patro in your terminal", styles = styles())]
 struct Cli {
+    #[arg(
+        short = 'v',
+        visible_short_alias = 'V',
+        long = "version",
+        action = ArgAction::SetTrue,
+        help = "Print version information"
+    )]
+    version: bool,
+
     #[command(subcommand)]
     command: Option<Commands>,
 
@@ -62,11 +71,20 @@ enum Commands {
     Convert { date: String },
     #[command(about = "Convert a Bikram Sambat date (YYYY-MM-DD) to AD")]
     ConvertBs { date: String },
+    #[command(about = "Generate shell completions (bash, zsh, fish)")]
+    Completions {
+        shell: clap_complete::Shell,
+    },
 }
 
 fn main() -> Result<()> {
     log::Log::init();
     let cli = Cli::parse();
+
+    if cli.version {
+        println!("npltz v{}", env!("CARGO_PKG_VERSION"));
+        return Ok(());
+    }
 
     if let Some(theme) = &cli.set_theme {
         let mut config = Config::load();
@@ -105,6 +123,10 @@ fn main() -> Result<()> {
         }
         Some(Commands::ConvertBs { date }) => {
             convert_bs_to_ad(&date)?;
+        }
+        Some(Commands::Completions { shell }) => {
+            let mut cmd = Cli::command();
+            clap_complete::generate(shell, &mut cmd, "npltz", &mut std::io::stdout());
         }
         None => {
             run_tui()?;

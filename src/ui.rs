@@ -280,12 +280,11 @@ fn render_goto_popup(frame: &mut Frame, area: Rect, app: &App) {
 }
 
 fn render_status_bar(frame: &mut Frame, area: Rect, app: &App) {
-    let theme_name = format!(" {}", app.theme.name);
     let text = format!(" npltz v{} ", env!("CARGO_PKG_VERSION"));
-    let bar = Paragraph::new(Line::from(vec![
-        Span::styled(text, Style::default().fg(app.theme.bg).bg(app.theme.primary)),
-        Span::styled(theme_name, Style::default().fg(app.theme.bg).bg(app.theme.accent)),
-    ]))
+    let bar = Paragraph::new(Line::from(vec![Span::styled(
+        text,
+        Style::default().fg(app.theme.bg).bg(app.theme.primary),
+    )]))
     .alignment(Alignment::Center);
     frame.render_widget(bar, area);
 }
