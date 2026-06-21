@@ -20,6 +20,10 @@ license.workspace = true
 categories.workspace = true
 keywords.workspace = true
 
+[lib]
+name = "npltz"
+path = "src/lib.rs"
+
 [dependencies]
 ratatui = { version = "0.30", default-features = false, features = ["crossterm"] }
 crossterm = "0.29"

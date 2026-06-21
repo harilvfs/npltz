@@ -5,6 +5,9 @@ edition.workspace = true
 publish = false
 
 [dependencies]
+npltz = { path = ".." }
 pico-args = "0.5"
 xshell = "0.2"
 anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+clap_mangen = "0.3"
