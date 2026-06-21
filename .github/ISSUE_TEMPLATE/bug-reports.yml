@@ -49,11 +49,11 @@ body:
       required: true
 
   - type: input
-    id: other_distro
+    id: other_os
     attributes:
-      label: "Other Distro (if not listed)"
-      description: "If you selected 'Other', specify your Arch-based distro."
-      placeholder: "Enter distro name"
+      label: "Other OS (if not listed)"
+      description: "If you selected 'Other', specify your OS info."
+      placeholder: "Enter OS name"
     validations:
       required: false
 
@@ -82,7 +82,7 @@ body:
   - type: input
     id: npltz_version
     attributes:
-      label: "Npltz Version"
+      label: "npltz Version"
       description: "Which version of the npltz are you using?"
       placeholder: "e.g., latest commit, version number"
     validations:
@@ -93,7 +93,7 @@ body:
     attributes:
       label: "Terminal Emulator"
       description: "Which terminal emulator are you using?"
-      placeholder: "e.g., Alacritty, Kitty, etc."
+      placeholder: "e.g., Alacritty, Kitty, Ghostty, or Powershell(Windows) etc."
     validations:
       required: false
 
