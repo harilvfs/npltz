@@ -56,7 +56,7 @@ static DATA: std::sync::LazyLock<Vec<YearData>> = std::sync::LazyLock::new(|| {
 });
 
 const AD_EPOCH: (i32, u32, u32) = (1918, 4, 12);
-const BS_EPOCH_YEAR: i32 = 1975;
+pub const BS_EPOCH_YEAR: i32 = 1975;
 
 fn get_year_data(bs_year: i32) -> Option<&'static YearData> {
     DATA.iter().find(|yd| yd.year == bs_year)
