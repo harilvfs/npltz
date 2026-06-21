@@ -72,9 +72,7 @@ enum Commands {
     #[command(about = "Convert a Bikram Sambat date (YYYY-MM-DD) to AD")]
     ConvertBs { date: String },
     #[command(about = "Generate shell completions (bash, zsh, fish)")]
-    Completions {
-        shell: clap_complete::Shell,
-    },
+    Completions { shell: clap_complete::Shell },
 }
 
 fn main() -> Result<()> {
