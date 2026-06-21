@@ -7,6 +7,9 @@ default-members = ["."]
 version = "1.0.0"
 edition = "2024"
 description = "Nepali Patro in your terminal"
+homepage = "https://github.com/harilvfs/npltz"
+documentation = "https://github.com/harilvfs/npltz/blob/main/.github/README.md"
+readme = "./.github/README.md"
 license = "MIT"
 categories = ["command-line-utilities"]
 keywords = ["nepali", "calendar", "bikram-sambat", "tui", "terminal"]
@@ -17,8 +20,12 @@ version.workspace = true
 edition.workspace = true
 description.workspace = true
 license.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+readme.workspace = true
 categories.workspace = true
 keywords.workspace = true
+include = ["src", "Cargo.toml", ".github/README.md", "man/npltz.1", "LICENSE"]
 
 [lib]
 name = "npltz"
