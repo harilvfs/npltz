@@ -21,11 +21,11 @@ categories.workspace = true
 keywords.workspace = true
 
 [dependencies]
-ratatui = "0.30"
+ratatui = { version = "0.30", default-features = false, features = ["crossterm"] }
 crossterm = "0.29"
 chrono = "0.4.45"
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+serde = { version = "1", default-features = false, features = ["derive"] }
+serde_json = { version = "1", default-features = false, features = ["std"] }
 clap = { version = "4", features = ["derive"] }
 clap_complete = "4"
 toml = "0.8"
@@ -36,3 +36,7 @@ thiserror = "2"
 opt-level = "z"
 debug = false
 lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+incremental = false
