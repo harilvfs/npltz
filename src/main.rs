@@ -65,6 +65,7 @@ enum Commands {
 }
 
 fn main() -> Result<()> {
+    log::Log::init();
     let cli = Cli::parse();
 
     if let Some(theme) = &cli.set_theme {
@@ -78,7 +79,11 @@ fn main() -> Result<()> {
             config.save()?;
             println!("{} has been set as your default theme.", theme::display_name(theme));
         } else {
-            let msg = format!("Unknown theme '{}'. Valid themes: {}", theme, theme::THEME_NAMES.join(", "));
+            let msg = format!(
+                "Unknown theme '{}'. Valid themes: {}",
+                theme,
+                theme::THEME_NAMES.join(", ")
+            );
             log::Log::error(&msg);
             return Err(NpltzError::InvalidTheme(msg));
         }
@@ -183,12 +188,10 @@ fn show_bs_date(date_str: &str, json: bool) -> Result<()> {
     if parts.len() != 3 {
         return Err(NpltzError::InvalidDate("Invalid date format. Use YYYY-MM-DD".into()));
     }
-    let year: i32 = parts[0].parse()
-        .map_err(|_| NpltzError::InvalidDate("Invalid year".into()))?;
-    let month: u32 = parts[1].parse()
-        .map_err(|_| NpltzError::InvalidDate("Invalid month".into()))?;
-    let day: u32 = parts[2].parse()
-        .map_err(|_| NpltzError::InvalidDate("Invalid day".into()))?;
+    let year: i32 = parts[0].parse().map_err(|_| NpltzError::InvalidDate("Invalid year".into()))?;
+    let month: u32 =
+        parts[1].parse().map_err(|_| NpltzError::InvalidDate("Invalid month".into()))?;
+    let day: u32 = parts[2].parse().map_err(|_| NpltzError::InvalidDate("Invalid day".into()))?;
 
     let ad = calendar::bs_to_ad(year, month, day);
     let weekday = ad.map_or(0, |d| d.format("%w").to_string().parse().unwrap_or(0));
@@ -242,12 +245,10 @@ fn convert_bs_to_ad(date_str: &str) -> Result<()> {
     if parts.len() != 3 {
         return Err(NpltzError::InvalidDate("Invalid date format. Use YYYY-MM-DD".into()));
     }
-    let year: i32 = parts[0].parse()
-        .map_err(|_| NpltzError::InvalidDate("Invalid year".into()))?;
-    let month: u32 = parts[1].parse()
-        .map_err(|_| NpltzError::InvalidDate("Invalid month".into()))?;
-    let day: u32 = parts[2].parse()
-        .map_err(|_| NpltzError::InvalidDate("Invalid day".into()))?;
+    let year: i32 = parts[0].parse().map_err(|_| NpltzError::InvalidDate("Invalid year".into()))?;
+    let month: u32 =
+        parts[1].parse().map_err(|_| NpltzError::InvalidDate("Invalid month".into()))?;
+    let day: u32 = parts[2].parse().map_err(|_| NpltzError::InvalidDate("Invalid day".into()))?;
 
     match calendar::bs_to_ad(year, month, day) {
         Some(ad) => {
@@ -275,7 +276,6 @@ fn run_tui() -> io::Result<()> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    log::Log::init();
     let config = Config::load();
     let theme_name = config.theme.clone().unwrap_or_else(|| "catppuccin-mocha".into());
     let mut app = App::new(&theme_name);

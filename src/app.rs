@@ -1,10 +1,7 @@
-use crate::calendar::{
-    self, NepaliDate, get_days_in_month, month_ad_range, month_start_weekday,
-};
+use crate::calendar::{self, NepaliDate, get_days_in_month, month_ad_range, month_start_weekday};
 use crate::config::Config;
-use crate::log;
-use crate::theme;
 use crate::theme::Theme;
+use crate::{log, theme};
 use chrono::{Datelike, Local};
 
 #[cfg(test)]
@@ -36,7 +33,9 @@ mod tests {
     #[test]
     fn test_ad_dates_in_cells() {
         let app = test_app();
-        let has_ad_dates = app.calendar_rows.iter()
+        let has_ad_dates = app
+            .calendar_rows
+            .iter()
             .flat_map(|r| &r.cells)
             .flatten()
             .any(|c| c.ad_day > 0 && c.ad_day <= 31);
@@ -215,7 +214,8 @@ mod tests {
     #[test]
     fn test_saturday_detection() {
         let app = test_app();
-        let has_saturday = app.calendar_rows.iter().flat_map(|r| &r.cells).flatten().any(|c| c.is_saturday);
+        let has_saturday =
+            app.calendar_rows.iter().flat_map(|r| &r.cells).flatten().any(|c| c.is_saturday);
         assert!(has_saturday);
     }
 }
@@ -454,11 +454,8 @@ impl App {
             return;
         };
 
-        self.ad_range_str = format!(
-            "{} - {}",
-            ad_start.format("%b %d"),
-            ad_end.format("%b %d, %Y"),
-        );
+        self.ad_range_str =
+            format!("{} - {}", ad_start.format("%b %d"), ad_end.format("%b %d, %Y"),);
 
         let mut rows: Vec<CalendarRow> = Vec::new();
         let mut current_cells: Vec<Option<CalendarCell>> = Vec::new();
@@ -475,7 +472,12 @@ impl App {
                 ty == self.view_year && tm == self.view_month && td == day
             });
             let is_saturday = cell_idx % 7 == 6;
-            current_cells.push(Some(CalendarCell { day, is_today, is_saturday, ad_day: ad_date.day() }));
+            current_cells.push(Some(CalendarCell {
+                day,
+                is_today,
+                is_saturday,
+                ad_day: ad_date.day(),
+            }));
             cell_idx += 1;
 
             if current_cells.len() == 7 {

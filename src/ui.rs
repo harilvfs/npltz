@@ -86,8 +86,9 @@ fn render_calendar_popup(frame: &mut Frame, area: Rect, app: &App) {
         header_area,
     );
 
+    let ad_style =
+        Style::default().fg(app.theme.secondary).add_modifier(Modifier::DIM | Modifier::ITALIC);
     let sat_style = Style::default().fg(app.theme.error);
-    let ad_style = Style::default().fg(app.theme.secondary);
     let mut grid_lines: Vec<Line> = Vec::new();
     for row in &app.calendar_rows {
         let mut bs_spans = Vec::new();
@@ -104,7 +105,13 @@ fn render_calendar_popup(frame: &mut Frame, area: Rect, app: &App) {
                             .add_modifier(Modifier::BOLD),
                     ));
                     let a = format!("{:^w$}", cell.ad_day.to_string(), w = cell_w);
-                    ad_spans.push(Span::styled(a, ad_style));
+                    ad_spans.push(Span::styled(
+                        a,
+                        Style::default()
+                            .fg(app.theme.bg)
+                            .bg(app.theme.primary)
+                            .add_modifier(Modifier::ITALIC),
+                    ));
                 }
                 Some(cell) if cell.is_saturday => {
                     let s = format!("{:^w$}", cell.day.to_string(), w = cell_w);
