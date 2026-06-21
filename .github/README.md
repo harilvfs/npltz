@@ -14,7 +14,9 @@
 
 **[npltz](https://github.com/harilvfs/npltz)** - a terminal-based Nepali calendar (Bikram Sambat) written in Rust using the [`ratatui`](https://github.com/ratatui-org/ratatui) TUI library. It's designed to be simple: view Nepali dates with AD (English) support in your terminal.
 
-npltz uses the [`nepali-date-converter`](https://crates.io/crates/nepali-date-converter) library to convert AD dates to Nepali effortlessly. Star that repo if you find it useful <https://github.com/dhurbachy/Nepali-Date-Converter>. Appreciate the work that actually made this tool possible without going back and forth.
+npltz uses calendar data from the [`nepali-date-converter`](https://crates.io/crates/nepali-date-converter) project by [dhurbachy](https://github.com/dhurbachy). The data (`calendar_data.json`) is compiled into the binary at build time via `include_str!()`, so no external JSON files are needed at runtime. It contains day counts for each month of each BS year (1975-2099) and is used for converting AD (English) dates to BS (Bikram Sambat/Nepali) and vice versa, as well as knowing how many days to render for a given month in the TUI. 
+
+Star his repo if you find it useful: <https://github.com/dhurbachy/Nepali-Date-Converter>. Appreciate the work that made this tool possible.
 
 > [!NOTE]
 > npltz is not for everyone it's mainly for Nepali folks who don't want to open a browser or an app just to check the date. You can use a simple tool that doesn't suck at looks or the work it's made for.
@@ -63,7 +65,7 @@ npltz supports some CLI commands too. See them with:
 npltz --help
 ```
 
-CLI commands provide BS-to-AD and AD-to-BS conversion. If you want to know a specific date in AD or BS, you can do it directly from the CLI.
+CLI commands provide AD-to-BS (`convert`) and BS-to-AD (`convert-bs`) conversion. If you want to know a specific date in AD or BS, you can do it directly from the CLI.
 
 npltz also supports themes you can set via the CLI or inside the TUI (press `c`):
 
