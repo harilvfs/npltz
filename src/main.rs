@@ -1,6 +1,7 @@
 mod app;
 mod calendar;
 mod config;
+mod error;
 mod log;
 mod theme;
 mod ui;
@@ -16,6 +17,7 @@ use crossterm::execute;
 use crossterm::terminal::{
     EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode,
 };
+use error::{NpltzError, Result};
 use ratatui::Terminal;
 use ratatui::backend::CrosstermBackend;
 use std::io;
@@ -62,22 +64,23 @@ enum Commands {
     ConvertBs { date: String },
 }
 
-fn main() -> io::Result<()> {
+fn main() -> Result<()> {
     let cli = Cli::parse();
 
     if let Some(theme) = &cli.set_theme {
         let mut config = Config::load();
         if theme == "default" {
             config.theme = None;
-            config.save();
+            config.save()?;
             println!("Default theme restored.");
         } else if theme::is_valid_theme(theme) {
             config.theme = Some(theme.clone());
-            config.save();
+            config.save()?;
             println!("{} has been set as your default theme.", theme::display_name(theme));
         } else {
-            eprintln!("Unknown theme '{}'. Valid themes: {}", theme, theme::THEME_NAMES.join(", "));
-            std::process::exit(1);
+            let msg = format!("Unknown theme '{}'. Valid themes: {}", theme, theme::THEME_NAMES.join(", "));
+            log::Log::error(&msg);
+            return Err(NpltzError::InvalidTheme(msg));
         }
         return Ok(());
     }
@@ -85,27 +88,27 @@ fn main() -> io::Result<()> {
     match cli.command {
         Some(Commands::Show { date, bs, json }) => {
             if let Some(bs_date) = bs {
-                show_bs_date(&bs_date, json);
+                show_bs_date(&bs_date, json)?;
             } else if let Some(ad_date) = date {
-                show_ad_date(&ad_date, json);
+                show_ad_date(&ad_date, json)?;
             } else {
-                show_today(json);
+                show_today(json)?;
             }
-            Ok(())
         }
         Some(Commands::Convert { date }) => {
-            convert_ad_to_bs(&date);
-            Ok(())
+            convert_ad_to_bs(&date)?;
         }
         Some(Commands::ConvertBs { date }) => {
-            convert_bs_to_ad(&date);
-            Ok(())
+            convert_bs_to_ad(&date)?;
         }
-        None => run_tui(),
+        None => {
+            run_tui()?;
+        }
     }
+    Ok(())
 }
 
-fn show_today(json: bool) {
+fn show_today(json: bool) -> Result<()> {
     let now = Local::now();
     let nd = calendar::ad_to_bs(now.year(), now.month(), now.day());
 
@@ -124,7 +127,7 @@ fn show_today(json: bool) {
             "ad_day": now.day(),
         });
         println!("{}", serde_json::to_string_pretty(&obj).unwrap());
-        return;
+        return Ok(());
     }
 
     if let Some(ref nd) = nd {
@@ -135,16 +138,12 @@ fn show_today(json: bool) {
 
     println!("English : {}, {} {}, {}", now.format("%A"), now.format("%B"), now.day(), now.year());
     println!("Time    : {}", now.format("%I:%M:%S %p"));
+    Ok(())
 }
 
-fn show_ad_date(date_str: &str, json: bool) {
-    let date = match NaiveDate::parse_from_str(date_str, "%Y-%m-%d") {
-        Ok(d) => d,
-        Err(_) => {
-            eprintln!("Invalid date format. Use YYYY-MM-DD");
-            std::process::exit(1);
-        }
-    };
+fn show_ad_date(date_str: &str, json: bool) -> Result<()> {
+    let date = NaiveDate::parse_from_str(date_str, "%Y-%m-%d")
+        .map_err(|_| NpltzError::InvalidDate("Invalid date format. Use YYYY-MM-DD".into()))?;
     let nd = calendar::ad_to_bs(date.year(), date.month(), date.day());
 
     if json {
@@ -160,7 +159,7 @@ fn show_ad_date(date_str: &str, json: bool) {
             "ad_day": date.day(),
         });
         println!("{}", serde_json::to_string_pretty(&obj).unwrap());
-        return;
+        return Ok(());
     }
 
     if let Some(ref nd) = nd {
@@ -176,26 +175,20 @@ fn show_ad_date(date_str: &str, json: bool) {
         date.day(),
         date.year()
     );
+    Ok(())
 }
 
-fn show_bs_date(date_str: &str, json: bool) {
+fn show_bs_date(date_str: &str, json: bool) -> Result<()> {
     let parts: Vec<&str> = date_str.split('-').collect();
     if parts.len() != 3 {
-        eprintln!("Invalid date format. Use YYYY-MM-DD");
-        std::process::exit(1);
+        return Err(NpltzError::InvalidDate("Invalid date format. Use YYYY-MM-DD".into()));
     }
-    let year: i32 = parts[0].parse().unwrap_or_else(|_| {
-        eprintln!("Invalid year");
-        std::process::exit(1);
-    });
-    let month: u32 = parts[1].parse().unwrap_or_else(|_| {
-        eprintln!("Invalid month");
-        std::process::exit(1);
-    });
-    let day: u32 = parts[2].parse().unwrap_or_else(|_| {
-        eprintln!("Invalid day");
-        std::process::exit(1);
-    });
+    let year: i32 = parts[0].parse()
+        .map_err(|_| NpltzError::InvalidDate("Invalid year".into()))?;
+    let month: u32 = parts[1].parse()
+        .map_err(|_| NpltzError::InvalidDate("Invalid month".into()))?;
+    let day: u32 = parts[2].parse()
+        .map_err(|_| NpltzError::InvalidDate("Invalid day".into()))?;
 
     let ad = calendar::bs_to_ad(year, month, day);
     let weekday = ad.map_or(0, |d| d.format("%w").to_string().parse().unwrap_or(0));
@@ -211,7 +204,7 @@ fn show_bs_date(date_str: &str, json: bool) {
             "bs_month_name": nd.month_name(),
         });
         println!("{}", serde_json::to_string_pretty(&obj).unwrap());
-        return;
+        return Ok(());
     }
 
     println!("Nepali  : {} {}, {} {}", nd.day_name(), nd.day, nd.month_name(), nd.year);
@@ -220,16 +213,12 @@ fn show_bs_date(date_str: &str, json: bool) {
     } else {
         println!("English : N/A");
     }
+    Ok(())
 }
 
-fn convert_ad_to_bs(date_str: &str) {
-    let date = match NaiveDate::parse_from_str(date_str, "%Y-%m-%d") {
-        Ok(d) => d,
-        Err(_) => {
-            eprintln!("Invalid date format. Use YYYY-MM-DD");
-            std::process::exit(1);
-        }
-    };
+fn convert_ad_to_bs(date_str: &str) -> Result<()> {
+    let date = NaiveDate::parse_from_str(date_str, "%Y-%m-%d")
+        .map_err(|_| NpltzError::InvalidDate("Invalid date format. Use YYYY-MM-DD".into()))?;
     match calendar::ad_to_bs(date.year(), date.month(), date.day()) {
         Some(nd) => {
             println!("{}", nd.format_long());
@@ -245,26 +234,20 @@ fn convert_ad_to_bs(date_str: &str) {
             );
         }
     }
+    Ok(())
 }
 
-fn convert_bs_to_ad(date_str: &str) {
+fn convert_bs_to_ad(date_str: &str) -> Result<()> {
     let parts: Vec<&str> = date_str.split('-').collect();
     if parts.len() != 3 {
-        eprintln!("Invalid date format. Use YYYY-MM-DD");
-        std::process::exit(1);
+        return Err(NpltzError::InvalidDate("Invalid date format. Use YYYY-MM-DD".into()));
     }
-    let year: i32 = parts[0].parse().unwrap_or_else(|_| {
-        eprintln!("Invalid year");
-        std::process::exit(1);
-    });
-    let month: u32 = parts[1].parse().unwrap_or_else(|_| {
-        eprintln!("Invalid month");
-        std::process::exit(1);
-    });
-    let day: u32 = parts[2].parse().unwrap_or_else(|_| {
-        eprintln!("Invalid day");
-        std::process::exit(1);
-    });
+    let year: i32 = parts[0].parse()
+        .map_err(|_| NpltzError::InvalidDate("Invalid year".into()))?;
+    let month: u32 = parts[1].parse()
+        .map_err(|_| NpltzError::InvalidDate("Invalid month".into()))?;
+    let day: u32 = parts[2].parse()
+        .map_err(|_| NpltzError::InvalidDate("Invalid day".into()))?;
 
     match calendar::bs_to_ad(year, month, day) {
         Some(ad) => {
@@ -281,6 +264,7 @@ fn convert_bs_to_ad(date_str: &str) {
             );
         }
     }
+    Ok(())
 }
 
 fn run_tui() -> io::Result<()> {
@@ -291,6 +275,7 @@ fn run_tui() -> io::Result<()> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
+    log::Log::init();
     let config = Config::load();
     let theme_name = config.theme.clone().unwrap_or_else(|| "catppuccin-mocha".into());
     let mut app = App::new(&theme_name);
@@ -304,6 +289,7 @@ fn run_tui() -> io::Result<()> {
     terminal.show_cursor()?;
 
     if let Err(e) = res {
+        log::Log::error(&format!("TUI error: {e}"));
         eprintln!("Error: {}", e);
     }
 

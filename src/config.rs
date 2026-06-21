@@ -1,3 +1,4 @@
+use crate::error::NpltzError;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
@@ -68,13 +69,13 @@ impl Config {
         fs::read_to_string(&path).ok().and_then(|c| toml::from_str(&c).ok()).unwrap_or_default()
     }
 
-    pub fn save(&self) {
+    pub fn save(&self) -> Result<(), NpltzError> {
         let path = Self::path();
         if let Some(parent) = path.parent() {
-            let _ = fs::create_dir_all(parent);
+            fs::create_dir_all(parent)?;
         }
-        if let Ok(content) = toml::to_string(self) {
-            let _ = fs::write(&path, content);
-        }
+        let content = toml::to_string(self).map_err(|e| NpltzError::Config(e.to_string()))?;
+        fs::write(&path, content)?;
+        Ok(())
     }
 }

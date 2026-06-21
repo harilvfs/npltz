@@ -369,7 +369,9 @@ impl App {
 
         let mut config = Config::load();
         config.theme = Some(name.to_string());
-        config.save();
+        if let Err(e) = config.save() {
+            log::Log::error(&format!("Failed to save theme config: {e}"));
+        }
         log::Log::info(&format!("Theme changed to {}", name));
     }
 
