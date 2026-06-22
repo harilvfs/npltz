@@ -139,6 +139,10 @@ npltz uses calendar data from the [`nepali-date-converter`](https://crates.io/cr
 
 See [CONTRIBUTING.md](https://github.com/harilvfs/npltz/blob/main/.github/CONTRIBUTING.md) for guidelines.
 
+## Community
+
+Join the [Discord](https://discord.com/invite/8NJWstnUHd) for discussions and yapping.
+
 ## Thanks
 
 Special thanks to [dhurbachy](https://github.com/dhurbachy) for the [`Nepali-Date-Converter`](https://github.com/dhurbachy/Nepali-Date-Converter) library that made this tool possible, and to other open-source devs maintaining the awesome crates and tools that npltz depends on. Appreciate that.
