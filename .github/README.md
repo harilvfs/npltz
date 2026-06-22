@@ -43,7 +43,7 @@ Star his repo if you find it useful: <https://github.com/dhurbachy/Nepali-Date-C
 ### Linux / Termux
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/harilvfs/npltz/main/install.sh | sh
+curl -fsSL npltz.chalisehari.com.np/install | sh
 ```
 
 ### Cargo (Linux, macOS, Windows)
