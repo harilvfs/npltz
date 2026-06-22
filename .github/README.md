@@ -40,9 +40,13 @@ Star his repo if you find it useful: <https://github.com/dhurbachy/Nepali-Date-C
 
 ## Installation
 
-An install script will be available in the coming days. For now:
+### Linux / Termux
 
-### Cargo (Linux, macOS, Windows) 
+```sh
+curl -fsSL https://raw.githubusercontent.com/harilvfs/npltz/main/install.sh | sh
+```
+
+### Cargo (Linux, macOS, Windows)
 
 ```sh
 cargo install npltz

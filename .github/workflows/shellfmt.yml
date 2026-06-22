@@ -1,0 +1,26 @@
+name: Shell Format Check
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '**/*.sh'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '**/*.sh'
+  workflow_dispatch:
+
+jobs:
+  shell-format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install shfmt
+        run: go install mvdan.cc/sh/v3/cmd/shfmt@latest
+
+      - name: Check formatting
+        run: |
+          find . -type f -name "*.sh" -not -path "./target/*" -not -path "./.git/*" | \
+          xargs shfmt -i 4 -sr -kp -d
