@@ -14,12 +14,11 @@
 
 **[npltz](https://github.com/harilvfs/npltz)** a terminal-based Nepali calendar (Bikram Sambat) written in Rust using the [`ratatui`](https://github.com/ratatui-org/ratatui). It's designed to be simple: view Nepali dates with AD (English) support in your terminal.
 
-npltz uses calendar data from the [`nepali-date-converter`](https://crates.io/crates/nepali-date-converter) project by [dhurbachy](https://github.com/dhurbachy). The data (`calendar_data.json`) is compiled into the binary at build time via `include_str!()`, so no external JSON files are needed at runtime. It contains day counts for each month of each BS year (1975-2099) and is used for converting AD (English) dates to BS (Bikram Sambat/Nepali) and vice versa, as well as knowing how many days to render for a given month in the TUI. 
-
-Star his repo if you find it useful: <https://github.com/dhurbachy/Nepali-Date-Converter>. Appreciate the work that made this tool possible.
+> [!WARNING]
+> npltz is in its very early stages. If you run into bugs, please [open an issue](https://github.com/harilvfs/npltz/issues/new).
 
 > [!NOTE]
-> npltz is not for everyone it's mainly for Nepali folks who don't want to open a browser or an app just to check the date. You can use a simple CLI tool that doesn't suck at looks or the work it's made for.
+> npltz is not for everyone. It's mainly for Nepali folks who don't want to open a browser or an app just to check the date. You can use a simple CLI tool that doesn't suck at looks or the work it's made for.
 
 <div align="center">
 
@@ -95,7 +94,9 @@ Man pages are generated via xtask using `clap_mangen`:
 cargo xtask man-pages
 ```
 
-The generated man page file is already in the repo.
+## How it Works
+
+npltz uses calendar data from the [`nepali-date-converter`](https://crates.io/crates/nepali-date-converter) project by [dhurbachy](https://github.com/dhurbachy). The data (`calendar_data.json`) is compiled into the binary at build time via `include_str!()`, so no external JSON files are needed at runtime. It contains day counts for each month of each BS year (1975-2099) and is used for converting AD (English) dates to BS (Bikram Sambat/Nepali) and vice versa, as well as knowing how many days to render for a given month in the TUI. Star his repo if you find it useful: <https://github.com/dhurbachy/Nepali-Date-Converter>.
 
 ## Contributing
 
