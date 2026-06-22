@@ -12,7 +12,7 @@ documentation = "https://github.com/harilvfs/npltz/blob/main/.github/README.md"
 readme = "./.github/README.md"
 license = "MIT"
 categories = ["command-line-utilities"]
-keywords = ["nepali", "calendar", "bikram-sambat", "tui", "terminal"]
+keywords = ["nepali-patro", "calendar", "bikram-sambat", "tui", "terminal"]
 
 [package]
 name = "npltz"
