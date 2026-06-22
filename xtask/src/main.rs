@@ -29,9 +29,12 @@ fn main() -> anyhow::Result<()> {
 
 fn ci(sh: &xshell::Shell) -> anyhow::Result<()> {
     xshell::cmd!(sh, "cargo +nightly fmt --all --check").run()?;
+    xshell::cmd!(sh, "cargo +nightly clippy --workspace").run()?;
     xshell::cmd!(sh, "cargo +nightly clippy --workspace -- -D warnings").run()?;
-    xshell::cmd!(sh, "cargo +nightly check --workspace").run()?;
-    xshell::cmd!(sh, "cargo +nightly test --workspace").run()?;
+    xshell::cmd!(sh, "cargo +nightly check --workspace --locked").run()?;
+    xshell::cmd!(sh, "cargo +nightly test --workspace --locked").run()?;
+    xshell::cmd!(sh, "taplo fmt --check").run()?;
+    xshell::cmd!(sh, "cargo deny check").run()?;
     Ok(())
 }
 

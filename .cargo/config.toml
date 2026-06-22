@@ -1,2 +1,41 @@
+[target.x86_64-unknown-linux-gnu]
+rustflags = ["-C", "target-cpu=x86-64"]
+
+[target.x86_64-unknown-linux-musl]
+rustflags = ["-C", "target-cpu=x86-64"]
+
+[target.aarch64-unknown-linux-gnu]
+rustflags = ["-C", "target-cpu=generic"]
+
+[target.aarch64-linux-android]
+rustflags = [
+  "-C",
+  "target-cpu=generic",
+  "-C",
+  "link-arg=-Wl,--allow-shlib-undefined",
+]
+
+[target.armv7-linux-androideabi]
+rustflags = [
+  "-C",
+  "target-cpu=generic",
+  "-C",
+  "link-arg=-Wl,--allow-shlib-undefined",
+]
+
+[build]
+target-dir = "build"
+
+[term]
+verbose = false
+color = "always"
+
+[env]
+RUST_BACKTRACE = "1"
+RUSTFLAGS = "-D warnings"
+
+[net]
+git-fetch-with-cli = true
+
 [alias]
 xtask = "run --package xtask --"
