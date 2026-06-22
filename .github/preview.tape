@@ -112,7 +112,3 @@ Type@100ms "2061" Sleep 1s Enter
 Sleep 1s
 
 Type "q"
-
-Type "npltz show" Sleep 0.5s Enter
-
-Sleep 1s
