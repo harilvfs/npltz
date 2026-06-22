@@ -36,6 +36,10 @@ Star his repo if you find it useful: <https://github.com/dhurbachy/Nepali-Date-C
 
 ## Preview
 
+
+
+> Preview by: [vhs](https://github.com/charmbracelet/vhs)
+
 <!-- preview gif here -->
 
 ## Installation
