@@ -1,0 +1,96 @@
+name: Preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release tag (e.g. v1.1.1)'
+        required: true
+
+jobs:
+  generate_preview:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+
+      - name: Set tag name
+        run: echo "TAG_NAME=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
+
+      - name: Download and extract npltz binary
+        run: |
+          TARGET="x86_64-unknown-linux-musl"
+          ARCHIVE="npltz-${TARGET}.tar.gz"
+          curl -L "https://github.com/${{ github.repository }}/releases/download/${{ env.TAG_NAME }}/${ARCHIVE}" -o "${ARCHIVE}"
+          tar xzf "${ARCHIVE}"
+          sudo mv "npltz-${TARGET}/npltz" /usr/local/bin/
+          rm -rf "npltz-${TARGET}" "${ARCHIVE}"
+
+      - name: VHS Docker Image
+        run: |
+          cat > Dockerfile.vhs << 'EOF'
+          FROM ghcr.io/charmbracelet/vhs
+          EOF
+
+          docker build -t vhs-with-arch-deps -f Dockerfile.vhs .
+
+      - name: Generate preview with VHS
+        run: |
+          docker run --rm \
+            -v $PWD:/vhs \
+            -v /usr/local/bin/npltz:/usr/local/bin/npltz \
+            vhs-with-arch-deps \
+            /vhs/.github/preview.tape
+
+      - name: Create .github directory if it doesn't exist
+        run: mkdir -p .github
+
+      - name: Move preview.gif
+        run: |
+          if [ -f "preview.gif" ]; then
+            cp preview.gif .github/preview.gif
+            rm -f preview.gif
+          else
+            PREVIEW_PATH=$(find . -name "preview.gif" -type f | head -n 1)
+            if [ -n "$PREVIEW_PATH" ] && [ "$PREVIEW_PATH" != "./.github/preview.gif" ]; then
+              cp "$PREVIEW_PATH" .github/preview.gif
+              rm -f "$PREVIEW_PATH"
+            elif [ -f "./.github/preview.gif" ]; then
+              echo "Preview already in correct dir"
+            else
+              echo "Error: preview.gif not found"
+              exit 1
+            fi
+          fi
+
+      - name: Clean up
+        run: rm -f Dockerfile.vhs
+
+      - name: Create PR
+        id: cpr
+        uses: peter-evans/create-pull-request@v8.1.1
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          commit-message: "chore(release): update preview from release ${{ env.TAG_NAME }}"
+          branch: feature/preview-update
+          title: "preview: Update preview from release ${{ env.TAG_NAME }}"
+          body: |
+            PR to update preview ${{ env.TAG_NAME }}
+            ![preview](https://raw.githubusercontent.com/${{ github.repository }}/feature/preview-update/.github/preview.gif)
+          delete-branch: false
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gh
+
+      - name: Merge
+        if: steps.cpr.outputs.pull-request-url != ''
+        run: |
+          gh pr merge feature/preview-update --squash --delete-branch --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
