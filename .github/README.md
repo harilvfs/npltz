@@ -57,6 +57,37 @@ cargo build --release
 ./build/release/npltz
 ```
 
+### Uninstall
+
+```sh
+cargo uninstall npltz
+```
+
+If installed via install script then, remove files manually: 
+
+On Linux
+
+```sh
+sudo rm /usr/local/bin/npltz
+sudo rm /usr/share/bash-completion/completions/npltz
+sudo rm /usr/share/zsh/site-functions/_npltz
+sudo rm /usr/share/fish/vendor_completions.d/npltz.fish
+sudo rm /usr/share/man/man1/npltz.1
+sudo rm /usr/share/applications/npltz.desktop
+rm -rf ~/.config/npltz
+```
+
+On Termux
+
+```sh
+rm $PREFIX/bin/npltz
+rm $PREFIX/share/bash-completion/completions/npltz
+rm $PREFIX/share/zsh/site-functions/_npltz
+rm $PREFIX/share/fish/vendor_completions.d/npltz.fish
+rm $PREFIX/share/man/man1/npltz.1
+rm -rf ~/.config/npltz
+```
+
 > [!CAUTION]
 > npltz hasn't been tested on macOS or Windows, so no guarantees it'll work on your OS. Use at your own risk.
 
