@@ -90,7 +90,7 @@ Documentation and source code available at:
 https://github.com/harilvfs/npltz
 
 .SH AUTHOR
-Aayush Chalise <me@aayush.xyz>
+Hari Chalise <harilvfs@chalisehari.com.np>
 
 .SH REPORTING BUGS
 If you encounter bugs or issues, please report them at:

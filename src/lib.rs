@@ -32,7 +32,7 @@ pub fn styles() -> clap::builder::Styles {
 }
 
 #[derive(Parser)]
-#[command(name = "npltz", about = "Nepali calendar and date converter for the terminal", styles = styles())]
+#[command(name = "npltz", about = "Nepali Patro for the terminal", styles = styles())]
 pub struct Cli {
     #[arg(
         short = 'v',
