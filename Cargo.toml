@@ -25,7 +25,7 @@ documentation.workspace = true
 readme.workspace = true
 categories.workspace = true
 keywords.workspace = true
-include = ["src", "Cargo.toml", ".github/README.md", "LICENSE"]
+include = ["src", "Cargo.toml", ".github/README.md", "LICENSE", "calendar_data.json"]
 
 [lib]
 name = "npltz"
