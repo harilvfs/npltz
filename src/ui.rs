@@ -140,16 +140,23 @@ fn render_calendar_popup(frame: &mut Frame, area: Rect, app: &App) {
     let now = chrono::Local::now();
     let label = Style::default().fg(app.theme.secondary).add_modifier(Modifier::BOLD);
 
-    let today_str = app.today.as_ref().map(|nd| nd.format_long()).unwrap_or_else(|| "N/A".into());
+    let nd = app.today.as_ref();
+    let nepali_long = nd.map_or_else(|| "N/A".into(), |n| n.format_long());
+    let nepali_num =
+        nd.map_or_else(|| "N/A".into(), |n| format!("{:04}/{:02}/{:02}", n.year, n.month, n.day));
+    let english_num = now.format("%Y/%m/%d").to_string();
 
     let info_lines = vec![
-        Line::from(vec![Span::styled("Nepali: ", label), Span::raw(today_str)]),
         Line::from(vec![
-            Span::styled("English:", label),
-            Span::raw(now.format(" %A, %B %d, %Y").to_string()),
+            Span::styled("Nepali: ", label),
+            Span::raw(format!("{}  ({})", nepali_num, nepali_long)),
         ]),
         Line::from(vec![
-            Span::styled("Clock:  ", label),
+            Span::styled("English:", label),
+            Span::raw(format!(" {}  ({})", english_num, now.format("%A, %B %d, %Y"))),
+        ]),
+        Line::from(vec![
+            Span::styled("Time:   ", label),
             Span::styled(
                 now.format(" %I:%M:%S %p").to_string(),
                 Style::default().fg(app.theme.warning).add_modifier(Modifier::BOLD),

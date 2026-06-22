@@ -140,7 +140,9 @@ fn show_today(json: bool) -> Result<()> {
     if json {
         let obj = serde_json::json!({
             "nepali": nd.as_ref().map(|n| n.format_long()),
+            "nepali_short": nd.as_ref().map(|n| format!("{:04}/{:02}/{:02}", n.year, n.month, n.day)),
             "english": now.format("%A, %B %d, %Y").to_string(),
+            "english_short": now.format("%Y/%m/%d").to_string(),
             "time": now.format("%I:%M:%S %p").to_string(),
             "bs_year": nd.as_ref().map(|n| n.year),
             "bs_month": nd.as_ref().map(|n| n.month),
@@ -156,12 +158,28 @@ fn show_today(json: bool) -> Result<()> {
     }
 
     if let Some(ref nd) = nd {
-        println!("Nepali  : {} {}, {} {}", nd.day_name(), nd.day, nd.month_name(), nd.year);
+        println!(
+            "Nepali  : {:04}/{:02}/{:02}  ({} {}, {} {})",
+            nd.year,
+            nd.month,
+            nd.day,
+            nd.day_name(),
+            nd.day,
+            nd.month_name(),
+            nd.year
+        );
     } else {
         println!("Nepali  : N/A");
     }
 
-    println!("English : {}, {} {}, {}", now.format("%A"), now.format("%B"), now.day(), now.year());
+    println!(
+        "English : {}  ({}, {} {}, {})",
+        now.format("%Y/%m/%d"),
+        now.format("%A"),
+        now.format("%B"),
+        now.day(),
+        now.year()
+    );
     println!("Time    : {}", now.format("%I:%M:%S %p"));
     Ok(())
 }
@@ -174,6 +192,7 @@ fn show_ad_date(date_str: &str, json: bool) -> Result<()> {
     if json {
         let obj = serde_json::json!({
             "nepali": nd.as_ref().map(|n| n.format_long()),
+            "nepali_short": nd.as_ref().map(|n| format!("{:04}/{:02}/{:02}", n.year, n.month, n.day)),
             "bs_year": nd.as_ref().map(|n| n.year),
             "bs_month": nd.as_ref().map(|n| n.month),
             "bs_day": nd.as_ref().map(|n| n.day),
@@ -188,13 +207,23 @@ fn show_ad_date(date_str: &str, json: bool) -> Result<()> {
     }
 
     if let Some(ref nd) = nd {
-        println!("Nepali  : {} {}, {} {}", nd.day_name(), nd.day, nd.month_name(), nd.year);
+        println!(
+            "Nepali  : {:04}/{:02}/{:02}  ({} {}, {} {})",
+            nd.year,
+            nd.month,
+            nd.day,
+            nd.day_name(),
+            nd.day,
+            nd.month_name(),
+            nd.year
+        );
     } else {
         println!("Nepali  : N/A");
     }
 
     println!(
-        "English : {}, {} {}, {}",
+        "English : {}  ({}, {} {}, {})",
+        date.format("%Y/%m/%d"),
         date.format("%A"),
         date.format("%B"),
         date.day(),
@@ -220,7 +249,9 @@ fn show_bs_date(date_str: &str, json: bool) -> Result<()> {
     if json {
         let obj = serde_json::json!({
             "nepali": nd.format_long(),
+            "nepali_short": format!("{:04}/{:02}/{:02}", nd.year, nd.month, nd.day),
             "english": ad.map(|d| d.format("%A, %B %d, %Y").to_string()),
+            "english_short": ad.map(|d| d.format("%Y/%m/%d").to_string()),
             "bs_year": year,
             "bs_month": month,
             "bs_day": day,
@@ -230,9 +261,25 @@ fn show_bs_date(date_str: &str, json: bool) -> Result<()> {
         return Ok(());
     }
 
-    println!("Nepali  : {} {}, {} {}", nd.day_name(), nd.day, nd.month_name(), nd.year);
+    println!(
+        "Nepali  : {:04}/{:02}/{:02}  ({} {}, {} {})",
+        nd.year,
+        nd.month,
+        nd.day,
+        nd.day_name(),
+        nd.day,
+        nd.month_name(),
+        nd.year
+    );
     if let Some(ad) = ad {
-        println!("English : {}, {} {}, {}", ad.format("%A"), ad.format("%B"), ad.day(), ad.year());
+        println!(
+            "English : {}  ({}, {} {}, {})",
+            ad.format("%Y/%m/%d"),
+            ad.format("%A"),
+            ad.format("%B"),
+            ad.day(),
+            ad.year()
+        );
     } else {
         println!("English : N/A");
     }
