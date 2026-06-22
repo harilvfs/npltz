@@ -12,18 +12,14 @@
 
 </div>
 
-**[npltz](https://github.com/harilvfs/npltz)** - a terminal-based Nepali calendar (Bikram Sambat) written in Rust using the [`ratatui`](https://github.com/ratatui-org/ratatui) TUI library. It's designed to be simple: view Nepali dates with AD (English) support in your terminal.
+**[npltz](https://github.com/harilvfs/npltz)** a terminal-based Nepali calendar (Bikram Sambat) written in Rust using the [`ratatui`](https://github.com/ratatui-org/ratatui). It's designed to be simple: view Nepali dates with AD (English) support in your terminal.
 
 npltz uses calendar data from the [`nepali-date-converter`](https://crates.io/crates/nepali-date-converter) project by [dhurbachy](https://github.com/dhurbachy). The data (`calendar_data.json`) is compiled into the binary at build time via `include_str!()`, so no external JSON files are needed at runtime. It contains day counts for each month of each BS year (1975-2099) and is used for converting AD (English) dates to BS (Bikram Sambat/Nepali) and vice versa, as well as knowing how many days to render for a given month in the TUI. 
 
 Star his repo if you find it useful: <https://github.com/dhurbachy/Nepali-Date-Converter>. Appreciate the work that made this tool possible.
 
 > [!NOTE]
-> npltz is not for everyone it's mainly for Nepali folks who don't want to open a browser or an app just to check the date. You can use a simple tool that doesn't suck at looks or the work it's made for.
-> 
-> Yeah, there are plenty of options like visiting a browser or using Hamro Patro.
-> 
-> npltz is mainly made for terminal folks who live in the terminal and do most of their work in a CLI. It doesn't target a huge audience, and honestly this is mainly made for my personal use. But it may still be useful to someone who just doesn't want any shenanigans for knowing the date.
+> npltz is not for everyone it's mainly for Nepali folks who don't want to open a browser or an app just to check the date. You can use a simple CLI tool that doesn't suck at looks or the work it's made for.
 
 <div align="center">
 
