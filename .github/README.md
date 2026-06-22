@@ -17,9 +17,6 @@
 > [!WARNING]
 > npltz is in its very early stages. If you run into bugs, please [open an issue](https://github.com/harilvfs/npltz/issues/new).
 
-> [!NOTE]
-> npltz is not for everyone. It's mainly for Nepali folks who don't want to open a browser or an app just to check the date. You can use a simple CLI tool that doesn't suck at looks or the work it's made for.
-
 <div align="center">
 
 [Installation](#installation) •
