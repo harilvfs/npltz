@@ -7,6 +7,15 @@ on:
         description: 'Release tag (e.g., v1.1.1)'
         required: true
         type: string
+      tag_title:
+        description: 'Release title (e.g., v1.1.1@Y-M-D)'
+        required: true
+        type: string
+      update_version:
+        description: 'Do you want to update the version in the repository?'
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -24,9 +33,19 @@ jobs:
       - name: Set up version variables
         run: |
           VERSION=$(echo "${{ github.event.inputs.tag_version }}" | sed 's/^v//')
+          CURRENT_MONTH=$(date +'%B')
+          CURRENT_YEAR=$(date +'%Y')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "CURRENT_MONTH=$CURRENT_MONTH" >> $GITHUB_ENV
+          echo "CURRENT_YEAR=$CURRENT_YEAR" >> $GITHUB_ENV
+
+      - name: Debug input values
+        run: |
+          echo "Update version input: '${{ github.event.inputs.update_version }}'"
+          echo "Update version type: $(echo '${{ github.event.inputs.update_version }}' | wc -c)"
 
       - name: Update Cargo.toml version
+        if: ${{ github.event.inputs.update_version == 'true' }}
         run: |
           sed -i "/\[workspace.package\]/,/^\[/ s/^version = \".*\"/version = \"$VERSION\"/" Cargo.toml
 
@@ -54,9 +73,11 @@ jobs:
           restore-keys: ${{ runner.os }}-cargo-index-
 
       - name: Run cargo build to update Cargo.lock
+        if: ${{ github.event.inputs.update_version == 'true' }}
         run: cargo build --release
 
       - name: Commit version changes
+        if: ${{ github.event.inputs.update_version == 'true' }}
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
@@ -145,11 +166,16 @@ jobs:
         env:
           OUTPUT: BODY.md
 
+      - name: Add release header
+        run: |
+          sed -i '/^## \[unreleased\]/d' BODY.md
+          printf "## What's Changed\n\n%s\n" "$(cat BODY.md)" > BODY.md
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ github.event.inputs.tag_version }}
-          name: ${{ github.event.inputs.tag_version }}
+          name: ${{ github.event.inputs.tag_title }}
           draft: false
           prerelease: true
           generate_release_notes: false
