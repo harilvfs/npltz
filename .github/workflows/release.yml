@@ -131,6 +131,7 @@ jobs:
           cp build/x86_64-unknown-linux-musl/release/npltz "$DIR/"
           cp completions/* "$DIR/completions/"
           cp man/npltz.1 "$DIR/man/"
+          cp npltz.desktop "$DIR/"
           tar -czf "${DIR}.tar.gz" "$DIR"
           sha256sum "${DIR}.tar.gz" > "${DIR}.tar.gz.sha256"
           echo "ARCHIVE_X86_64=${DIR}.tar.gz" >> $GITHUB_ENV
@@ -143,6 +144,7 @@ jobs:
           cp build/aarch64-unknown-linux-musl/release/npltz "$DIR/"
           cp completions/* "$DIR/completions/"
           cp man/npltz.1 "$DIR/man/"
+          cp npltz.desktop "$DIR/"
           tar -czf "${DIR}.tar.gz" "$DIR"
           sha256sum "${DIR}.tar.gz" > "${DIR}.tar.gz.sha256"
           echo "ARCHIVE_AARCH64=${DIR}.tar.gz" >> $GITHUB_ENV
