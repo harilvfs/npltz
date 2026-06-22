@@ -37,5 +37,10 @@ jobs:
             build/
           cache-on-failure: true
 
+      - name: Install tools
+        uses: taiki-e/install-action@v2
+        with:
+          tool: taplo-cli,cargo-deny
+
       - name: Run CI checks
         run: cargo xtask ci
