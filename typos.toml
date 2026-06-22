@@ -6,4 +6,4 @@ ratatui = "ratatui"
 nd = "nd"
 
 [files]
-extend-exclude = []
+extend-exclude = ["CHANGELOG.md"]
