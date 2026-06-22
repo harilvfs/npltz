@@ -48,6 +48,15 @@ cargo install npltz
 
 As a Linux user, I don't know how installation works directly on macOS or Windows, so I'm not providing a direct install script for them. Even though macOS supports Unix-like environments and shell scripts can run there, I've never used macOS myself, so without basic knowledge I don't want to talk shit. Windows I don't give a shit either, but you can still install with Cargo.
 
+### Build from Source
+
+```sh
+git clone https://github.com/harilvfs/npltz.git
+cd npltz
+cargo build --release
+./build/release/npltz
+```
+
 > [!CAUTION]
 > npltz hasn't been tested on macOS or Windows, so no guarantees it'll work on your OS. Use at your own risk.
 
