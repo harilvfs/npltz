@@ -36,6 +36,8 @@ jobs:
 
       - name: Generate changelog with git-cliff
         run: git-cliff -o CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cleanup git-cliff installation files
         run: rm -rf git-cliff-*

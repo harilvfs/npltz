@@ -167,6 +167,7 @@ jobs:
           args: --unreleased --strip header
         env:
           OUTPUT: BODY.md
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Add release header
         run: |
