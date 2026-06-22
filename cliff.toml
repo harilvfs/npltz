@@ -1,3 +1,6 @@
+# git-cliff ~ default configuration file
+# https://git-cliff.org/docs/configuration
+
 [remote.github]
 owner = "harilvfs"
 repo = "npltz"
@@ -19,7 +22,7 @@ body = """
 ### {{ group | striptags | trim | upper_first }}
 
 {% for commit in commits %}
-- {% if commit.scope %} *({{ commit.scope | lower }})* {% endif %}{{ commit.message | upper_first | trim }}{%- if commit.breaking %} [**breaking**]{% endif %}
+- [{{ commit.id | truncate(length=7, end="") }}](https://github.com/harilvfs/npltz/commit/{{ commit.id }}) {% if commit.scope %} *({{ commit.scope | lower }})* {% endif %}{{ commit.message | upper_first | trim }}{%- if commit.remote.username %} by @{{ commit.remote.username }}{% endif %}{%- if commit.remote.pr_number %} in [#{{ commit.remote.pr_number }}](https://github.com/harilvfs/npltz/pull/{{ commit.remote.pr_number }}){% endif %}{%- if commit.breaking %} [**breaking**]{% endif %}
 {% endfor %}
 
 {% endfor %}
@@ -32,23 +35,48 @@ footer = """
 
 trim = true
 
+postprocessors = [
+  { pattern = '<REPO>', replace = "https://github.com/harilvfs/npltz" },
+]
+
 [git]
 conventional_commits = true
 filter_unconventional = true
 split_commits = false
 
+commit_preprocessors = [
+  { pattern = '\\((\\w+\\s)?#([0-9]+)\\)', replace = "" },
+  { pattern = '(Add setup script)', replace = "feat(setup): ${1}" },
+  { pattern = '(Fix install command)', replace = "fix(install): ${1}" },
+  { pattern = '(Improve logging)', replace = "chore(logging): ${1}" },
+  { pattern = '(Update config defaults)', replace = "refactor(config): ${1}" },
+  { pattern = '\\<[d]eatil\\>', replace = "detail" },
+]
+
 commit_parsers = [
-  { message = "^feat", group = "🚀 Features" },
-  { message = "^fix", group = "🐛 Bug Fixes" },
-  { message = "^doc", group = "📚 Documentation" },
-  { message = "^perf", group = "⚡ Performance" },
-  { message = "^refactor", group = "🚜 Refactor" },
-  { message = "^style", group = "🎨 Styling" },
-  { message = "^test", group = "🧪 Testing" },
+  { message = "^feat", group = "<!-- 0 -->🚀 Features" },
+  { message = "^fix", group = "<!-- 1 -->🐛 Bug Fixes" },
+  { message = "^doc", group = "<!-- 3 -->📚 Documentation" },
+  { message = "^perf", group = "<!-- 4 -->⚡ Performance" },
+  { message = "^refactor", group = "<!-- 2 -->🚜 Refactor" },
+  { message = "^style", group = "<!-- 5 -->🎨 Styling" },
+  { message = "^test", group = "<!-- 6 -->🧪 Testing" },
+  { message = "^ui|^ux", group = "<!-- 12 -->🧩 UI/UX" },
   { message = "^chore\\(release\\)", skip = true },
-  { message = "^chore", group = "⚙️ Miscellaneous" },
-  { message = ".*", group = "💼 Other" },
+  { message = "^chore: update CHANGELOG for v[0-9]+\\.[0-9]+\\.[0-9]+", skip = true },
+  { message = "^chore: release", skip = true },
+  { message = "^chore\\(deps.*\\)", skip = true },
+  { message = "^chore\\(pr\\)", skip = true },
+  { message = "^chore\\(pull\\)", skip = true },
+  { message = "^chore|^ci", group = "<!-- 7 -->⚙️ Miscellaneous Tasks" },
+  { body = ".*security", group = "<!-- 8 -->🛡️ Security" },
+  { message = "^revert", group = "<!-- 9 -->◀️ Revert" },
+  { message = ".*", group = "<!-- 10 -->💼 Other" },
 ]
 
 filter_commits = false
+topo_order = false
+sort_commits = "oldest"
+skip_tags = ""
+ignore_tags = ""
 tag_pattern = "v[0-9]+\\.[0-9]+\\.[0-9]+"
