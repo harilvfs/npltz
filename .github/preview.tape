@@ -107,7 +107,7 @@ Enter
 
 Type "g" Sleep 0.5s
 
-Type@100ms "2061" Sleep 1s Enter
+Type@200ms "2061" Sleep 1s Enter
 
 Sleep 1s
 
