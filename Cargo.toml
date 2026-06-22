@@ -4,7 +4,7 @@ resolver = "2"
 default-members = ["."]
 
 [workspace.package]
-version = "0.0.0"
+version = "1.0.0"
 edition = "2024"
 description = "Nepali Patro in your terminal"
 homepage = "https://github.com/harilvfs/npltz"
