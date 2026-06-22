@@ -57,7 +57,7 @@
 
 Output preview.gif
 
-Require carch
+Require npltz
 Require sh
 
 Set Shell "bash"
