@@ -1,5 +1,30 @@
 
-## [unreleased]
+## [1.0.1](https://github.com/harilvfs/npltz/compare/v1.0.0...v1.0.1) - 2026-06-23
+
+
+### 🚀 Features
+
+
+- [3c95e4a](https://github.com/harilvfs/npltz/commit/3c95e4ace3dde5d3ecab2c58c942d9bb5394ba8f)  *(tui)* Add warning if terminal size width is less than 80 by @harilvfs
+
+- [5b1a100](https://github.com/harilvfs/npltz/commit/5b1a1002f36119fadda5c07f8e34b75c63923459)  *(tui)* Add help menu popup by @harilvfs
+
+
+
+### 🚜 Refactor
+
+
+- [7485459](https://github.com/harilvfs/npltz/commit/74854591c71c26bec37b7c8b85104c23145f3a2b)  *(script)* Making install script minimal by @harilvfs
+
+- [ed8a576](https://github.com/harilvfs/npltz/commit/ed8a576f6ce3d941c95e9b1785dc377813cf53c4) Split large modules (#8) by @harilvfs in [#8](https://github.com/harilvfs/npltz/pull/8)
+
+
+
+### 🎨 Styling
+
+
+- [2c7ad40](https://github.com/harilvfs/npltz/commit/2c7ad401988f3f8ff7e5058be8b4616012f55e88)  *(tui)* Make border text alignment center by @harilvfs
+
 
 
 ### ⚙️ Miscellaneous Tasks
@@ -8,6 +33,12 @@
 - [7e4be3e](https://github.com/harilvfs/npltz/commit/7e4be3e760fadccf9ba55ca157bc63a1cbc1d38d)  *(cargo)* Include calendar_data.json by @harilvfs
 
 - [18add81](https://github.com/harilvfs/npltz/commit/18add81618b7fd5c6dcd7f05642a1986079661fb)  *(topic)* Add matching keywords as project by @harilvfs
+
+- [014b090](https://github.com/harilvfs/npltz/commit/014b0902b1490279e343f6396fe8ffa3920320ab)  *(lints)* Correct toml formatting by @harilvfs
+
+- [ce23784](https://github.com/harilvfs/npltz/commit/ce23784ea6b8ec65f76ae9ce9110f2704891e707)  *(metadata)* Correct mail and description by @harilvfs
+
+- [a2f8e4c](https://github.com/harilvfs/npltz/commit/a2f8e4c794e98ec8a50add7c9ed38e851dbe93cb)  *(typo)* Correct project about heading typo by @harilvfs
 
 
 
