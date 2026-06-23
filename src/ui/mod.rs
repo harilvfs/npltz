@@ -1,7 +1,6 @@
 mod calendar_popup;
 mod goto_popup;
 mod help_popup;
-mod status_bar;
 mod theme_selector;
 mod warning;
 
@@ -12,17 +11,7 @@ use ratatui::layout::Rect;
 pub fn render(frame: &mut Frame, app: &mut App) {
     let area = frame.area();
 
-    let pct = if area.width < 60 { 80 } else { 60 };
-    let popup_area = centered_rect(pct, 80, area);
-    calendar_popup::render(frame, popup_area, app);
-
-    let status_area = Rect {
-        x:      area.x,
-        y:      area.y + area.height.saturating_sub(1),
-        width:  area.width,
-        height: 1,
-    };
-    status_bar::render(frame, status_area, app);
+    calendar_popup::render(frame, area, app);
 
     match app.mode {
         AppMode::ThemeSelector => {
