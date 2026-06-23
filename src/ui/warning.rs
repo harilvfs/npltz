@@ -7,6 +7,7 @@ use ratatui::widgets::{Block, BorderType, Borders, Clear, Paragraph, Wrap};
 pub fn render(frame: &mut Frame, area: Rect) {
     let block = Block::default()
         .title(" Warning ")
+        .title_alignment(Alignment::Center)
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
         .border_style(Style::default().fg(ratatui::style::Color::Red));

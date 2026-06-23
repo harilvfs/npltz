@@ -1,6 +1,6 @@
 use crate::app::App;
 use ratatui::Frame;
-use ratatui::layout::Rect;
+use ratatui::layout::{Alignment, Rect};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, BorderType, Borders, Clear, Paragraph};
@@ -59,6 +59,7 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) -> u16 {
 
     let block = Block::default()
         .title(title)
+        .title_alignment(Alignment::Center)
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
         .border_style(Style::default().fg(app.theme.primary));

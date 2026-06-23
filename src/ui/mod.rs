@@ -12,7 +12,7 @@ use ratatui::layout::Rect;
 pub fn render(frame: &mut Frame, app: &mut App) {
     let area = frame.area();
 
-    let pct = if area.width < 60 { 85 } else { 70 };
+    let pct = if area.width < 60 { 80 } else { 60 };
     let popup_area = centered_rect(pct, 80, area);
     calendar_popup::render(frame, popup_area, app);
 

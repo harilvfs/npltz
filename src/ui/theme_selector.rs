@@ -11,6 +11,7 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
 
     let block = Block::default()
         .title(" Select Default Theme ")
+        .title_alignment(Alignment::Center)
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
         .border_style(Style::default().fg(app.theme.primary));
