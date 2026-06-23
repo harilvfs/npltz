@@ -29,7 +29,7 @@ pub fn show_today(json: bool) -> Result<()> {
 
     if let Some(ref nd) = nd {
         println!(
-            "Nepali  : {:04}/{:02}/{:02}  ({} {}, {} {})",
+            "BS : {:04}/{:02}/{:02}  ({} {}, {} {})",
             nd.year,
             nd.month,
             nd.day,
@@ -39,18 +39,18 @@ pub fn show_today(json: bool) -> Result<()> {
             nd.year
         );
     } else {
-        println!("Nepali  : N/A");
+        println!("BS : N/A");
     }
 
     println!(
-        "English : {}  ({}, {} {}, {})",
+        "AD : {}  ({}, {} {}, {})",
         now.format("%Y/%m/%d"),
         now.format("%A"),
         now.format("%B"),
         now.day(),
         now.year()
     );
-    println!("Time    : {}", now.format("%I:%M:%S %p"));
+    println!("Time : {}", now.format("%I:%M:%S %p"));
     Ok(())
 }
 
@@ -78,7 +78,7 @@ pub fn show_ad_date(date_str: &str, json: bool) -> Result<()> {
 
     if let Some(ref nd) = nd {
         println!(
-            "Nepali  : {:04}/{:02}/{:02}  ({} {}, {} {})",
+            "BS : {:04}/{:02}/{:02}  ({} {}, {} {})",
             nd.year,
             nd.month,
             nd.day,
@@ -88,11 +88,11 @@ pub fn show_ad_date(date_str: &str, json: bool) -> Result<()> {
             nd.year
         );
     } else {
-        println!("Nepali  : N/A");
+        println!("BS : N/A");
     }
 
     println!(
-        "English : {}  ({}, {} {}, {})",
+        "AD : {}  ({}, {} {}, {})",
         date.format("%Y/%m/%d"),
         date.format("%A"),
         date.format("%B"),
@@ -132,7 +132,7 @@ pub fn show_bs_date(date_str: &str, json: bool) -> Result<()> {
     }
 
     println!(
-        "Nepali  : {:04}/{:02}/{:02}  ({} {}, {} {})",
+        "BS : {:04}/{:02}/{:02}  ({} {}, {} {})",
         nd.year,
         nd.month,
         nd.day,
@@ -143,7 +143,7 @@ pub fn show_bs_date(date_str: &str, json: bool) -> Result<()> {
     );
     if let Some(ad) = ad {
         println!(
-            "English : {}  ({}, {} {}, {})",
+            "AD : {}  ({}, {} {}, {})",
             ad.format("%Y/%m/%d"),
             ad.format("%A"),
             ad.format("%B"),
@@ -151,7 +151,7 @@ pub fn show_bs_date(date_str: &str, json: bool) -> Result<()> {
             ad.year()
         );
     } else {
-        println!("English : N/A");
+        println!("AD : N/A");
     }
     Ok(())
 }
