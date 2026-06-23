@@ -108,7 +108,7 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
     let now = chrono::Local::now();
     let info = if let Some(ref nd) = app.today {
         format!(
-            "{}  {}  {}",
+            "{} · {} · {}",
             nd.format_long(),
             now.format("%a, %b %d, %Y"),
             now.format("%I:%M:%S %p"),
