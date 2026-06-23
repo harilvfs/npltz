@@ -1,5 +1,6 @@
 mod calendar_popup;
 mod goto_popup;
+mod help_popup;
 mod status_bar;
 mod theme_selector;
 mod warning;
@@ -8,10 +9,10 @@ use crate::app::{App, AppMode};
 use ratatui::Frame;
 use ratatui::layout::Rect;
 
-pub fn render(frame: &mut Frame, app: &App) {
+pub fn render(frame: &mut Frame, app: &mut App) {
     let area = frame.area();
 
-    let pct = if area.width < 60 { 95 } else { 80 };
+    let pct = if area.width < 60 { 85 } else { 70 };
     let popup_area = centered_rect(pct, 80, area);
     calendar_popup::render(frame, popup_area, app);
 
@@ -31,6 +32,11 @@ pub fn render(frame: &mut Frame, app: &App) {
         AppMode::Goto => {
             let goto_area = centered_rect(40, 20, area);
             goto_popup::render(frame, goto_area, app);
+        }
+        AppMode::Help => {
+            let help_area = centered_rect(45, 55, area);
+            let max_scroll = help_popup::render(frame, help_area, app);
+            app.help_max_scroll = max_scroll;
         }
         AppMode::Normal => {}
     }

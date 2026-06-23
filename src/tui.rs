@@ -54,6 +54,7 @@ fn run_app(
                 AppMode::Normal => handle_normal_key(app, key.code),
                 AppMode::ThemeSelector => handle_theme_selector_key(app, key.code),
                 AppMode::Goto => handle_goto_key(app, key.code),
+                AppMode::Help => handle_help_key(app, key.code),
             }
         }
 
@@ -80,6 +81,26 @@ fn handle_normal_key(app: &mut App, key: KeyCode) {
         KeyCode::Char('t') => app.navigate_today(),
         KeyCode::Char('c') => app.open_theme_selector(),
         KeyCode::Char('g') => app.open_goto(),
+        KeyCode::Char('?') => app.open_help(),
+        _ => {}
+    }
+}
+
+fn handle_help_key(app: &mut App, key: KeyCode) {
+    match key {
+        KeyCode::Esc | KeyCode::Char('q') | KeyCode::Char('?') => app.close_help(),
+        KeyCode::Char('j') | KeyCode::Down | KeyCode::Right => {
+            app.help_scroll = (app.help_scroll + 1).min(app.help_max_scroll);
+        }
+        KeyCode::Char('k') | KeyCode::Up | KeyCode::Left => {
+            app.help_scroll = app.help_scroll.saturating_sub(1);
+        }
+        KeyCode::Home => {
+            app.help_scroll = 0;
+        }
+        KeyCode::End => {
+            app.help_scroll = app.help_max_scroll;
+        }
         _ => {}
     }
 }

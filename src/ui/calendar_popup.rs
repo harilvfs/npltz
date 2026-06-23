@@ -134,7 +134,7 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
 
     let nav_style = Style::default().fg(app.theme.secondary);
     let nav = Line::from(vec![Span::styled(
-        "  h/l: month  |  j/k: year  |  g: goto date  |  t: today  |  c: theme  |  q: quit",
+        "h/l month · j/k year · t today · ? help · q quit",
         nav_style,
     )])
     .alignment(Alignment::Center);

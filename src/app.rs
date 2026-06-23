@@ -10,25 +10,7 @@ mod tests {
     use crate::theme;
 
     fn test_app() -> App {
-        let theme = theme::from_name("catppuccin-mocha");
-        let mut app = App {
-            should_quit: false,
-            show_small_warning: false,
-            mode: AppMode::Normal,
-            theme,
-            today: None,
-            view_year: 2081,
-            view_month: 1,
-            initial_view_set: true,
-            ad_range_str: String::new(),
-            calendar_rows: Vec::new(),
-            today_key: None,
-            theme_selector_selected: 0,
-            goto_input: String::new(),
-            goto_error: None,
-        };
-        app.build_view();
-        app
+        App::new_test("catppuccin-mocha")
     }
 
     #[test]
@@ -226,6 +208,7 @@ pub enum AppMode {
     Normal,
     ThemeSelector,
     Goto,
+    Help,
 }
 
 pub struct App {
@@ -247,6 +230,9 @@ pub struct App {
 
     pub goto_input: String,
     pub goto_error: Option<String>,
+
+    pub help_scroll:     u16,
+    pub help_max_scroll: u16,
 }
 
 pub struct CalendarCell {
@@ -280,8 +266,36 @@ impl App {
             theme_selector_selected: 0,
             goto_input: String::new(),
             goto_error: None,
+
+            help_scroll: 0,
+            help_max_scroll: 0,
         };
         app.update();
+        app
+    }
+
+    #[cfg(test)]
+    pub fn new_test(theme_name: &str) -> Self {
+        let theme = theme::from_name(theme_name);
+        let mut app = App {
+            should_quit: false,
+            show_small_warning: false,
+            mode: AppMode::Normal,
+            theme,
+            today: None,
+            view_year: 2081,
+            view_month: 1,
+            initial_view_set: true,
+            ad_range_str: String::new(),
+            calendar_rows: Vec::new(),
+            today_key: None,
+            theme_selector_selected: 0,
+            goto_input: String::new(),
+            goto_error: None,
+            help_scroll: 0,
+            help_max_scroll: 0,
+        };
+        app.build_view();
         app
     }
 
@@ -387,6 +401,16 @@ impl App {
     pub fn close_goto(&mut self) {
         self.mode = AppMode::Normal;
         self.goto_error = None;
+    }
+
+    pub fn open_help(&mut self) {
+        self.help_scroll = 0;
+        self.mode = AppMode::Help;
+    }
+
+    pub fn close_help(&mut self) {
+        self.help_scroll = 0;
+        self.mode = AppMode::Normal;
     }
 
     pub fn apply_goto(&mut self) {
