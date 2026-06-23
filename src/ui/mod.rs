@@ -1,8 +1,8 @@
-pub(crate) mod calendar_popup;
-pub(crate) mod goto_popup;
-pub(crate) mod status_bar;
-pub(crate) mod theme_selector;
-pub(crate) mod warning;
+mod calendar_popup;
+mod goto_popup;
+mod status_bar;
+mod theme_selector;
+mod warning;
 
 use crate::app::{App, AppMode};
 use ratatui::Frame;
