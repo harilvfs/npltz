@@ -4,7 +4,7 @@ use ratatui::Frame;
 use ratatui::layout::{Alignment, Constraint, Layout, Rect};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
-use ratatui::widgets::{Block, BorderType, Borders, Clear, Paragraph, Wrap};
+use ratatui::widgets::{Block, BorderType, Borders, Clear, Paragraph};
 
 use super::DAY_HEADER;
 
@@ -25,15 +25,19 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
         .border_style(Style::default().fg(app.theme.primary));
     let inner = block.inner(area);
 
-    let [header_area, grid_area, info_area, nav_area] = Layout::vertical([
+    let [header_area, grid_area, info_area, bottom_area] = Layout::vertical([
         Constraint::Length(1),
         Constraint::Min(0),
-        Constraint::Length(4),
         Constraint::Length(1),
+        Constraint::Length(3),
     ])
     .areas(inner);
 
-    let cell_w = (inner.width.saturating_sub(2) / 7).clamp(3, 10) as usize;
+    let [date_area, _spacer, hint_area] =
+        Layout::vertical([Constraint::Length(1), Constraint::Length(1), Constraint::Length(1)])
+            .areas(bottom_area);
+
+    let cell_w = (inner.width.saturating_sub(2) / 7).clamp(3, 12) as usize;
 
     let hdr = Style::default().fg(app.theme.secondary).add_modifier(Modifier::BOLD);
     let sat_hdr = Style::default().fg(app.theme.error).add_modifier(Modifier::BOLD);
@@ -102,44 +106,39 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
     frame.render_widget(Paragraph::new(grid_lines).alignment(Alignment::Center), grid_area);
 
     let now = chrono::Local::now();
-    let label = Style::default().fg(app.theme.secondary).add_modifier(Modifier::BOLD);
-
-    let nd = app.today.as_ref();
-    let nepali_long = nd.map_or_else(|| "N/A".into(), |n| n.format_long());
-    let nepali_num =
-        nd.map_or_else(|| "N/A".into(), |n| format!("{:04}/{:02}/{:02}", n.year, n.month, n.day));
-    let english_num = now.format("%Y/%m/%d").to_string();
-
-    let info_lines = vec![
-        Line::from(vec![
-            Span::styled("Nepali: ", label),
-            Span::raw(format!("{}  ({})", nepali_num, nepali_long)),
-        ]),
-        Line::from(vec![
-            Span::styled("English:", label),
-            Span::raw(format!(" {}  ({})", english_num, now.format("%A, %B %d, %Y"))),
-        ]),
-        Line::from(vec![
-            Span::styled("Time:   ", label),
-            Span::styled(
-                now.format(" %I:%M:%S %p").to_string(),
-                Style::default().fg(app.theme.warning).add_modifier(Modifier::BOLD),
-            ),
-        ]),
-    ];
-
+    let info = if let Some(ref nd) = app.today {
+        format!(
+            "{}  {}  {}",
+            nd.format_long(),
+            now.format("%a, %b %d, %Y"),
+            now.format("%I:%M:%S %p"),
+        )
+    } else {
+        String::new()
+    };
+    let bold_line = Style::default()
+        .fg(app.theme.secondary)
+        .add_modifier(Modifier::BOLD | Modifier::UNDERLINED);
+    let bold = Style::default().fg(app.theme.secondary).add_modifier(Modifier::BOLD);
     frame.render_widget(
-        Paragraph::new(info_lines).wrap(Wrap { trim: false }).alignment(Alignment::Center),
+        Paragraph::new(Line::from(Span::styled(info, bold_line))).alignment(Alignment::Center),
         info_area,
     );
 
-    let nav_style = Style::default().fg(app.theme.secondary);
-    let nav = Line::from(vec![Span::styled(
-        "h/l month · j/k year · t today · ? help · q quit",
-        nav_style,
-    )])
-    .alignment(Alignment::Center);
-    frame.render_widget(nav, nav_area);
+    let date_text = app.today.as_ref().map_or_else(
+        || "--/--/--".into(),
+        |nd| format!("{:04}/{:02}/{:02} · {}", nd.year, nd.month, nd.day, now.format("%Y/%m/%d")),
+    );
+    frame.render_widget(
+        Paragraph::new(Line::from(vec![Span::styled(date_text, bold_line)]))
+            .alignment(Alignment::Center),
+        date_area,
+    );
+    frame.render_widget(
+        Paragraph::new(Line::from(vec![Span::styled("h/l · j/k · t · ? · q", bold)]))
+            .alignment(Alignment::Center),
+        hint_area,
+    );
 
     frame.render_widget(block, area);
 }
