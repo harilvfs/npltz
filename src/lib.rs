@@ -391,6 +391,10 @@ fn run_app(
 }
 
 fn handle_normal_key(app: &mut App, key: KeyCode) {
+    if app.show_small_warning && key == KeyCode::Enter {
+        app.show_small_warning = false;
+    }
+
     match key {
         KeyCode::Char('q') | KeyCode::Esc => app.should_quit = true,
         KeyCode::Right | KeyCode::Char('l') => app.navigate_next(),

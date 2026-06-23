@@ -13,6 +13,7 @@ mod tests {
         let theme = theme::from_name("catppuccin-mocha");
         let mut app = App {
             should_quit: false,
+            show_small_warning: false,
             mode: AppMode::Normal,
             theme,
             today: None,
@@ -228,9 +229,10 @@ pub enum AppMode {
 }
 
 pub struct App {
-    pub should_quit: bool,
-    pub mode:        AppMode,
-    pub theme:       Theme,
+    pub should_quit:        bool,
+    pub show_small_warning: bool,
+    pub mode:               AppMode,
+    pub theme:              Theme,
 
     pub today:            Option<NepaliDate>,
     pub view_year:        i32,
@@ -265,6 +267,7 @@ impl App {
         let theme = theme::from_name(theme_name);
         let mut app = App {
             should_quit: false,
+            show_small_warning: true,
             mode: AppMode::Normal,
             theme,
             today: None,

@@ -21,7 +21,8 @@ const DAY_HEADER: [&str; 7] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 pub fn render(frame: &mut Frame, app: &App) {
     let area = frame.area();
 
-    let popup_area = centered_rect(80, 80, area);
+    let pct = if area.width < 60 { 95 } else { 80 };
+    let popup_area = centered_rect(pct, 80, area);
     render_calendar_popup(frame, popup_area, app);
 
     let status_area = Rect {
@@ -42,6 +43,10 @@ pub fn render(frame: &mut Frame, app: &App) {
             render_goto_popup(frame, goto_area, app);
         }
         AppMode::Normal => {}
+    }
+
+    if area.width < 80 && app.show_small_warning {
+        render_small_screen_warning(frame, area);
     }
 }
 
@@ -69,7 +74,7 @@ fn render_calendar_popup(frame: &mut Frame, area: Rect, app: &App) {
     ])
     .areas(inner);
 
-    let cell_w = 10usize;
+    let cell_w = (inner.width.saturating_sub(2) / 7).clamp(3, 10) as usize;
 
     let hdr = Style::default().fg(app.theme.secondary).add_modifier(Modifier::BOLD);
     let sat_hdr = Style::default().fg(app.theme.error).add_modifier(Modifier::BOLD);
@@ -283,6 +288,39 @@ fn render_goto_popup(frame: &mut Frame, area: Rect, app: &App) {
         );
     }
 
+    frame.render_widget(block, area);
+}
+
+fn render_small_screen_warning(frame: &mut Frame, area: Rect) {
+    let block = Block::default()
+        .title(" Warning ")
+        .borders(Borders::ALL)
+        .border_type(BorderType::Rounded)
+        .border_style(Style::default().fg(ratatui::style::Color::Red));
+    let inner = block.inner(area);
+
+    let lines = vec![
+        Line::from(Span::styled(
+            "Terminal too small",
+            Style::default().fg(ratatui::style::Color::Red).add_modifier(Modifier::BOLD),
+        )),
+        Line::from(Span::raw("")),
+        Line::from(Span::raw("The calendar may not display correctly")),
+        Line::from(Span::raw("at this size.")),
+        Line::from(Span::raw("")),
+        Line::from(Span::raw("Try landscape mode or a larger terminal.")),
+        Line::from(Span::raw("")),
+        Line::from(Span::styled(
+            "Press Enter to continue",
+            Style::default().fg(ratatui::style::Color::DarkGray),
+        )),
+    ];
+
+    frame.render_widget(Clear, area);
+    frame.render_widget(
+        Paragraph::new(lines).alignment(Alignment::Center).wrap(Wrap { trim: false }),
+        inner,
+    );
     frame.render_widget(block, area);
 }
 
