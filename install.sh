@@ -51,8 +51,8 @@ detect_target() {
 }
 
 get_latest_version() {
-    _tag=$(curl -fsL "https://api.github.com/repos/$REPO/releases/latest" 2>/dev/null \
-        | grep '"tag_name"' | head -1 | cut -d'"' -f4)
+    _tag=$(curl -fsL "https://api.github.com/repos/$REPO/releases/latest" 2> /dev/null |
+          grep '"tag_name"' | head -1 | cut -d'"' -f4)
     case "$_tag" in
         v[0-9]*) echo "$_tag" ;;
         *) echo "" ;;
