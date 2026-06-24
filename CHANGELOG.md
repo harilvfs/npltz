@@ -1,4 +1,23 @@
 
+## [1.0.2](https://github.com/harilvfs/npltz/compare/v1.0.1...v1.0.2) - 2026-06-24
+
+
+### 🚜 Refactor
+
+
+- [9478f8a](https://github.com/harilvfs/npltz/commit/9478f8a3767b7b06dd6937d000335befb818dacd)  *(tui)* Make full-screen tui and remove status widget (#11) by @harilvfs in [#11](https://github.com/harilvfs/npltz/pull/11)
+
+
+
+### ⚙️ Miscellaneous Tasks
+
+
+- [1707342](https://github.com/harilvfs/npltz/commit/17073421ad84b18f7224c9ce424b4329a61ff811)  *(cli)* Simply to use BS/AD by @harilvfs
+
+- [ba8c715](https://github.com/harilvfs/npltz/commit/ba8c715d4673a9c857d39855c10890fbbf715ba9)  *(tui)* Add dot separator by @harilvfs
+
+
+
 ## [1.0.1](https://github.com/harilvfs/npltz/compare/v1.0.0...v1.0.1) - 2026-06-23
 
 
