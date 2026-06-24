@@ -10,15 +10,17 @@ else
     IS_ANDROID=false
 fi
 
+if [ "$IS_ANDROID" = "true" ] && [ -z "$PREFIX" ]; then
+    PREFIX="/data/data/com.termux/files/usr"
+fi
+
 detect_target() {
     ARCH=$(uname -m)
     OS=$(uname -s)
-
     if [ "$OS" != "Linux" ]; then
         echo "unsupported OS: $OS" >&2
         exit 1
     fi
-
     if [ "$IS_ANDROID" = "true" ]; then
         case "$ARCH" in
             aarch64 | arm64)
@@ -48,11 +50,20 @@ detect_target() {
     fi
 }
 
+get_latest_version() {
+    _tag=$(curl -fsL "https://api.github.com/repos/$REPO/releases/latest" 2>/dev/null \
+        | grep '"tag_name"' | head -1 | cut -d'"' -f4)
+    case "$_tag" in
+        v[0-9]*) echo "$_tag" ;;
+        *) echo "" ;;
+    esac
+}
+
 VERSION="${NPLTZ_VERSION:-latest}"
 TARGET=$(detect_target)
 
 if [ "$VERSION" = "latest" ]; then
-    VERSION=$(curl -fsL "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name"' | head -1 | cut -d'"' -f4)
+    VERSION=$(get_latest_version)
 fi
 
 if [ -z "$VERSION" ]; then
