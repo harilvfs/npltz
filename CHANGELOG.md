@@ -1,4 +1,30 @@
 
+## [1.0.3](https://github.com/harilvfs/npltz/compare/v1.0.2...v1.0.3) - 2026-06-24
+
+
+### 🚀 Features
+
+
+- [58cef01](https://github.com/harilvfs/npltz/commit/58cef018c8731ae7c89cc72f3734cc3e596284b5)  *(tui)* Add mark when using 'goto' specific year day by @harilvfs
+
+
+
+### 🐛 Bug Fixes
+
+
+- [a79aad5](https://github.com/harilvfs/npltz/commit/a79aad5e2339360933722a51948b240e9226bfb9)  *(install)* Check version tag before download to prevent 404 by @harilvfs
+
+
+
+### ⚙️ Miscellaneous Tasks
+
+
+- [3ec4339](https://github.com/harilvfs/npltz/commit/3ec4339ccc09ce3355c2b627f3d53f32f231b562)  *(tui)* Increase popup size by @harilvfs
+
+- [58b30d8](https://github.com/harilvfs/npltz/commit/58b30d8e57b934d97a069349d3dfbc900e0c7ee2)  *(lint)* Correct shfmt fix by @harilvfs
+
+
+
 ## [1.0.2](https://github.com/harilvfs/npltz/compare/v1.0.1...v1.0.2) - 2026-06-24
 
 
