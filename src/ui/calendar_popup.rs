@@ -81,6 +81,18 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
                             .add_modifier(Modifier::ITALIC),
                     ));
                 }
+                Some(cell) if cell.is_goto_target => {
+                    let s = format!("{:^w$}", format!("★{}", cell.day), w = cell_w);
+                    bs_spans.push(Span::styled(
+                        s,
+                        Style::default().fg(app.theme.primary).add_modifier(Modifier::BOLD),
+                    ));
+                    let a = format!("{:^w$}", format!("★{}", cell.ad_day), w = cell_w);
+                    ad_spans.push(Span::styled(
+                        a,
+                        Style::default().fg(app.theme.primary).add_modifier(Modifier::ITALIC),
+                    ));
+                }
                 Some(cell) if cell.is_saturday => {
                     let s = format!("{:^w$}", cell.day.to_string(), w = cell_w);
                     bs_spans.push(Span::styled(s, sat_style));
@@ -106,12 +118,17 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
     frame.render_widget(Paragraph::new(grid_lines).alignment(Alignment::Center), grid_area);
 
     let now = chrono::Local::now();
+    let goto_info = app
+        .goto_date_key
+        .map(|(y, m, d)| format!("  ★  Goto: {:04}/{:02}/{:02}", y, m, d))
+        .unwrap_or_default();
     let info = if let Some(ref nd) = app.today {
         format!(
-            "{} · {} · {}",
+            "{} · {} · {}{}",
             nd.format_long(),
             now.format("%a, %b %d, %Y"),
             now.format("%I:%M:%S %p"),
+            goto_info,
         )
     } else {
         String::new()

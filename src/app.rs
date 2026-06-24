@@ -228,18 +228,20 @@ pub struct App {
 
     pub theme_selector_selected: usize,
 
-    pub goto_input: String,
-    pub goto_error: Option<String>,
+    pub goto_input:    String,
+    pub goto_error:    Option<String>,
+    pub goto_date_key: Option<(i32, u32, u32)>,
 
     pub help_scroll:     u16,
     pub help_max_scroll: u16,
 }
 
 pub struct CalendarCell {
-    pub day:         u32,
-    pub is_today:    bool,
-    pub is_saturday: bool,
-    pub ad_day:      u32,
+    pub day:            u32,
+    pub is_today:       bool,
+    pub is_saturday:    bool,
+    pub is_goto_target: bool,
+    pub ad_day:         u32,
 }
 
 pub struct CalendarRow {
@@ -266,6 +268,7 @@ impl App {
             theme_selector_selected: 0,
             goto_input: String::new(),
             goto_error: None,
+            goto_date_key: None,
 
             help_scroll: 0,
             help_max_scroll: 0,
@@ -292,6 +295,7 @@ impl App {
             theme_selector_selected: 0,
             goto_input: String::new(),
             goto_error: None,
+            goto_date_key: None,
             help_scroll: 0,
             help_max_scroll: 0,
         };
@@ -444,7 +448,7 @@ impl App {
             None => 1,
         };
 
-        if let Some(&d) = parts.get(2) {
+        let day: Option<u32> = if let Some(&d) = parts.get(2) {
             let day: u32 = match d.parse() {
                 Ok(d) if (1..=32).contains(&d) => d,
                 _ => {
@@ -460,10 +464,14 @@ impl App {
                 self.goto_error = Some(format!("{}/{} has only {} days", year, month, days_in_m));
                 return;
             }
-        }
+            Some(day)
+        } else {
+            None
+        };
 
         self.view_year = year;
         self.view_month = month;
+        self.goto_date_key = day.map(|d| (year, month, d));
         self.build_view();
         self.mode = AppMode::Normal;
         self.goto_error = None;
@@ -498,11 +506,15 @@ impl App {
             let is_today = self.today_key.is_some_and(|(ty, tm, td)| {
                 ty == self.view_year && tm == self.view_month && td == day
             });
+            let is_goto_target = self.goto_date_key.is_some_and(|(gy, gm, gd)| {
+                gy == self.view_year && gm == self.view_month && gd == day
+            });
             let is_saturday = cell_idx % 7 == 6;
             current_cells.push(Some(CalendarCell {
                 day,
                 is_today,
                 is_saturday,
+                is_goto_target,
                 ad_day: ad_date.day(),
             }));
             cell_idx += 1;
