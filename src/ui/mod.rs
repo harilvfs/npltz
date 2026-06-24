@@ -15,11 +15,11 @@ pub fn render(frame: &mut Frame, app: &mut App) {
 
     match app.mode {
         AppMode::ThemeSelector => {
-            let sel_area = centered_rect(40, 30, area);
+            let sel_area = centered_rect(50, 40, area);
             theme_selector::render(frame, sel_area, app);
         }
         AppMode::Goto => {
-            let goto_area = centered_rect(40, 20, area);
+            let goto_area = centered_rect(50, 30, area);
             goto_popup::render(frame, goto_area, app);
         }
         AppMode::Help => {
