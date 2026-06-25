@@ -10,16 +10,15 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
     frame.render_widget(Clear, area);
 
     let block = Block::default()
-        .title(" Select Default Theme ")
+        .title(" Theme  j/k nav · Enter/Space apply · q/esc/c cancel ")
         .title_alignment(Alignment::Center)
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
         .border_style(Style::default().fg(app.theme.primary));
     let inner = block.inner(area);
 
-    let [current_area, list_area, help_area] =
-        Layout::vertical([Constraint::Length(1), Constraint::Min(0), Constraint::Length(1)])
-            .areas(inner);
+    let [current_area, list_area] =
+        Layout::vertical([Constraint::Length(1), Constraint::Min(0)]).areas(inner);
 
     let current_line = Line::from(vec![
         Span::styled("  Current: ", Style::default().fg(app.theme.secondary)),
@@ -54,17 +53,6 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
 
     let mut list_state = ListState::default().with_selected(Some(app.theme_selector_selected));
     frame.render_stateful_widget(list, list_area, &mut list_state);
-
-    let help = Line::from(vec![
-        Span::styled(" j/k ", Style::default().fg(app.theme.success)),
-        Span::styled("navigate", Style::default().fg(app.theme.fg)),
-        Span::styled("  Enter ", Style::default().fg(app.theme.success)),
-        Span::styled("apply", Style::default().fg(app.theme.fg)),
-        Span::styled("  q/esc ", Style::default().fg(app.theme.error)),
-        Span::styled("cancel", Style::default().fg(app.theme.fg)),
-    ])
-    .alignment(Alignment::Center);
-    frame.render_widget(help, help_area);
 
     frame.render_widget(block, area);
 }

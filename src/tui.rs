@@ -117,7 +117,7 @@ fn handle_help_key(app: &mut App, key: KeyCode) {
 fn handle_theme_selector_key(app: &mut App, key: KeyCode) {
     match key {
         KeyCode::Esc | KeyCode::Char('q') | KeyCode::Char('c') => app.close_theme_selector(),
-        KeyCode::Enter => app.apply_selected_theme(),
+        KeyCode::Enter | KeyCode::Char('l') | KeyCode::Char(' ') => app.apply_selected_theme(),
         KeyCode::Up | KeyCode::Char('k') => app.theme_selector_prev(),
         KeyCode::Down | KeyCode::Char('j') => app.theme_selector_next(),
         _ => {}
