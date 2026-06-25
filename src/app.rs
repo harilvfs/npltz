@@ -305,15 +305,23 @@ impl App {
 
     pub fn update(&mut self) {
         let now = Local::now();
-        self.today = calendar::ad_to_bs(now.year(), now.month(), now.day());
+        let (y, m, d) = (now.year(), now.month(), now.day());
 
-        if let Some(ref nd) = self.today {
-            self.today_key = Some((nd.year, nd.month, nd.day));
-            if !self.initial_view_set {
-                self.view_year = nd.year;
-                self.view_month = nd.month;
-                self.initial_view_set = true;
-                self.build_view();
+        let today_changed = match self.today_key {
+            Some((ty, tm, td)) => ty != y || tm != m || td != d,
+            None => true,
+        };
+
+        if today_changed {
+            self.today = calendar::ad_to_bs(y, m, d);
+            if let Some(ref nd) = self.today {
+                self.today_key = Some((nd.year, nd.month, nd.day));
+                if !self.initial_view_set {
+                    self.view_year = nd.year;
+                    self.view_month = nd.month;
+                    self.initial_view_set = true;
+                    self.build_view();
+                }
             }
         }
     }
@@ -476,6 +484,22 @@ impl App {
         self.mode = AppMode::Normal;
         self.goto_error = None;
         log::Log::info(&format!("Goto: {}/{}", year, month));
+    }
+
+    pub fn prev_month_info(&self) -> (u32, i32) {
+        if self.view_month <= 1 {
+            (12, self.view_year - 1)
+        } else {
+            (self.view_month - 1, self.view_year)
+        }
+    }
+
+    pub fn next_month_info(&self) -> (u32, i32) {
+        if self.view_month >= 12 {
+            (1, self.view_year + 1)
+        } else {
+            (self.view_month + 1, self.view_year)
+        }
     }
 
     pub fn build_view(&mut self) {

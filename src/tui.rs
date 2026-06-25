@@ -1,7 +1,9 @@
 use crate::app::{App, AppMode};
 use crate::config::Config;
 use crate::{log, ui};
-use crossterm::event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode};
+use crossterm::event::{
+    self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, MouseEvent, MouseEventKind,
+};
 use crossterm::execute;
 use crossterm::terminal::{
     EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode,
@@ -47,14 +49,21 @@ fn run_app(
     loop {
         terminal.draw(|frame| ui::render(frame, app))?;
 
-        if event::poll(tick_rate)?
-            && let Event::Key(key) = event::read()?
-        {
-            match app.mode {
-                AppMode::Normal => handle_normal_key(app, key.code),
-                AppMode::ThemeSelector => handle_theme_selector_key(app, key.code),
-                AppMode::Goto => handle_goto_key(app, key.code),
-                AppMode::Help => handle_help_key(app, key.code),
+        if event::poll(tick_rate)? {
+            loop {
+                match event::read()? {
+                    Event::Key(key) => match app.mode {
+                        AppMode::Normal => handle_normal_key(app, key.code),
+                        AppMode::ThemeSelector => handle_theme_selector_key(app, key.code),
+                        AppMode::Goto => handle_goto_key(app, key.code),
+                        AppMode::Help => handle_help_key(app, key.code),
+                    },
+                    Event::Mouse(mouse) => handle_mouse(app, mouse),
+                    _ => {}
+                }
+                if !event::poll(Duration::ZERO)? {
+                    break;
+                }
             }
         }
 
@@ -125,4 +134,26 @@ fn handle_goto_key(app: &mut App, key: KeyCode) {
         }
         _ => {}
     }
+}
+
+fn handle_mouse(app: &mut App, mouse: MouseEvent) {
+    if app.mode != AppMode::Normal {
+        return;
+    }
+    if mouse.kind != MouseEventKind::Down(crossterm::event::MouseButton::Left) {
+        return;
+    }
+    let (term_w, term_h) = terminal_size().unwrap_or((80, 24));
+    let nav_row = term_h.saturating_sub(4);
+    if mouse.row >= nav_row {
+        if mouse.column < term_w / 2 {
+            app.navigate_prev();
+        } else {
+            app.navigate_next();
+        }
+    }
+}
+
+fn terminal_size() -> Option<(u16, u16)> {
+    crossterm::terminal::size().ok()
 }
