@@ -137,6 +137,21 @@ pub fn english_month_name(month: u32) -> &'static str {
     MONTH_NAMES[month as usize - 1]
 }
 
+pub fn get_year_total_days(bs_year: i32) -> Option<u32> {
+    let yd = get_year_data(bs_year)?;
+    Some(yd.total_days)
+}
+
+pub fn get_day_of_year(bs_year: i32, bs_month: u32, bs_day: u32) -> Option<u32> {
+    let yd = get_year_data(bs_year)?;
+    let mut total = 0u32;
+    for m in 0..(bs_month as usize - 1) {
+        total += yd.months[m];
+    }
+    total += bs_day;
+    Some(total)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

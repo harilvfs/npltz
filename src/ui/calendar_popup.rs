@@ -1,5 +1,6 @@
 use crate::app::App;
 use crate::calendar;
+use chrono::Datelike;
 use ratatui::Frame;
 use ratatui::layout::{Alignment, Constraint, Layout, Rect};
 use ratatui::style::{Modifier, Style};
@@ -8,7 +9,7 @@ use ratatui::widgets::{Block, BorderType, Borders, Clear, Paragraph};
 
 use super::DAY_HEADER;
 
-const SIDEBAR_WIDTH: u16 = 24;
+const SIDEBAR_WIDTH: u16 = 30;
 
 pub fn render(frame: &mut Frame, area: Rect, app: &App) {
     frame.render_widget(Clear, area);
@@ -18,43 +19,16 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
         .title_alignment(Alignment::Center)
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
-        .border_style(Style::default().fg(app.theme.primary));
+        .border_style(Style::default().fg(app.theme.primary))
+        .title_bottom(Line::from(" h/l · j/k · t · c · g · ? · q ").alignment(Alignment::Center));
     let inner = block.inner(area);
-
-    let [main_area, info_area, hint_area] =
-        Layout::vertical([Constraint::Min(0), Constraint::Length(1), Constraint::Length(1)])
-            .areas(inner);
 
     let sb_w = SIDEBAR_WIDTH.min(inner.width / 3);
     let [sidebar_area, content_area] =
-        Layout::horizontal([Constraint::Length(sb_w), Constraint::Min(0)]).areas(main_area);
+        Layout::horizontal([Constraint::Length(sb_w), Constraint::Min(0)]).areas(inner);
 
     render_sidebar(frame, sidebar_area, app);
     render_content(frame, content_area, app);
-
-    let now = chrono::Local::now();
-    let goto_info = app
-        .goto_date_key
-        .map(|(y, m, d)| format!("  ★  Goto: {:04}/{:02}/{:02}", y, m, d))
-        .unwrap_or_default();
-    let info = if let Some(ref nd) = app.today {
-        format!("{} · {}{}", nd.format_long(), now.format("%a, %b %d, %Y"), goto_info,)
-    } else {
-        String::new()
-    };
-    let bold_line = Style::default()
-        .fg(app.theme.secondary)
-        .add_modifier(Modifier::BOLD | Modifier::UNDERLINED);
-    let bold = Style::default().fg(app.theme.secondary).add_modifier(Modifier::BOLD);
-    frame.render_widget(
-        Paragraph::new(Line::from(Span::styled(info, bold_line))).alignment(Alignment::Center),
-        info_area,
-    );
-    frame.render_widget(
-        Paragraph::new(Line::from(vec![Span::styled("h/l · j/k · t · c · g · ? · q", bold)]))
-            .alignment(Alignment::Center),
-        hint_area,
-    );
 
     frame.render_widget(block, area);
 }
@@ -72,7 +46,6 @@ fn render_sidebar(frame: &mut Frame, area: Rect, app: &App) {
     let label_style = Style::default().fg(app.theme.secondary);
     let value_style = Style::default().fg(app.theme.primary).add_modifier(Modifier::BOLD);
     let dim_style = Style::default().fg(app.theme.secondary).add_modifier(Modifier::DIM);
-    let day_num_style = Style::default().fg(app.theme.fg).add_modifier(Modifier::BOLD);
     let sep_style = Style::default().fg(app.theme.secondary);
 
     let w = (inner.width as usize).max(2);
@@ -86,10 +59,11 @@ fn render_sidebar(frame: &mut Frame, area: Rect, app: &App) {
         format!("{}{}{}", " ".repeat(header_pad), header_text, " ".repeat(header_pad_r));
     lines.push(Line::from(Span::styled(header_line, header_bg_style)));
     lines.push(Line::from(""));
+    lines.push(Line::from(""));
 
     if let Some(ref nd) = app.today {
-        let month = calendar::english_month_name(app.view_month);
-        let year_str = format!("{} Year", app.view_year);
+        let month = calendar::english_month_name(nd.month);
+        let year_str = format!("{} Year", nd.year);
         let gap = w.saturating_sub(2 + month.len() + year_str.len());
         lines.push(Line::from(vec![
             Span::styled(" ", label_style),
@@ -97,29 +71,31 @@ fn render_sidebar(frame: &mut Frame, area: Rect, app: &App) {
             Span::styled(" ".repeat(gap), Style::default()),
             Span::styled(year_str, value_style),
         ]));
+        lines.push(Line::from(""));
 
         lines.push(Line::from(Span::styled(format!(" {}", sep), sep_style)));
+        lines.push(Line::from(""));
 
-        let day_name_str = nd.day_name();
-        let pad_day_name = w.saturating_sub(day_name_str.len()) / 2;
+        let day_line_str = format!("{}, day {}", nd.day_name(), nd.day);
+        let pad_day_line = w.saturating_sub(day_line_str.len()) / 2;
         lines.push(Line::from(vec![
-            Span::styled(" ".repeat(pad_day_name), Style::default()),
-            Span::styled(day_name_str, label_style),
+            Span::styled(" ".repeat(pad_day_line), Style::default()),
+            Span::styled(day_line_str, label_style),
         ]));
-        let day_label = "day";
-        let pad_label = w.saturating_sub(day_label.len()) / 2;
-        lines.push(Line::from(vec![
-            Span::styled(" ".repeat(pad_label), Style::default()),
-            Span::styled(day_label, dim_style),
-        ]));
-        let day_str = nd.day.to_string();
-        let pad_num = w.saturating_sub(day_str.len()) / 2;
-        lines.push(Line::from(vec![
-            Span::styled(" ".repeat(pad_num), Style::default()),
-            Span::styled(day_str, day_num_style),
-        ]));
+
+        let ad_date = calendar::bs_to_ad(nd.year, nd.month, nd.day);
+        if let Some(ref date) = ad_date {
+            let ad_str = date.format("%b %d, %Y").to_string();
+            let pad_ad = w.saturating_sub(ad_str.len()) / 2;
+            lines.push(Line::from(vec![
+                Span::styled(" ".repeat(pad_ad), Style::default()),
+                Span::styled(ad_str, dim_style),
+            ]));
+        }
+        lines.push(Line::from(""));
 
         lines.push(Line::from(Span::styled(format!(" {}", sep), sep_style)));
+        lines.push(Line::from(""));
 
         let time_str = now.format("%I:%M:%S %p").to_string();
         let pad_time = w.saturating_sub(time_str.len()) / 2;
@@ -127,6 +103,58 @@ fn render_sidebar(frame: &mut Frame, area: Rect, app: &App) {
             Span::styled(" ".repeat(pad_time), Style::default()),
             Span::styled(time_str, dim_style),
         ]));
+        lines.push(Line::from(""));
+
+        lines.push(Line::from(Span::styled(format!(" {}", sep), sep_style)));
+        lines.push(Line::from(""));
+
+        if let Some(days_total) = calendar::get_days_in_month(nd.year, nd.month) {
+            let remaining = days_total - nd.day;
+            let remaining_str =
+                format!("{} days left on {}", remaining, calendar::english_month_name(nd.month));
+            let pad_remaining = w.saturating_sub(remaining_str.len()) / 2;
+            lines.push(Line::from(vec![
+                Span::styled(" ".repeat(pad_remaining), Style::default()),
+                Span::styled(remaining_str, dim_style),
+            ]));
+            lines.push(Line::from(""));
+
+            if let (Some(day_of_year), Some(year_days)) = (
+                calendar::get_day_of_year(nd.year, nd.month, nd.day),
+                calendar::get_year_total_days(nd.year),
+            ) {
+                let progress = day_of_year as f64 / year_days as f64;
+                let bar_width = w.saturating_sub(4);
+                let filled = (progress * bar_width as f64).round() as usize;
+                let empty = bar_width.saturating_sub(filled);
+                let bar_str = format!("{}{}", "\u{2588}".repeat(filled), "\u{2591}".repeat(empty));
+                let pad_bar = (w.saturating_sub(bar_width)) / 2;
+                lines.push(Line::from(vec![
+                    Span::styled(" ".repeat(pad_bar), Style::default()),
+                    Span::styled(bar_str, Style::default().fg(app.theme.primary)),
+                ]));
+                let pct_str = format!("{}% complete this year", (progress * 100.0) as u32);
+                let pad_pct = w.saturating_sub(pct_str.len()) / 2;
+                lines.push(Line::from(vec![
+                    Span::styled(" ".repeat(pad_pct), Style::default()),
+                    Span::styled(pct_str, dim_style),
+                ]));
+                lines.push(Line::from(""));
+            }
+        }
+
+        let ad_date = calendar::bs_to_ad(nd.year, nd.month, nd.day);
+        if let Some(ref date) = ad_date {
+            let week_num = date.iso_week().week();
+            let last_day = chrono::NaiveDate::from_ymd_opt(date.year(), 12, 28).unwrap();
+            let total_weeks = last_day.iso_week().week();
+            let week_str = format!("Week {}/{}", week_num, total_weeks);
+            let pad_week = w.saturating_sub(week_str.len()) / 2;
+            lines.push(Line::from(vec![
+                Span::styled(" ".repeat(pad_week), Style::default()),
+                Span::styled(week_str, dim_style),
+            ]));
+        }
     } else {
         lines.push(Line::from(Span::styled(" --", dim_style)));
         lines.push(Line::from(Span::styled(format!(" {}", sep), sep_style)));
