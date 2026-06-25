@@ -1,4 +1,14 @@
 
+## [1.0.4](https://github.com/harilvfs/npltz/compare/v1.0.3...v1.0.4) - 2026-06-25
+
+
+### 🚜 Refactor
+
+
+- [91b7947](https://github.com/harilvfs/npltz/commit/91b794748b945ebacfccce348e5621cd04738530)  *(tui)* Update to new looks (#16) by @harilvfs in [#16](https://github.com/harilvfs/npltz/pull/16)
+
+
+
 ## [1.0.3](https://github.com/harilvfs/npltz/compare/v1.0.2...v1.0.3) - 2026-06-24
 
 
