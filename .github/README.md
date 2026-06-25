@@ -95,6 +95,8 @@ rm -rf ~/.config/npltz
 
 npltz is a simple TUI built with ratatui. Keybinds are shown on screen to navigate, switch years, go to a specific year, change themes, and more.
 
+Press `?` inside the TUI to open the help screen with all keyboard shortcuts.
+
 ### Commands
 
 npltz supports some CLI commands too. See them with:
@@ -110,6 +112,8 @@ npltz also supports themes you can set via the CLI or inside the TUI (press `c`)
 ```
 npltz --set-theme <theme-name>
 ```
+
+Available themes: `catppuccin-mocha`, `dracula`, `gruvbox`, `nord`, `rose-pine`
 
 ### Completions / Man Pages
 
