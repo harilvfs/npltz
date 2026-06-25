@@ -1,4 +1,28 @@
 
+## [1.0.5](https://github.com/harilvfs/npltz/compare/v1.0.4...v1.0.5) - 2026-06-25
+
+
+### 🚀 Features
+
+
+- [bfdd9c1](https://github.com/harilvfs/npltz/commit/bfdd9c1d4ac04d0783b98c160a4a26945104e1e4)  *(tui)* Add detail to side panel by @harilvfs
+
+
+
+### 🎨 Styling
+
+
+- [ac9d83d](https://github.com/harilvfs/npltz/commit/ac9d83ded6ade2722360db11acc9eafca0e4e897)  *(tui)* Make theme popup bindings at tui border by @harilvfs
+
+
+
+### ⚙️ Miscellaneous Tasks
+
+
+- [682aa5b](https://github.com/harilvfs/npltz/commit/682aa5be396d0b04fcf8374054dab0ac565f0117)  *(docs)* Add info about available themes by @harilvfs
+
+
+
 ## [1.0.4](https://github.com/harilvfs/npltz/compare/v1.0.3...v1.0.4) - 2026-06-25
 
 
