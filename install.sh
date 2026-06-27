@@ -95,25 +95,25 @@ TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
 
 ASSET="$BINARY-$TARGET"
-curl -fsSL "https://github.com/$REPO/releases/download/$VERSION/$ASSET" -o "$TMPDIR/$BINARY"
-curl -fsSL "https://github.com/$REPO/releases/download/$VERSION/$ASSET.sha256" -o "$TMPDIR/$BINARY.sha256"
+curl -fsSL "https://github.com/$REPO/releases/download/$VERSION/$ASSET" -o "$TMPDIR/$ASSET"
+curl -fsSL "https://github.com/$REPO/releases/download/$VERSION/$ASSET.sha256" -o "$TMPDIR/$ASSET.sha256"
 
 cd "$TMPDIR"
 if command -v sha256sum > /dev/null 2>&1; then
-    sha256sum -c "$BINARY.sha256"
+    sha256sum -c "$ASSET.sha256"
 else
-    shasum -a 256 -c "$BINARY.sha256"
+    shasum -a 256 -c "$ASSET.sha256"
 fi
-chmod 755 "$BINARY"
+chmod 755 "$ASSET"
 
 if [ "$IS_ANDROID" = "true" ]; then
-    install -Dm755 "$BINARY" "$PREFIX/bin/$BINARY"
+    install -Dm755 "$ASSET" "$PREFIX/bin/$BINARY"
 elif [ "$(uname -s)" = "Darwin" ]; then
     mkdir -p /usr/local/bin
-    install -m755 "$BINARY" "/usr/local/bin/$BINARY"
+    install -m755 "$ASSET" "/usr/local/bin/$BINARY"
 else
     sudo mkdir -p /usr/local/bin
-    sudo install -m755 "$BINARY" "/usr/local/bin/$BINARY"
+    sudo install -m755 "$ASSET" "/usr/local/bin/$BINARY"
 fi
 
 echo "$BINARY installed successfully"
