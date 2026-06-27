@@ -24,6 +24,7 @@ license.workspace = true
 homepage.workspace = true
 documentation.workspace = true
 readme.workspace = true
+repository.workspace = true
 categories.workspace = true
 keywords.workspace = true
 include = [
