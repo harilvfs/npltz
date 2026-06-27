@@ -104,6 +104,12 @@ Keywords=nepali;calendar;bikram-sambat;date;patro;tui;
 
     let mut cmd = Cli::command();
     cmd = cmd.name("npltz");
+    cmd = cmd.long_about(
+        "A terminal-based Nepali calendar (Bikram Sambat) viewer with an interactive \
+TUI and CLI conversion tools.\n\n\
+npltz displays Nepali months with English dates alongside, \
+supports AD to BS conversion, and offers simplicity.",
+    );
 
     if dry_run {
         println!("(dry run) Would install:");
@@ -169,6 +175,22 @@ Keywords=nepali;calendar;bikram-sambat;date;patro;tui;
         content = content.replace(&old, &new);
     }
     content = content.replace("npltz\\-help(1)", "\\fBhelp\\fR");
+
+    content.push_str(
+        r#".SH DOCUMENTATION
+Documentation and source code available at:
+.br
+https://github.com/harilvfs/npltz
+
+.SH AUTHOR
+Hari Chalise <harilvfs@chalisehari.com.np>
+
+.SH REPORTING BUGS
+If you encounter bugs or issues, please report them at:
+.br
+https://github.com/harilvfs/npltz/issues
+"#,
+    );
 
     let mdir = man_dir();
     let man_path = mdir.join("npltz.1");
