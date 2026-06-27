@@ -1,4 +1,38 @@
 
+## [1.0.6](https://github.com/harilvfs/npltz/compare/v1.0.5...v1.0.6) - 2026-06-27
+
+
+### 🚀 Features
+
+
+- [9dc79c5](https://github.com/harilvfs/npltz/commit/9dc79c56bcd1dd3b32e6a2763cf236fe00d0047b) Add self-management cmds, cross-platform releases, and cargo-binstall support (#21) by @harilvfs in [#21](https://github.com/harilvfs/npltz/pull/21)
+
+- [faf4b4f](https://github.com/harilvfs/npltz/commit/faf4b4fc6b466f513f18b878de93c99bca55f233)  *(script)* Add verify shasum by @harilvfs
+
+
+
+### 🐛 Bug Fixes
+
+
+- [b1c214a](https://github.com/harilvfs/npltz/commit/b1c214a70a5371db5150e81fc330168738c854af)  *(build)* Add rustls-tls feature for reqwest openssl by @harilvfs
+
+- [b7bbe3b](https://github.com/harilvfs/npltz/commit/b7bbe3baf3d00efb8ccba1dc81df0289612e90c9)  *(macos)* Correct shasum arguments by @harilvfs
+
+
+
+### ⚙️ Miscellaneous Tasks
+
+
+- [122fb94](https://github.com/harilvfs/npltz/commit/122fb94345d92843a5076d745492dc1ff3f6883c)  *(tui)* Add `g` key to close goto popup by @harilvfs
+
+- [d12b2e7](https://github.com/harilvfs/npltz/commit/d12b2e7242622d6e862d719d8c38d738d0164944)  *(release)* Remove macos-13 for build by @harilvfs
+
+- [5f5e6c7](https://github.com/harilvfs/npltz/commit/5f5e6c77f95fa6d86169dc72c7130d5718c6f873)  *(deny)* Allow CDLA-Permissive-2.0 & ISC license by @harilvfs
+
+- [c362411](https://github.com/harilvfs/npltz/commit/c3624110a0996f446b220c27b5b5ef4bd81e6b66)  *(ci)* If case for prerelease by @harilvfs
+
+
+
 ## [1.0.5](https://github.com/harilvfs/npltz/compare/v1.0.4...v1.0.5) - 2026-06-25
 
 
