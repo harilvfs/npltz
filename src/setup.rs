@@ -12,6 +12,7 @@ pub fn run_setup(dry_run: bool) -> crate::error::Result<()> {
     use std::fs;
     use std::path::PathBuf;
 
+    #[cfg(target_os = "linux")]
     const DESKTOP_FILE: &str = "[Desktop Entry]
 Name=npltz
 Comment=A terminal-based Nepali calendar BS (Bikram Sambat) viewer
