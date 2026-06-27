@@ -126,7 +126,7 @@ fn handle_theme_selector_key(app: &mut App, key: KeyCode) {
 
 fn handle_goto_key(app: &mut App, key: KeyCode) {
     match key {
-        KeyCode::Esc | KeyCode::Char('q') => app.close_goto(),
+        KeyCode::Esc | KeyCode::Char('q') | KeyCode::Char('g') => app.close_goto(),
         KeyCode::Enter => app.apply_goto(),
         KeyCode::Char(c) if c.is_ascii_digit() || c == '-' => app.goto_input.push(c),
         KeyCode::Backspace => {
