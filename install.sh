@@ -91,17 +91,25 @@ fi
 
 echo "Installing $BINARY $VERSION ($TARGET)"
 
-URL="https://github.com/$REPO/releases/download/$VERSION/$BINARY-$TARGET"
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "$TMPDIR"' EXIT
+
+ASSET="$BINARY-$TARGET"
+curl -fsSL "https://github.com/$REPO/releases/download/$VERSION/$ASSET" -o "$TMPDIR/$BINARY"
+curl -fsSL "https://github.com/$REPO/releases/download/$VERSION/$ASSET.sha256" -o "$TMPDIR/$BINARY.sha256"
+
+cd "$TMPDIR"
+sha256sum -c "$BINARY.sha256"
+chmod 755 "$BINARY"
 
 if [ "$IS_ANDROID" = "true" ]; then
-    curl -fsSL "$URL" -o "$PREFIX/bin/$BINARY"
-    chmod +x "$PREFIX/bin/$BINARY"
+    install -Dm755 "$BINARY" "$PREFIX/bin/$BINARY"
 elif [ "$(uname -s)" = "Darwin" ]; then
-    curl -fsSL "$URL" -o "/usr/local/bin/$BINARY"
-    chmod +x "/usr/local/bin/$BINARY"
+    mkdir -p /usr/local/bin
+    install -m755 "$BINARY" "/usr/local/bin/$BINARY"
 else
-    sudo curl -fsSL "$URL" -o "/usr/local/bin/$BINARY"
-    sudo chmod +x "/usr/local/bin/$BINARY"
+    sudo mkdir -p /usr/local/bin
+    sudo install -m755 "$BINARY" "/usr/local/bin/$BINARY"
 fi
 
 echo "$BINARY installed successfully"

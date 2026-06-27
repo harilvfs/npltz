@@ -103,6 +103,8 @@ jobs:
           cp build/x86_64-unknown-linux-musl/release/npltz npltz-x86_64-unknown-linux-musl
           cp build/aarch64-unknown-linux-musl/release/npltz npltz-aarch64-unknown-linux-musl
           chmod +x npltz-x86_64-unknown-linux-musl npltz-aarch64-unknown-linux-musl
+          sha256sum npltz-x86_64-unknown-linux-musl > npltz-x86_64-unknown-linux-musl.sha256
+          sha256sum npltz-aarch64-unknown-linux-musl > npltz-aarch64-unknown-linux-musl.sha256
 
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v7
@@ -142,7 +144,9 @@ jobs:
         run: |
           gh release upload ${{ github.event.inputs.tag_version }} \
             npltz-x86_64-unknown-linux-musl \
-            npltz-aarch64-unknown-linux-musl
+            npltz-x86_64-unknown-linux-musl.sha256 \
+            npltz-aarch64-unknown-linux-musl \
+            npltz-aarch64-unknown-linux-musl.sha256
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -193,11 +197,13 @@ jobs:
       - name: Rename binary
         run: |
           cp build/${{ matrix.target }}/release/npltz npltz-${{ matrix.target }}
+          sha256sum npltz-${{ matrix.target }} > npltz-${{ matrix.target }}.sha256
 
       - name: Upload macOS asset
         run: |
           gh release upload ${{ github.event.inputs.tag_version }} \
-            npltz-${{ matrix.target }}
+            npltz-${{ matrix.target }} \
+            npltz-${{ matrix.target }}.sha256
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -249,10 +255,15 @@ jobs:
         run: |
           Copy-Item "build/${{ matrix.target }}/release/npltz.exe" "npltz-${{ matrix.target }}.exe"
 
+      - name: Generate checksum
+        shell: bash
+        run: sha256sum "npltz-${{ matrix.target }}.exe" > "npltz-${{ matrix.target }}.exe.sha256"
+
       - name: Upload Windows asset
         run: |
           gh release upload ${{ github.event.inputs.tag_version }} `
-            npltz-${{ matrix.target }}.exe
+            npltz-${{ matrix.target }}.exe `
+            npltz-${{ matrix.target }}.exe.sha256
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -312,11 +323,15 @@ jobs:
           cp build/aarch64-linux-android/release/npltz npltz-aarch64-linux-android
           cp build/armv7-linux-androideabi/release/npltz npltz-armv7-linux-androideabi
           chmod +x npltz-aarch64-linux-android npltz-armv7-linux-androideabi
+          sha256sum npltz-aarch64-linux-android > npltz-aarch64-linux-android.sha256
+          sha256sum npltz-armv7-linux-androideabi > npltz-armv7-linux-androideabi.sha256
 
       - name: Upload Android assets
         run: |
           gh release upload ${{ github.event.inputs.tag_version }} \
             npltz-aarch64-linux-android \
-            npltz-armv7-linux-androideabi
+            npltz-aarch64-linux-android.sha256 \
+            npltz-armv7-linux-androideabi \
+            npltz-armv7-linux-androideabi.sha256
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
