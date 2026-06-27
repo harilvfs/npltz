@@ -197,7 +197,7 @@ jobs:
       - name: Rename binary
         run: |
           cp build/${{ matrix.target }}/release/npltz npltz-${{ matrix.target }}
-          sha256sum npltz-${{ matrix.target }} > npltz-${{ matrix.target }}.sha256
+          shasum -a 256 npltz-${{ matrix.target }} > npltz-${{ matrix.target }}.sha256
 
       - name: Upload macOS asset
         run: |

@@ -99,7 +99,11 @@ curl -fsSL "https://github.com/$REPO/releases/download/$VERSION/$ASSET" -o "$TMP
 curl -fsSL "https://github.com/$REPO/releases/download/$VERSION/$ASSET.sha256" -o "$TMPDIR/$BINARY.sha256"
 
 cd "$TMPDIR"
-sha256sum -c "$BINARY.sha256"
+if command -v sha256sum > /dev/null 2>&1; then
+    sha256sum -c "$BINARY.sha256"
+else
+    shasum -a 256 -c "$BINARY.sha256"
+fi
 chmod 755 "$BINARY"
 
 if [ "$IS_ANDROID" = "true" ]; then
