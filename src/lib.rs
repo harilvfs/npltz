@@ -5,6 +5,8 @@ mod commands;
 mod config;
 mod error;
 mod log;
+mod self_manage;
+mod setup;
 mod theme;
 mod tui;
 mod ui;
@@ -67,6 +69,18 @@ pub fn run() -> Result<()> {
         Some(Commands::Completions { shell }) => {
             let mut cmd = Cli::command();
             clap_complete::generate(shell, &mut cmd, "npltz", &mut std::io::stdout());
+        }
+        Some(Commands::Setup { dry_run }) => {
+            setup::run_setup(dry_run)?;
+        }
+        Some(Commands::CheckUpdate) => {
+            self_manage::check_update()?;
+        }
+        Some(Commands::Update) => {
+            self_manage::update()?;
+        }
+        Some(Commands::Uninstall) => {
+            self_manage::uninstall()?;
         }
         None => {
             run_tui()?;

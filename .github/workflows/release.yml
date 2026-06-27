@@ -33,16 +33,7 @@ jobs:
       - name: Set up version variables
         run: |
           VERSION=$(echo "${{ github.event.inputs.tag_version }}" | sed 's/^v//')
-          CURRENT_MONTH=$(date +'%B')
-          CURRENT_YEAR=$(date +'%Y')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "CURRENT_MONTH=$CURRENT_MONTH" >> $GITHUB_ENV
-          echo "CURRENT_YEAR=$CURRENT_YEAR" >> $GITHUB_ENV
-
-      - name: Debug input values
-        run: |
-          echo "Update version input: '${{ github.event.inputs.update_version }}'"
-          echo "Update version type: $(echo '${{ github.event.inputs.update_version }}' | wc -c)"
 
       - name: Update Cargo.toml version
         if: ${{ github.event.inputs.update_version == 'true' }}
@@ -107,56 +98,19 @@ jobs:
             --target-dir=build \
             --target=aarch64-unknown-linux-musl
 
-      - name: Generate completions
+      - name: Rename binaries
         run: |
-          mkdir -p completions
-          ./build/x86_64-unknown-linux-musl/release/npltz completions bash > completions/npltz.bash
-          ./build/x86_64-unknown-linux-musl/release/npltz completions zsh > completions/npltz.zsh
-          ./build/x86_64-unknown-linux-musl/release/npltz completions fish > completions/npltz.fish
-
-      - name: Generate manpage
-        run: cargo xtask man
-
-      - name: Upload completions as artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: completions
-          path: completions/
-          retention-days: 1
-
-      - name: Package x86_64 release archive
-        run: |
-          DIR="npltz-x86_64-unknown-linux-musl"
-          mkdir -p "$DIR/completions" "$DIR/man"
-          cp build/x86_64-unknown-linux-musl/release/npltz "$DIR/"
-          cp completions/* "$DIR/completions/"
-          cp man/npltz.1 "$DIR/man/"
-          cp npltz.desktop "$DIR/"
-          tar -czf "${DIR}.tar.gz" "$DIR"
-          sha256sum "${DIR}.tar.gz" > "${DIR}.tar.gz.sha256"
-          echo "ARCHIVE_X86_64=${DIR}.tar.gz" >> $GITHUB_ENV
-          echo "ARCHIVE_X86_64_SHA=${DIR}.tar.gz.sha256" >> $GITHUB_ENV
-
-      - name: Package aarch64 release archive
-        run: |
-          DIR="npltz-aarch64-unknown-linux-musl"
-          mkdir -p "$DIR/completions" "$DIR/man"
-          cp build/aarch64-unknown-linux-musl/release/npltz "$DIR/"
-          cp completions/* "$DIR/completions/"
-          cp man/npltz.1 "$DIR/man/"
-          cp npltz.desktop "$DIR/"
-          tar -czf "${DIR}.tar.gz" "$DIR"
-          sha256sum "${DIR}.tar.gz" > "${DIR}.tar.gz.sha256"
-          echo "ARCHIVE_AARCH64=${DIR}.tar.gz" >> $GITHUB_ENV
-          echo "ARCHIVE_AARCH64_SHA=${DIR}.tar.gz.sha256" >> $GITHUB_ENV
+          cp build/x86_64-unknown-linux-musl/release/npltz npltz-x86_64-unknown-linux-musl
+          cp build/aarch64-unknown-linux-musl/release/npltz npltz-aarch64-unknown-linux-musl
+          chmod +x npltz-x86_64-unknown-linux-musl npltz-aarch64-unknown-linux-musl
 
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: linux-archives
+          name: linux-binaries
           path: |
-            npltz-*.tar.gz
-            npltz-*.tar.gz.sha256
+            npltz-x86_64-unknown-linux-musl
+            npltz-aarch64-unknown-linux-musl
           retention-days: 1
 
       - name: Generate changelog
@@ -187,10 +141,120 @@ jobs:
       - name: Upload Linux assets
         run: |
           gh release upload ${{ github.event.inputs.tag_version }} \
-            ${{ env.ARCHIVE_X86_64 }} \
-            ${{ env.ARCHIVE_X86_64_SHA }} \
-            ${{ env.ARCHIVE_AARCH64 }} \
-            ${{ env.ARCHIVE_AARCH64_SHA }}
+            npltz-x86_64-unknown-linux-musl \
+            npltz-aarch64-unknown-linux-musl
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  macos:
+    runs-on: ${{ matrix.runner }}
+    needs: release
+    strategy:
+      matrix:
+        include:
+          - runner: macos-13
+            target: x86_64-apple-darwin
+          - runner: macos-14
+            target: aarch64-apple-darwin
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Install Rust (nightly)
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: nightly-2025-12-31
+          targets: ${{ matrix.target }}
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v5
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-registry-${{ matrix.target }}-
+
+      - name: Cache Cargo index
+        uses: actions/cache@v5
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-index-${{ matrix.target }}-
+
+      - name: Build binary
+        run: |
+          cargo build \
+            --release \
+            --verbose \
+            --target-dir=build \
+            --target=${{ matrix.target }}
+
+      - name: Rename binary
+        run: |
+          cp build/${{ matrix.target }}/release/npltz npltz-${{ matrix.target }}
+
+      - name: Upload macOS asset
+        run: |
+          gh release upload ${{ github.event.inputs.tag_version }} \
+            npltz-${{ matrix.target }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  windows:
+    runs-on: windows-latest
+    needs: release
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-pc-windows-msvc
+          - target: aarch64-pc-windows-msvc
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Install Rust (nightly)
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: nightly-2025-12-31
+          targets: ${{ matrix.target }}
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v5
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-registry-${{ matrix.target }}-
+
+      - name: Cache Cargo index
+        uses: actions/cache@v5
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-index-${{ matrix.target }}-
+
+      - name: Build binary
+        run: |
+          cargo build `
+            --release `
+            --verbose `
+            --target-dir=build `
+            --target=${{ matrix.target }}
+
+      - name: Rename binary
+        run: |
+          Copy-Item "build/${{ matrix.target }}/release/npltz.exe" "npltz-${{ matrix.target }}.exe"
+
+      - name: Upload Windows asset
+        run: |
+          gh release upload ${{ github.event.inputs.tag_version }} `
+            npltz-${{ matrix.target }}.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -231,15 +295,6 @@ jobs:
       - name: Install cross
         run: cargo install cross
 
-      - name: Generate manpage
-        run: cargo xtask man
-
-      - name: Download completions
-        uses: actions/download-artifact@v7
-        with:
-          name: completions
-          path: completions/
-
       - name: Build aarch64 Android binary
         run: |
           cross build \
@@ -254,45 +309,16 @@ jobs:
             --target-dir=build \
             --target=armv7-linux-androideabi
 
-      - name: Package aarch64 Android archive
+      - name: Rename binaries
         run: |
-          DIR="npltz-aarch64-linux-android"
-          mkdir -p "$DIR/completions" "$DIR/man"
-          cp build/aarch64-linux-android/release/npltz "$DIR/"
-          cp completions/* "$DIR/completions/"
-          cp man/npltz.1 "$DIR/man/"
-          tar -czf "${DIR}.tar.gz" "$DIR"
-          sha256sum "${DIR}.tar.gz" > "${DIR}.tar.gz.sha256"
-          echo "ARCHIVE_AARCH64_ANDROID=${DIR}.tar.gz" >> $GITHUB_ENV
-          echo "ARCHIVE_AARCH64_ANDROID_SHA=${DIR}.tar.gz.sha256" >> $GITHUB_ENV
-
-      - name: Package armv7 Android archive
-        run: |
-          DIR="npltz-armv7-linux-androideabi"
-          mkdir -p "$DIR/completions" "$DIR/man"
-          cp build/armv7-linux-androideabi/release/npltz "$DIR/"
-          cp completions/* "$DIR/completions/"
-          cp man/npltz.1 "$DIR/man/"
-          tar -czf "${DIR}.tar.gz" "$DIR"
-          sha256sum "${DIR}.tar.gz" > "${DIR}.tar.gz.sha256"
-          echo "ARCHIVE_ARMV7_ANDROID=${DIR}.tar.gz" >> $GITHUB_ENV
-          echo "ARCHIVE_ARMV7_ANDROID_SHA=${DIR}.tar.gz.sha256" >> $GITHUB_ENV
-
-      - name: Upload Android archives as artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: android-archives
-          path: |
-            npltz-*.tar.gz
-            npltz-*.tar.gz.sha256
-          retention-days: 1
+          cp build/aarch64-linux-android/release/npltz npltz-aarch64-linux-android
+          cp build/armv7-linux-androideabi/release/npltz npltz-armv7-linux-androideabi
+          chmod +x npltz-aarch64-linux-android npltz-armv7-linux-androideabi
 
       - name: Upload Android assets
         run: |
           gh release upload ${{ github.event.inputs.tag_version }} \
-            ${{ env.ARCHIVE_AARCH64_ANDROID }} \
-            ${{ env.ARCHIVE_AARCH64_ANDROID_SHA }} \
-            ${{ env.ARCHIVE_ARMV7_ANDROID }} \
-            ${{ env.ARCHIVE_ARMV7_ANDROID_SHA }}
+            npltz-aarch64-linux-android \
+            npltz-armv7-linux-androideabi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

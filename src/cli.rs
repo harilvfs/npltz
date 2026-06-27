@@ -51,6 +51,17 @@ pub enum Commands {
     ConvertBs { date: String },
     #[command(about = "Generate shell completions (bash, zsh, fish)")]
     Completions { shell: clap_complete::Shell },
+    #[command(about = "Install completions and man page to system paths")]
+    Setup {
+        #[arg(long, help = "Show what would be installed without making changes")]
+        dry_run: bool,
+    },
+    #[command(about = "Check for updates")]
+    CheckUpdate,
+    #[command(about = "Update npltz to the latest version")]
+    Update,
+    #[command(about = "Uninstall npltz and its files")]
+    Uninstall,
 }
 
 #[cfg(test)]

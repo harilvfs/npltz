@@ -4,6 +4,7 @@
 [default.extend-words]
 ratatui = "ratatui"
 nd = "nd"
+nstall = "nstall"
 
 [files]
 extend-exclude = ["CHANGELOG.md"]
