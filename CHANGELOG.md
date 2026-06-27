@@ -1,5 +1,14 @@
 
-## [unreleased]
+## [1.1.0](https://github.com/harilvfs/npltz/compare/v1.0.7...v1.1.0) - 2026-06-27
+
+
+### 🐛 Bug Fixes
+
+
+- [f0fc4d8](https://github.com/harilvfs/npltz/commit/f0fc4d8e33c890719a6edd63cc86c428db5bc443) Correct binary download with latest changes by @harilvfs
+
+- [050256c](https://github.com/harilvfs/npltz/commit/050256ced18c9e4bee39e67c610fdf2891c92db7) Correct workspace repository by @harilvfs
+
 
 
 ### ⚙️ Miscellaneous Tasks
