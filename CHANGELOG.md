@@ -1,4 +1,40 @@
 
+## [unreleased]
+
+
+### ⚙️ Miscellaneous Tasks
+
+
+- [a6a068d](https://github.com/harilvfs/npltz/commit/a6a068d3ded92dea29fc5e2b2435447696036186) For .desktop make target os linux by @harilvfs
+
+
+
+## [1.0.7](https://github.com/harilvfs/npltz/compare/v1.0.6...v1.0.7) - 2026-06-27
+
+
+### 🚀 Features
+
+
+- [779f358](https://github.com/harilvfs/npltz/commit/779f3581497b96819c35fd2468c78be69b837936) Embed .desktop to setup by @harilvfs
+
+
+
+### 🐛 Bug Fixes
+
+
+- [ab3b8f4](https://github.com/harilvfs/npltz/commit/ab3b8f4411beeb9fb8816b604312ded860a296da) Add repository metadata by @harilvfs
+
+- [e941833](https://github.com/harilvfs/npltz/commit/e9418331fb7ce5e903526d4a36d68a3c2916288a)  *(script)* Correct binary-assets by @harilvfs
+
+
+
+### ⚙️ Miscellaneous Tasks
+
+
+- [9f5432c](https://github.com/harilvfs/npltz/commit/9f5432ce782cb338b2d486e19b8e4bdc4f9b447b)  *(man-pages)* Match the layout same as xtask by @harilvfs
+
+
+
 ## [1.0.6](https://github.com/harilvfs/npltz/compare/v1.0.5...v1.0.6) - 2026-06-27
 
 
