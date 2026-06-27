@@ -147,15 +147,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   macos:
-    runs-on: ${{ matrix.runner }}
+    runs-on: macos-14
     needs: release
     strategy:
       matrix:
-        include:
-          - runner: macos-13
-            target: x86_64-apple-darwin
-          - runner: macos-14
-            target: aarch64-apple-darwin
+        target:
+          - x86_64-apple-darwin
+          - aarch64-apple-darwin
 
     steps:
       - name: Checkout Repository
@@ -208,9 +206,9 @@ jobs:
     needs: release
     strategy:
       matrix:
-        include:
-          - target: x86_64-pc-windows-msvc
-          - target: aarch64-pc-windows-msvc
+        target:
+          - x86_64-pc-windows-msvc
+          - aarch64-pc-windows-msvc
 
     steps:
       - name: Checkout Repository
