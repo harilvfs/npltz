@@ -136,7 +136,7 @@ jobs:
           tag_name: ${{ github.event.inputs.tag_version }}
           name: ${{ github.event.inputs.tag_title }}
           draft: false
-          prerelease: false
+          prerelease: ${{ github.event.inputs.update_version != 'true' }}
           generate_release_notes: false
           body_path: BODY.md
 
