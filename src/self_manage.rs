@@ -2,7 +2,10 @@ use crate::error::{NpltzError, Result};
 use serde::Deserialize;
 use std::fs;
 use std::io::{self, Write};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
+
+#[cfg(not(target_os = "windows"))]
+use std::path::Path;
 
 const REPO: &str = "harilvfs/npltz";
 
@@ -50,16 +53,19 @@ fn get_latest_version() -> Result<String> {
     Ok(release.tag_name.trim_start_matches('v').to_string())
 }
 
+#[cfg(not(target_os = "windows"))]
 fn is_termux() -> bool {
     std::env::var("TERMUX_VERSION").is_ok() || std::env::var("PREFIX").is_ok()
 }
 
+#[cfg(not(target_os = "windows"))]
 fn termux_prefix() -> PathBuf {
     std::env::var("PREFIX")
         .map(PathBuf::from)
         .unwrap_or_else(|_| PathBuf::from("/data/data/com.termux/files/usr"))
 }
 
+#[cfg(not(target_os = "windows"))]
 fn is_root() -> bool {
     std::env::var("EUID").is_ok_and(|v| v == "0")
 }
