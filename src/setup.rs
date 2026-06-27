@@ -12,7 +12,16 @@ pub fn run_setup(dry_run: bool) -> crate::error::Result<()> {
     use std::fs;
     use std::path::PathBuf;
 
-    const DESKTOP_FILE: &str = include_str!("../npltz.desktop");
+    const DESKTOP_FILE: &str = "[Desktop Entry]
+Name=npltz
+Comment=A terminal-based Nepali calendar BS (Bikram Sambat) viewer
+Exec=npltz
+Icon=utilities-terminal
+Type=Application
+Terminal=true
+Categories=Utility;
+Keywords=nepali;calendar;bikram-sambat;date;patro;tui;
+";
 
     fn is_termux() -> bool {
         std::env::var("TERMUX_VERSION").is_ok() || std::env::var("PREFIX").is_ok()

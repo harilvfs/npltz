@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=npltz
-Comment=A terminal-based Nepali calendar BS (Bikram Sambat) viewer
-Exec=npltz
-Icon=utilities-terminal
-Type=Application
-Terminal=true
-Categories=Utility;
-Keywords=nepali;calendar;bikram-sambat;date;patro;tui;

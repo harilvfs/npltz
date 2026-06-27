@@ -32,7 +32,6 @@ include = [
   ".github/README.md",
   "LICENSE",
   "calendar_data.json",
-  "npltz.desktop",
 ]
 
 [lib]
