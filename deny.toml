@@ -10,6 +10,8 @@ allow = [
   "Unlicense",
   "Zlib",
   "BSD-3-Clause",
+  "CDLA-Permissive-2.0",
+  "ISC",
 ]
 
 [licenses.private]
