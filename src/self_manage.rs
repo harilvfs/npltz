@@ -248,35 +248,52 @@ pub fn uninstall() -> Result<()> {
 
             #[cfg(not(target_os = "windows"))]
             {
-                let files = if is_termux() {
+                let home = std::env::var("HOME").ok();
+                let is_termux = is_termux();
+                let is_root = is_root();
+                let is_macos = cfg!(target_os = "macos");
+
+                let mut files: Vec<PathBuf> = Vec::new();
+
+                if is_termux {
                     let prefix = termux_prefix();
-                    vec![
+                    files.extend(vec![
                         prefix.join("bin/npltz"),
                         prefix.join("share/bash-completion/completions/npltz"),
                         prefix.join("share/zsh/site-functions/_npltz"),
                         prefix.join("share/fish/vendor_completions.d/npltz.fish"),
                         prefix.join("share/man/man1/npltz.1"),
-                    ]
-                } else if cfg!(target_os = "macos") {
-                    vec![
+                    ]);
+                } else if is_macos {
+                    files.extend(vec![
                         PathBuf::from("/usr/local/bin/npltz"),
                         PathBuf::from("/usr/local/share/bash-completion/completions/npltz"),
                         PathBuf::from("/usr/local/share/zsh/site-functions/_npltz"),
                         PathBuf::from("/usr/local/share/fish/vendor_completions.d/npltz.fish"),
                         PathBuf::from("/usr/local/share/man/man1/npltz.1"),
-                    ]
-                } else {
-                    vec![
+                    ]);
+                } else if is_root {
+                    files.extend(vec![
                         PathBuf::from("/usr/local/bin/npltz"),
                         PathBuf::from("/usr/share/bash-completion/completions/npltz"),
                         PathBuf::from("/usr/share/zsh/site-functions/_npltz"),
                         PathBuf::from("/usr/share/fish/vendor_completions.d/npltz.fish"),
                         PathBuf::from("/usr/share/man/man1/npltz.1"),
                         PathBuf::from("/usr/share/applications/npltz.desktop"),
-                    ]
-                };
+                    ]);
+                } else if let Some(ref h) = home {
+                    let data = PathBuf::from(h).join(".local/share");
+                    files.extend(vec![
+                        PathBuf::from("/usr/local/bin/npltz"),
+                        data.join("bash-completion/completions/npltz"),
+                        data.join("zsh/site-functions/_npltz"),
+                        data.join("fish/vendor_completions.d/npltz.fish"),
+                        data.join("man/man1/npltz.1"),
+                        data.join("applications/npltz.desktop"),
+                    ]);
+                }
 
-                let use_sudo = !is_termux() && !is_root() && !cfg!(target_os = "macos");
+                let use_sudo = !is_termux && !is_root && !is_macos;
 
                 for path in &files {
                     if path.exists() {
@@ -291,8 +308,8 @@ pub fn uninstall() -> Result<()> {
                     }
                 }
 
-                if let Ok(home) = std::env::var("HOME") {
-                    let config_dir = Path::new(&home).join(".config/npltz");
+                if let Some(ref h) = home {
+                    let config_dir = Path::new(h).join(".config/npltz");
                     if config_dir.exists() {
                         fs::remove_dir_all(&config_dir).ok();
                         println!("  Removed {}", config_dir.display());
