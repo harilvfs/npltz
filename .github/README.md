@@ -34,19 +34,33 @@
 
 ## Installation
 
-### Linux / Termux
+### Linux / macOS / Termux
 
 ```sh
 curl -fsSL npltz.chalisehari.com.np/install | sh
 ```
 
-### Cargo (Linux, macOS, Windows)
+The install script auto-detects your platform and installs the correct binary.
+
+### Windows
+
+Download the `.exe` from [releases](https://github.com/harilvfs/npltz/releases/latest) and add it to your PATH.
+
+### Cargo Binstall (All Platforms)
+
+Downloads pre-built binaries instead of compiling:
+
+```sh
+cargo binstall npltz
+```
+
+### Cargo Install (All Platforms)
+
+Compiles from source (slower):
 
 ```sh
 cargo install npltz
 ```
-
-As a Linux user, I don't know how installation works directly on macOS or Windows, so I'm not providing a direct install script for them. Even though macOS supports Unix-like environments and shell scripts can run there, I've never used macOS myself, so without basic knowledge I don't want to talk shit. Windows I don't give a shit either, but you can still install with Cargo.
 
 ### Build from Source
 
@@ -57,39 +71,8 @@ cargo build --release
 ./build/release/npltz
 ```
 
-### Uninstall
-
-```sh
-cargo uninstall npltz
-```
-
-If installed via install script then, remove files manually: 
-
-On Linux
-
-```sh
-sudo rm /usr/local/bin/npltz
-sudo rm /usr/share/bash-completion/completions/npltz
-sudo rm /usr/share/zsh/site-functions/_npltz
-sudo rm /usr/share/fish/vendor_completions.d/npltz.fish
-sudo rm /usr/share/man/man1/npltz.1
-sudo rm /usr/share/applications/npltz.desktop
-rm -rf ~/.config/npltz
-```
-
-On Termux
-
-```sh
-rm $PREFIX/bin/npltz
-rm $PREFIX/share/bash-completion/completions/npltz
-rm $PREFIX/share/zsh/site-functions/_npltz
-rm $PREFIX/share/fish/vendor_completions.d/npltz.fish
-rm $PREFIX/share/man/man1/npltz.1
-rm -rf ~/.config/npltz
-```
-
 > [!CAUTION]
-> npltz hasn't been tested on macOS or Windows, so no guarantees it'll work on your OS. Use at your own risk.
+> npltz has not been tested on macOS or Windows. If you run into any issues, please [open an issue](https://github.com/harilvfs/npltz/issues).
 
 ## Usage
 
@@ -99,41 +82,82 @@ Press `?` inside the TUI to open the help screen with all keyboard shortcuts.
 
 ### Commands
 
-npltz supports some CLI commands too. See them with:
-
 ```
 npltz --help
 ```
 
-CLI commands provide AD-to-BS (`convert`) and BS-to-AD (`convert-bs`) conversion. If you want to know a specific date in AD or BS, you can do it directly from the CLI.
+#### Date Conversion
 
-npltz also supports themes you can set via the CLI or inside the TUI (press `c`):
-
+```sh
+npltz convert 2024-04-13       # AD → BS
+npltz convert-bs 2081-01-01    # BS → AD
+npltz show                     # Today's date
+npltz show --date 2024-04-13   # Specific AD date
+npltz show --bs 2081-01-01     # Specific BS date
+npltz show --json              # Output as JSON
 ```
-npltz --set-theme <theme-name>
+
+#### Themes
+
+```sh
+npltz --set-theme catppuccin-mocha
+npltz --set-theme default       # Reset to default
 ```
 
 Available themes: `catppuccin-mocha`, `dracula`, `gruvbox`, `nord`, `rose-pine`
 
-### Completions / Man Pages
+#### Setup (Completions & Man Pages)
 
-Generate shell completions:
+Install shell completions and man page to system paths:
 
-```
-npltz completions <shell>
-```
-
-Example:
-
-```
-npltz completions bash
+```sh
+npltz setup
+npltz setup --dry-run           # Preview without installing
 ```
 
-Man pages are generated via xtask using `clap_mangen`:
+This detects your platform (Linux, macOS, Termux) and installs to the correct directories. Not required on Windows.
 
+#### Check for Updates
+
+```sh
+npltz check-update
 ```
+
+#### Update
+
+```sh
+npltz update
+```
+
+Re-runs the install script to update to the latest version.
+
+#### Uninstall
+
+```sh
+npltz uninstall
+```
+
+Removes the binary, completions, man pages, and config files.
+
+### Completions & Man Pages (Manual)
+
+Generate shell completions manually:
+
+```sh
+npltz completions bash > /usr/share/bash-completion/completions/npltz
+npltz completions zsh > /usr/share/zsh/site-functions/_npltz
+npltz completions fish > /usr/share/fish/vendor_completions.d/npltz.fish
+```
+
+Generate man page from source:
+
+```sh
+git clone https://github.com/harilvfs/npltz.git
+cd npltz
 cargo xtask man-pages
 ```
+
+The generated man page is at `man/npltz.1`.
 
 ## How it Works
 

@@ -17,10 +17,6 @@ fi
 detect_target() {
     ARCH=$(uname -m)
     OS=$(uname -s)
-    if [ "$OS" != "Linux" ]; then
-        echo "unsupported OS: $OS" >&2
-        exit 1
-    fi
     if [ "$IS_ANDROID" = "true" ]; then
         case "$ARCH" in
             aarch64 | arm64)
@@ -34,20 +30,42 @@ detect_target() {
                 exit 1
                 ;;
         esac
-    else
-        case "$ARCH" in
-            x86_64 | amd64)
-                echo "x86_64-unknown-linux-musl"
-                ;;
-            aarch64 | arm64)
-                echo "aarch64-unknown-linux-musl"
-                ;;
-            *)
-                echo "unsupported architecture: $ARCH" >&2
-                exit 1
-                ;;
-        esac
+        return
     fi
+    case "$OS" in
+        Linux)
+            case "$ARCH" in
+                x86_64 | amd64)
+                    echo "x86_64-unknown-linux-musl"
+                    ;;
+                aarch64 | arm64)
+                    echo "aarch64-unknown-linux-musl"
+                    ;;
+                *)
+                    echo "unsupported architecture: $ARCH" >&2
+                    exit 1
+                    ;;
+        esac
+            ;;
+        Darwin)
+            case "$ARCH" in
+                x86_64)
+                    echo "x86_64-apple-darwin"
+                    ;;
+                arm64)
+                    echo "aarch64-apple-darwin"
+                    ;;
+                *)
+                    echo "unsupported architecture: $ARCH" >&2
+                    exit 1
+                    ;;
+        esac
+            ;;
+        *)
+            echo "unsupported OS: $OS" >&2
+            exit 1
+            ;;
+    esac
 }
 
 get_latest_version() {
@@ -71,66 +89,20 @@ if [ -z "$VERSION" ]; then
     exit 1
 fi
 
-echo "$BINARY $VERSION ($TARGET)"
+echo "Installing $BINARY $VERSION ($TARGET)"
 
-TMPDIR=$(mktemp -d)
-trap 'rm -rf "$TMPDIR"' EXIT
-
-ARCHIVE="${BINARY}-${TARGET}.tar.gz"
-URL="https://github.com/$REPO/releases/download/$VERSION/$ARCHIVE"
-
-curl -fsSL "$URL" -o "$TMPDIR/$ARCHIVE"
-curl -fsSL "$URL.sha256" -o "$TMPDIR/$ARCHIVE.sha256"
-
-cd "$TMPDIR"
-sha256sum -c "$ARCHIVE.sha256"
-tar xzf "$ARCHIVE"
-cd "${BINARY}-${TARGET}"
+URL="https://github.com/$REPO/releases/download/$VERSION/$BINARY-$TARGET"
 
 if [ "$IS_ANDROID" = "true" ]; then
-    install -Dm755 "$BINARY" "$PREFIX/bin/$BINARY"
-
-    if [ -d "completions" ]; then
-        mkdir -p "$PREFIX/share/bash-completion/completions" \
-            "$PREFIX/share/zsh/site-functions" \
-            "$PREFIX/share/fish/vendor_completions.d"
-
-        [ -f "completions/$BINARY.bash" ] && cp "completions/$BINARY.bash" \
-            "$PREFIX/share/bash-completion/completions/$BINARY"
-        [ -f "completions/$BINARY.zsh" ] && cp "completions/$BINARY.zsh" \
-            "$PREFIX/share/zsh/site-functions/_$BINARY"
-        [ -f "completions/$BINARY.fish" ] && cp "completions/$BINARY.fish" \
-            "$PREFIX/share/fish/vendor_completions.d/$BINARY.fish"
-    fi
-
-    if [ -f "man/$BINARY.1" ]; then
-        install -Dm644 "man/$BINARY.1" "$PREFIX/share/man/man1/$BINARY.1"
-    fi
+    curl -fsSL "$URL" -o "$PREFIX/bin/$BINARY"
+    chmod +x "$PREFIX/bin/$BINARY"
+elif [ "$(uname -s)" = "Darwin" ]; then
+    curl -fsSL "$URL" -o "/usr/local/bin/$BINARY"
+    chmod +x "/usr/local/bin/$BINARY"
 else
-    sudo install -Dm755 "$BINARY" "/usr/local/bin/$BINARY"
-
-    if [ -d "completions" ]; then
-        sudo mkdir -p /usr/share/bash-completion/completions \
-            /usr/share/zsh/site-functions \
-            /usr/share/fish/vendor_completions.d
-
-        [ -f "completions/$BINARY.bash" ] && sudo cp "completions/$BINARY.bash" \
-            /usr/share/bash-completion/completions/$BINARY
-        [ -f "completions/$BINARY.zsh" ] && sudo cp "completions/$BINARY.zsh" \
-            /usr/share/zsh/site-functions/_$BINARY
-        [ -f "completions/$BINARY.fish" ] && sudo cp "completions/$BINARY.fish" \
-            /usr/share/fish/vendor_completions.d/$BINARY.fish
-    fi
-
-    if [ -f "man/$BINARY.1" ]; then
-        sudo install -Dm644 "man/$BINARY.1" /usr/share/man/man1/$BINARY.1
-    fi
-
-    if [ -f "$BINARY.desktop" ]; then
-        sudo install -Dm644 "$BINARY.desktop" /usr/share/applications/$BINARY.desktop
-    fi
-
-    mandb -q 2> /dev/null || true
+    sudo curl -fsSL "$URL" -o "/usr/local/bin/$BINARY"
+    sudo chmod +x "/usr/local/bin/$BINARY"
 fi
 
 echo "$BINARY installed successfully"
+echo "Run '$BINARY setup' to install completions and man page"

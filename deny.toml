@@ -9,6 +9,7 @@ allow = [
   "Unicode-3.0",
   "Unlicense",
   "Zlib",
+  "BSD-3-Clause",
 ]
 
 [licenses.private]

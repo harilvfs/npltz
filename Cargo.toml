@@ -31,6 +31,7 @@ include = [
   ".github/README.md",
   "LICENSE",
   "calendar_data.json",
+  "npltz.desktop",
 ]
 
 [lib]
@@ -48,6 +49,14 @@ clap_complete = "4"
 toml = "0.8"
 dirs = "6"
 thiserror = "2"
+clap_mangen = "0.3"
+reqwest = { version = "0.12", features = ["blocking", "json"] }
+
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ target }{ archive-suffix }"
+bin-dir = "{ bin }{ binary-ext }"
+pkg-fmt = "bin"
+disabled-strategies = ["quick-install", "compile"]
 
 [profile.release]
 opt-level = "z"
