@@ -1,4 +1,14 @@
 
+## [1.1.1](https://github.com/harilvfs/npltz/compare/v1.1.0...v1.1.1) - 2026-06-27
+
+
+### 🚀 Features
+
+
+- [0a26d66](https://github.com/harilvfs/npltz/commit/0a26d663915be9bab5899943476b188afa0bc276) Add cargo-binstall for update cmd by @harilvfs
+
+
+
 ## [1.1.0](https://github.com/harilvfs/npltz/compare/v1.0.7...v1.1.0) - 2026-06-27
 
 
