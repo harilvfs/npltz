@@ -21,14 +21,12 @@ jobs:
       - name: Set tag name
         run: echo "TAG_NAME=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
 
-      - name: Download and extract npltz binary
+      - name: Download npltz binary
         run: |
           TARGET="x86_64-unknown-linux-musl"
-          ARCHIVE="npltz-${TARGET}.tar.gz"
-          curl -L "https://github.com/${{ github.repository }}/releases/download/${{ env.TAG_NAME }}/${ARCHIVE}" -o "${ARCHIVE}"
-          tar xzf "${ARCHIVE}"
-          sudo mv "npltz-${TARGET}/npltz" /usr/local/bin/
-          rm -rf "npltz-${TARGET}" "${ARCHIVE}"
+          curl -L "https://github.com/${{ github.repository }}/releases/download/${{ env.TAG_NAME }}/npltz-${TARGET}" -o npltz
+          chmod +x npltz
+          sudo mv npltz /usr/local/bin/
 
       - name: VHS Docker Image
         run: |
