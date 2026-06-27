@@ -129,7 +129,7 @@ npltz check-update
 npltz update
 ```
 
-Re-runs the install script to update to the latest version.
+Follows the same installation method you originally used: cargo, cargo-binstall, or install script.
 
 #### Uninstall
 
@@ -137,7 +137,7 @@ Re-runs the install script to update to the latest version.
 npltz uninstall
 ```
 
-Removes the binary, completions, man pages, and config files.
+Removes the binary, completions, man pages, and config files. Selecting "cargo(c)" will also remove binaries installed by `cargo binstall`, since both install to `~/.cargo/bin/`.
 
 ### Completions & Man Pages (Manual)
 
