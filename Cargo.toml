@@ -9,6 +9,7 @@ edition = "2024"
 description = "Nepali Patro in your terminal"
 homepage = "https://github.com/harilvfs/npltz"
 documentation = "https://github.com/harilvfs/npltz/blob/main/.github/README.md"
+repository = "https://github.com/harilvfs/npltz"
 readme = "./.github/README.md"
 license = "MIT"
 categories = ["command-line-utilities"]
