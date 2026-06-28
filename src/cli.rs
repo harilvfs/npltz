@@ -36,18 +36,25 @@ pub struct Cli {
 pub enum Commands {
     #[command(about = "Show today's Nepali and English date")]
     Show {
-        #[arg(long, help = "Show date for a specific AD date (YYYY-MM-DD)")]
+        #[arg(long, help = "Convert an AD date to BS and display both (YYYY-MM-DD)")]
         date: Option<String>,
 
-        #[arg(long, help = "Convert a BS date to AD (YYYY-MM-DD)")]
+        #[arg(long, help = "Convert a BS date to AD and display both (YYYY-MM-DD)")]
         bs: Option<String>,
 
         #[arg(long, help = "Output as JSON")]
         json: bool,
+
+        #[arg(
+            long,
+            value_name = "N",
+            help = "Print the next N BS dates with their AD equivalents"
+        )]
+        upcoming: Option<u32>,
     },
-    #[command(about = "Convert an AD date (YYYY-MM-DD) to Bikram Sambat")]
+    #[command(about = "Convert an AD date to Bikram Sambat (YYYY-MM-DD)")]
     Convert { date: String },
-    #[command(about = "Convert a Bikram Sambat date (YYYY-MM-DD) to AD")]
+    #[command(about = "Convert a Bikram Sambat date to AD (YYYY-MM-DD)")]
     ConvertBs { date: String },
     #[command(about = "Generate shell completions (bash, zsh, fish)")]
     Completions { shell: clap_complete::Shell },
@@ -60,6 +67,19 @@ pub enum Commands {
     CheckUpdate,
     #[command(about = "Update npltz to the latest version")]
     Update,
+    #[command(about = "Show the current BS week")]
+    Week,
+    #[command(about = "Export BS dates to an iCalendar (.ics) file")]
+    Export {
+        #[arg(long, value_name = "YYYY-MM", help = "Start month (default: current BS month)")]
+        month: Option<String>,
+
+        #[arg(long, value_name = "N", help = "Number of months to export (default: 1)")]
+        count: Option<u32>,
+
+        #[arg(short, long, value_name = "FILE", help = "Output file path")]
+        output: Option<String>,
+    },
     #[command(about = "Uninstall npltz and its files")]
     Uninstall,
 }
@@ -79,10 +99,11 @@ mod tests {
     fn test_cli_show() {
         let cli = Cli::try_parse_from(["npltz", "show"]).unwrap();
         match cli.command.unwrap() {
-            Commands::Show { date, bs, json } => {
+            Commands::Show { date, bs, json, upcoming } => {
                 assert!(date.is_none());
                 assert!(bs.is_none());
                 assert!(!json);
+                assert!(upcoming.is_none());
             }
             _ => panic!("Expected Show command"),
         }

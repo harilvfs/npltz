@@ -3,6 +3,7 @@ mod goto_popup;
 mod help_popup;
 mod theme_selector;
 mod warning;
+mod year_overview;
 
 use crate::app::{App, AppMode};
 use ratatui::Frame;
@@ -26,6 +27,10 @@ pub fn render(frame: &mut Frame, app: &mut App) {
             let help_area = centered_rect(45, 55, area);
             let max_scroll = help_popup::render(frame, help_area, app);
             app.help_max_scroll = max_scroll;
+        }
+        AppMode::YearOverview => {
+            let overview_area = centered_rect(85, 85, area);
+            year_overview::render(frame, overview_area, app);
         }
         AppMode::Normal => {}
     }

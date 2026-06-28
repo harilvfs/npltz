@@ -57,6 +57,7 @@ fn run_app(
                         AppMode::ThemeSelector => handle_theme_selector_key(app, key.code),
                         AppMode::Goto => handle_goto_key(app, key.code),
                         AppMode::Help => handle_help_key(app, key.code),
+                        AppMode::YearOverview => handle_year_overview_key(app, key.code),
                     },
                     Event::Mouse(mouse) => handle_mouse(app, mouse),
                     _ => {}
@@ -91,6 +92,7 @@ fn handle_normal_key(app: &mut App, key: KeyCode) {
         KeyCode::Char('c') => app.open_theme_selector(),
         KeyCode::Char('g') => app.open_goto(),
         KeyCode::Char('?') => app.open_help(),
+        KeyCode::Char('y') => app.open_year_overview(),
         _ => {}
     }
 }
@@ -104,6 +106,12 @@ fn handle_help_key(app: &mut App, key: KeyCode) {
         KeyCode::Char('k') | KeyCode::Up | KeyCode::Left => {
             app.help_scroll = app.help_scroll.saturating_sub(1);
         }
+        KeyCode::PageDown => {
+            app.help_scroll = (app.help_scroll + 10).min(app.help_max_scroll);
+        }
+        KeyCode::PageUp => {
+            app.help_scroll = app.help_scroll.saturating_sub(10);
+        }
         KeyCode::Home => {
             app.help_scroll = 0;
         }
@@ -114,12 +122,24 @@ fn handle_help_key(app: &mut App, key: KeyCode) {
     }
 }
 
+fn handle_year_overview_key(app: &mut App, key: KeyCode) {
+    match key {
+        KeyCode::Esc | KeyCode::Char('q') | KeyCode::Char('y') => app.close_year_overview(),
+        KeyCode::Char('h') | KeyCode::Left => app.year_prev(),
+        KeyCode::Char('l') | KeyCode::Right => app.year_next(),
+        KeyCode::Char('t') => app.year_today(),
+        _ => {}
+    }
+}
+
 fn handle_theme_selector_key(app: &mut App, key: KeyCode) {
     match key {
         KeyCode::Esc | KeyCode::Char('q') | KeyCode::Char('c') => app.close_theme_selector(),
         KeyCode::Enter | KeyCode::Char('l') | KeyCode::Char(' ') => app.apply_selected_theme(),
         KeyCode::Up | KeyCode::Char('k') => app.theme_selector_prev(),
         KeyCode::Down | KeyCode::Char('j') => app.theme_selector_next(),
+        KeyCode::Home => app.theme_selector_first(),
+        KeyCode::End => app.theme_selector_last(),
         _ => {}
     }
 }
@@ -140,17 +160,25 @@ fn handle_mouse(app: &mut App, mouse: MouseEvent) {
     if app.mode != AppMode::Normal {
         return;
     }
-    if mouse.kind != MouseEventKind::Down(crossterm::event::MouseButton::Left) {
-        return;
-    }
-    let (term_w, term_h) = terminal_size().unwrap_or((80, 24));
-    let nav_row = term_h.saturating_sub(4);
-    if mouse.row >= nav_row {
-        if mouse.column < term_w / 2 {
+    match mouse.kind {
+        MouseEventKind::Down(crossterm::event::MouseButton::Left) => {
+            let (term_w, term_h) = terminal_size().unwrap_or((80, 24));
+            let nav_row = term_h.saturating_sub(4);
+            if mouse.row >= nav_row {
+                if mouse.column < term_w / 2 {
+                    app.navigate_prev();
+                } else {
+                    app.navigate_next();
+                }
+            }
+        }
+        MouseEventKind::ScrollUp => {
             app.navigate_prev();
-        } else {
+        }
+        MouseEventKind::ScrollDown => {
             app.navigate_next();
         }
+        _ => {}
     }
 }
 

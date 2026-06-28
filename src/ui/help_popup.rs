@@ -14,28 +14,50 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) -> u16 {
 
     let lines = vec![
         Line::from(""),
-        Line::from(vec![Span::styled(" Navigation", bold)]),
+        Line::from(vec![Span::styled("  Navigation", bold)]),
         Line::from(""),
         Line::from(vec![
-            Span::styled("  \u{2190}  \u{2192}  ", warn),
-            Span::styled("h  l \u{2014} Prev / next month", sec),
+            Span::styled("  ←  →      ", warn),
+            Span::styled("h  l     Prev / next month", sec),
         ]),
         Line::from(vec![
-            Span::styled("  \u{2191}  \u{2193}  ", warn),
-            Span::styled("k  j \u{2014} Prev / next year", sec),
+            Span::styled("  ↑  ↓      ", warn),
+            Span::styled("k  j     Prev / next year", sec),
         ]),
-        Line::from(vec![Span::styled("  t    ", warn), Span::styled("Jump to today", sec)]),
-        Line::from(vec![Span::styled("  g    ", warn), Span::styled("Go to specific date", sec)]),
+        Line::from(vec![Span::styled("  t        ", warn), Span::styled("Jump to today", sec)]),
+        Line::from(vec![
+            Span::styled("  g        ", warn),
+            Span::styled("Go to specific date", sec),
+        ]),
         Line::from(""),
-        Line::from(vec![Span::styled(" Theme", bold)]),
+        Line::from(vec![Span::styled("  Actions", bold)]),
         Line::from(""),
-        Line::from(vec![Span::styled("  c    ", warn), Span::styled("Change theme", sec)]),
+        Line::from(vec![Span::styled("  y        ", warn), Span::styled("Year overview", sec)]),
+        Line::from(vec![Span::styled("  c        ", warn), Span::styled("Change theme", sec)]),
+        Line::from(vec![Span::styled("  Mouse", bold)]),
         Line::from(""),
-        Line::from(vec![Span::styled(" General", bold)]),
+        Line::from(vec![Span::styled("  Scroll   ", warn), Span::styled("Prev / next month", sec)]),
         Line::from(""),
-        Line::from(vec![Span::styled("  ?    ", warn), Span::styled("Show this help", sec)]),
-        Line::from(vec![Span::styled("  q    ", warn), Span::styled("Quit", sec)]),
-        Line::from(vec![Span::styled("  Esc  ", warn), Span::styled("Close popups / quit", sec)]),
+        Line::from(vec![Span::styled("  Theme Selector", bold)]),
+        Line::from(""),
+        Line::from(vec![Span::styled("  j/k      ", warn), Span::styled("Prev / next theme", sec)]),
+        Line::from(vec![
+            Span::styled("  Enter    ", warn),
+            Span::styled("Apply selected theme", sec),
+        ]),
+        Line::from(vec![Span::styled("  Home     ", warn), Span::styled("First theme", sec)]),
+        Line::from(vec![Span::styled("  End      ", warn), Span::styled("Last theme", sec)]),
+        Line::from(""),
+        Line::from(vec![Span::styled("  General", bold)]),
+        Line::from(""),
+        Line::from(vec![Span::styled("  ?        ", warn), Span::styled("Show this help", sec)]),
+        Line::from(vec![Span::styled("  q        ", warn), Span::styled("Quit", sec)]),
+        Line::from(vec![
+            Span::styled("  Esc      ", warn),
+            Span::styled("Close popups / quit", sec),
+        ]),
+        Line::from(vec![Span::styled("  PgUp     ", warn), Span::styled("Scroll help up", sec)]),
+        Line::from(vec![Span::styled("  PgDown   ", warn), Span::styled("Scroll help down", sec)]),
     ];
 
     let tmp = Block::default().borders(Borders::ALL);
@@ -52,7 +74,7 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) -> u16 {
     let max_scroll = content_height.saturating_sub(content_area.height);
 
     let title = if max_scroll > 0 {
-        format!(" Help  {}/{}  j/k/arrows ", app.help_scroll.min(max_scroll), max_scroll)
+        format!(" Help  {}/{}  PgUp/PgDn scroll ", app.help_scroll.min(max_scroll), max_scroll)
     } else {
         " Help ".to_string()
     };
