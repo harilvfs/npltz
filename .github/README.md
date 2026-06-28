@@ -144,9 +144,9 @@ Removes the binary, completions, man pages, and config files. Selecting "cargo(c
 Generate shell completions manually:
 
 ```sh
-npltz completions bash > /usr/share/bash-completion/completions/npltz
-npltz completions zsh > /usr/share/zsh/site-functions/_npltz
-npltz completions fish > /usr/share/fish/vendor_completions.d/npltz.fish
+npltz completions bash
+npltz completions zsh
+npltz completions fish
 ```
 
 Generate man page from source:
