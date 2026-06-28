@@ -1,4 +1,28 @@
 
+## [1.1.2](https://github.com/harilvfs/npltz/compare/v1.1.1...v1.1.2) - 2026-06-28
+
+
+### 🚀 Features
+
+
+- [7d5d03b](https://github.com/harilvfs/npltz/commit/7d5d03b4f64cad39e5bea55dd51128c0b7e39341) Add year overview, export/upcoming/week cmds and color-coded days (#33) by @harilvfs in [#33](https://github.com/harilvfs/npltz/pull/33)
+
+
+
+### 🐛 Bug Fixes
+
+
+- [fea96e3](https://github.com/harilvfs/npltz/commit/fea96e370d5fe0721f1778683753b4f5fb9c939e) Remove completions, man pages, and desktop file during uninstall by @harilvfs
+
+
+
+### ⚙️ Miscellaneous Tasks
+
+
+- [324bf2b](https://github.com/harilvfs/npltz/commit/324bf2be01ceea3291da550bf398445f4c8bf8ec)  *(docs)* Remove defined completions dir by @harilvfs
+
+
+
 ## [1.1.1](https://github.com/harilvfs/npltz/compare/v1.1.0...v1.1.1) - 2026-06-27
 
 
