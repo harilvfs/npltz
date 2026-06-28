@@ -84,11 +84,7 @@ fn render_mini_month(frame: &mut Frame, area: Rect, app: &App, month: u32) {
     };
 
     let mut week_rows: Vec<Vec<u32>> = Vec::new();
-    let mut current_week: Vec<u32> = Vec::new();
-
-    for _ in 0..start_weekday {
-        current_week.push(0);
-    }
+    let mut current_week: Vec<u32> = vec![0; start_weekday];
 
     for d in 1..=days_in_month {
         current_week.push(d);

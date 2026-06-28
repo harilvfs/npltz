@@ -45,7 +45,11 @@ pub enum Commands {
         #[arg(long, help = "Output as JSON")]
         json: bool,
 
-        #[arg(long, value_name = "N", help = "Print the next N BS dates with their AD equivalents")]
+        #[arg(
+            long,
+            value_name = "N",
+            help = "Print the next N BS dates with their AD equivalents"
+        )]
         upcoming: Option<u32>,
     },
     #[command(about = "Convert an AD date to Bikram Sambat (YYYY-MM-DD)")]

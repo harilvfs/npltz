@@ -227,7 +227,7 @@ pub fn show_upcoming(n: u32) -> Result<()> {
             println!("AD {} (out of BS range)", ad_date.format("%Y-%m-%d"));
         }
         if i < n - 1 {
-            ad_date = ad_date + chrono::Duration::days(1);
+            ad_date += chrono::Duration::days(1);
         }
     }
     Ok(())
@@ -292,7 +292,7 @@ pub fn export_ics(month: Option<&str>, count: Option<u32>, output: Option<&str>)
             parts[0].parse().map_err(|_| NpltzError::InvalidDate("Invalid year".into()))?;
         let mo: u32 =
             parts[1].parse().map_err(|_| NpltzError::InvalidDate("Invalid month".into()))?;
-        if mo < 1 || mo > 12 {
+        if !(1..=12).contains(&mo) {
             return Err(NpltzError::InvalidDate("Month must be 1-12".into()));
         }
         (y, mo)
@@ -302,13 +302,14 @@ pub fn export_ics(month: Option<&str>, count: Option<u32>, output: Option<&str>)
 
     let num_months = count.unwrap_or(1);
 
-    let mut lines: Vec<String> = Vec::new();
-    lines.push("BEGIN:VCALENDAR".into());
-    lines.push("VERSION:2.0".into());
-    lines.push("PRODID:-//npltz//Nepali Calendar//EN".into());
-    lines.push("CALSCALE:GREGORIAN".into());
-    lines.push("METHOD:PUBLISH".into());
-    lines.push("X-WR-CALNAME:Nepali Calendar (BS)".into());
+    let mut lines: Vec<String> = vec![
+        "BEGIN:VCALENDAR".into(),
+        "VERSION:2.0".into(),
+        "PRODID:-//npltz//Nepali Calendar//EN".into(),
+        "CALSCALE:GREGORIAN".into(),
+        "METHOD:PUBLISH".into(),
+        "X-WR-CALNAME:Nepali Calendar (BS)".into(),
+    ];
 
     for offset in 0..num_months {
         let m = ((start_month - 1 + offset) % 12) + 1;

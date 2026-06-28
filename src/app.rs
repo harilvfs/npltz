@@ -568,7 +568,7 @@ impl App {
                 gy == self.view_year && gm == self.view_month && gd == day
             });
             let is_saturday = cell_idx % 7 == 6;
-            let is_sunday = cell_idx % 7 == 0;
+            let is_sunday = cell_idx.is_multiple_of(7);
             current_cells.push(Some(CalendarCell {
                 day,
                 is_today,
