@@ -2,6 +2,7 @@ use crate::calendar;
 use crate::error::{NpltzError, Result};
 use calendar::NepaliDate;
 use chrono::{Datelike, Local, NaiveDate};
+use std::fs;
 
 pub fn show_today(json: bool) -> Result<()> {
     let now = Local::now();
@@ -202,5 +203,169 @@ pub fn convert_bs_to_ad(date_str: &str) -> Result<()> {
             );
         }
     }
+    Ok(())
+}
+
+pub fn show_upcoming(n: u32) -> Result<()> {
+    let now = Local::now();
+    let mut ad_date = NaiveDate::from_ymd_opt(now.year(), now.month(), now.day())
+        .ok_or_else(|| NpltzError::InvalidDate("Invalid current date".into()))?;
+
+    for i in 0..n {
+        let nd = calendar::ad_to_bs(ad_date.year(), ad_date.month(), ad_date.day());
+        if let Some(ref date) = nd {
+            println!(
+                "BS {:04}-{:02}-{:02} ({}) → AD {} ({})",
+                date.year,
+                date.month,
+                date.day,
+                date.day_name(),
+                ad_date.format("%Y-%m-%d"),
+                ad_date.format("%A"),
+            );
+        } else {
+            println!("AD {} (out of BS range)", ad_date.format("%Y-%m-%d"));
+        }
+        if i < n - 1 {
+            ad_date = ad_date + chrono::Duration::days(1);
+        }
+    }
+    Ok(())
+}
+
+pub fn show_week() -> Result<()> {
+    let now = Local::now();
+    let today = NaiveDate::from_ymd_opt(now.year(), now.month(), now.day())
+        .ok_or_else(|| NpltzError::InvalidDate("Invalid current date".into()))?;
+
+    let weekday = today.format("%w").to_string().parse::<i64>().unwrap_or(0);
+    let sunday = today - chrono::Duration::days(weekday);
+
+    let today_bs = calendar::ad_to_bs(now.year(), now.month(), now.day());
+    let week_num = today_bs
+        .as_ref()
+        .map(|nd| {
+            let day_of_year = calendar::get_day_of_year(nd.year, nd.month, nd.day).unwrap_or(0);
+            (day_of_year - 1) / 7 + 1
+        })
+        .unwrap_or(0);
+
+    println!(
+        "Week {} of {} ({})",
+        week_num,
+        today_bs.as_ref().map(|n| n.year).unwrap_or(0),
+        today_bs.as_ref().map(|n| n.month_name()).unwrap_or(""),
+    );
+    println!();
+
+    for i in 0..7 {
+        let date = sunday + chrono::Duration::days(i);
+        let nd = calendar::ad_to_bs(date.year(), date.month(), date.day());
+        if let Some(ref d) = nd {
+            let marker = if i == weekday { " *" } else { "" };
+            println!(
+                "{:<4} {:02}  {:<8} {:02}  → {} {}{}",
+                d.day_name(),
+                d.day,
+                d.month_name(),
+                d.month,
+                date.format("%b %d"),
+                date.format("%Y"),
+                marker,
+            );
+        }
+    }
+    Ok(())
+}
+
+pub fn export_ics(month: Option<&str>, count: Option<u32>, output: Option<&str>) -> Result<()> {
+    let now = Local::now();
+    let today_bs = calendar::ad_to_bs(now.year(), now.month(), now.day())
+        .ok_or_else(|| NpltzError::InvalidDate("Cannot determine current BS date".into()))?;
+
+    let (start_year, start_month) = if let Some(m) = month {
+        let parts: Vec<&str> = m.split('-').collect();
+        if parts.len() != 2 {
+            return Err(NpltzError::InvalidDate("Month format must be YYYY-MM".into()));
+        }
+        let y: i32 =
+            parts[0].parse().map_err(|_| NpltzError::InvalidDate("Invalid year".into()))?;
+        let mo: u32 =
+            parts[1].parse().map_err(|_| NpltzError::InvalidDate("Invalid month".into()))?;
+        if mo < 1 || mo > 12 {
+            return Err(NpltzError::InvalidDate("Month must be 1-12".into()));
+        }
+        (y, mo)
+    } else {
+        (today_bs.year, today_bs.month)
+    };
+
+    let num_months = count.unwrap_or(1);
+
+    let mut lines: Vec<String> = Vec::new();
+    lines.push("BEGIN:VCALENDAR".into());
+    lines.push("VERSION:2.0".into());
+    lines.push("PRODID:-//npltz//Nepali Calendar//EN".into());
+    lines.push("CALSCALE:GREGORIAN".into());
+    lines.push("METHOD:PUBLISH".into());
+    lines.push("X-WR-CALNAME:Nepali Calendar (BS)".into());
+
+    for offset in 0..num_months {
+        let m = ((start_month - 1 + offset) % 12) + 1;
+        let y = start_year + ((start_month - 1 + offset) / 12) as i32;
+
+        let days_in_month = match calendar::get_days_in_month(y, m) {
+            Some(d) => d,
+            None => continue,
+        };
+
+        for day in 1..=days_in_month {
+            let ad = match calendar::bs_to_ad(y, m, day) {
+                Some(d) => d,
+                None => continue,
+            };
+
+            let nd = NepaliDate {
+                year: y,
+                month: m,
+                day,
+                weekday: ad.format("%w").to_string().parse().unwrap_or(0),
+            };
+
+            let ad_str = ad.format("%Y%m%d").to_string();
+            let next_day = ad + chrono::Duration::days(1);
+            let ad_end = next_day.format("%Y%m%d").to_string();
+
+            let uid = format!("npltz-{:04}{:02}{:02}@npltz", y, m, day);
+            let summary =
+                format!("BS {:04}-{:02}-{:02} ({} {})", y, m, day, nd.day_name(), nd.month_name(),);
+            let description = format!(
+                "Bikram Sambat: {} {}\nGregorian: {} {}",
+                nd.day_name(),
+                nd.month_name(),
+                ad.format("%A"),
+                ad.format("%B %d, %Y"),
+            );
+
+            lines.push("BEGIN:VEVENT".into());
+            lines.push(format!("DTSTART;VALUE=DATE:{ad_str}"));
+            lines.push(format!("DTEND;VALUE=DATE:{ad_end}"));
+            lines.push(format!("DTSTAMP:{}", now.format("%Y%m%dT%H%M%SZ")));
+            lines.push(format!("UID:{uid}"));
+            lines.push(format!("SUMMARY:{summary}"));
+            lines.push(format!("DESCRIPTION:{description}"));
+            lines.push("TRANSP:TRANSPARENT".into());
+            lines.push("END:VEVENT".into());
+        }
+    }
+
+    lines.push("END:VCALENDAR".into());
+
+    let ics_content = lines.join("\r\n");
+    let out_path = output.unwrap_or("nepali_calendar.ics");
+
+    fs::write(out_path, &ics_content)?;
+
+    println!("Exported BS calendar to {out_path}");
     Ok(())
 }

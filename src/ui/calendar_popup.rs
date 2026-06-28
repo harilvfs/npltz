@@ -11,7 +11,7 @@ use super::DAY_HEADER;
 
 const SIDEBAR_WIDTH: u16 = 30;
 
-pub fn render(frame: &mut Frame, area: Rect, app: &App) {
+pub fn render(frame: &mut Frame, area: Rect, app: &mut App) {
     frame.render_widget(Clear, area);
 
     let block = Block::default()
@@ -20,7 +20,9 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
         .border_style(Style::default().fg(app.theme.primary))
-        .title_bottom(Line::from(" h/l · j/k · t · c · g · ? · q ").alignment(Alignment::Center));
+        .title_bottom(
+            Line::from(" h/l · j/k · c · g · y · t · ? · q ").alignment(Alignment::Center),
+        );
     let inner = block.inner(area);
 
     let sb_w = SIDEBAR_WIDTH.min(inner.width / 3);
@@ -167,7 +169,7 @@ fn render_sidebar(frame: &mut Frame, area: Rect, app: &App) {
     frame.render_widget(block, area);
 }
 
-fn render_content(frame: &mut Frame, area: Rect, app: &App) {
+fn render_content(frame: &mut Frame, area: Rect, app: &mut App) {
     let [month_hdr_area, day_hdr_area, grid_area, nav_area] = Layout::vertical([
         Constraint::Length(1),
         Constraint::Length(1),
@@ -210,6 +212,7 @@ fn render_content(frame: &mut Frame, area: Rect, app: &App) {
     let ad_style =
         Style::default().fg(app.theme.secondary).add_modifier(Modifier::DIM | Modifier::ITALIC);
     let sat_style = Style::default().fg(app.theme.error);
+    let sun_style = Style::default().fg(app.theme.warning).add_modifier(Modifier::BOLD);
     let mut grid_lines: Vec<Line> = Vec::new();
     for row in &app.calendar_rows {
         let mut bs_spans = Vec::new();
@@ -249,6 +252,12 @@ fn render_content(frame: &mut Frame, area: Rect, app: &App) {
                 Some(cell) if cell.is_saturday => {
                     let s = format!("{:^w$}", cell.day.to_string(), w = cell_w);
                     bs_spans.push(Span::styled(s, sat_style));
+                    let a = format!("{:^w$}", cell.ad_day.to_string(), w = cell_w);
+                    ad_spans.push(Span::styled(a, ad_style));
+                }
+                Some(cell) if cell.is_sunday => {
+                    let s = format!("{:^w$}", cell.day.to_string(), w = cell_w);
+                    bs_spans.push(Span::styled(s, sun_style));
                     let a = format!("{:^w$}", cell.ad_day.to_string(), w = cell_w);
                     ad_spans.push(Span::styled(a, ad_style));
                 }

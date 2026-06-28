@@ -92,9 +92,25 @@ npltz --help
 npltz convert 2024-04-13       # AD → BS
 npltz convert-bs 2081-01-01    # BS → AD
 npltz show                     # Today's date
-npltz show --date 2024-04-13   # Specific AD date
-npltz show --bs 2081-01-01     # Specific BS date
+npltz show --date 2024-04-13   # Convert a specific AD date to BS
+npltz show --bs 2081-01-01     # Convert a specific BS date to AD
 npltz show --json              # Output as JSON
+npltz show --upcoming 10       # Print the next 10 BS dates (replace 10 with any number)
+```
+
+#### Week
+
+```sh
+npltz week                     # Show the current BS week (7 days)
+```
+
+#### Export
+
+```sh
+npltz export                   # Export current BS month to .ics
+npltz export --month 2083-04   # Export a specific BS month
+npltz export --count 3         # Export 3 months starting from current
+npltz export -o calendar.ics   # Custom output file
 ```
 
 #### Themes

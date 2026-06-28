@@ -209,6 +209,7 @@ pub enum AppMode {
     ThemeSelector,
     Goto,
     Help,
+    YearOverview,
 }
 
 pub struct App {
@@ -240,6 +241,7 @@ pub struct CalendarCell {
     pub day:            u32,
     pub is_today:       bool,
     pub is_saturday:    bool,
+    pub is_sunday:      bool,
     pub is_goto_target: bool,
     pub ad_day:         u32,
 }
@@ -296,6 +298,7 @@ impl App {
             goto_input: String::new(),
             goto_error: None,
             goto_date_key: None,
+
             help_scroll: 0,
             help_max_scroll: 0,
         };
@@ -391,6 +394,14 @@ impl App {
         self.theme_selector_selected = (self.theme_selector_selected + len - 1) % len;
     }
 
+    pub fn theme_selector_first(&mut self) {
+        self.theme_selector_selected = 0;
+    }
+
+    pub fn theme_selector_last(&mut self) {
+        self.theme_selector_selected = theme::THEME_NAMES.len() - 1;
+    }
+
     pub fn apply_selected_theme(&mut self) {
         let name = theme::THEME_NAMES[self.theme_selector_selected];
         self.theme = theme::from_name(name);
@@ -423,6 +434,29 @@ impl App {
     pub fn close_help(&mut self) {
         self.help_scroll = 0;
         self.mode = AppMode::Normal;
+    }
+
+    pub fn open_year_overview(&mut self) {
+        self.mode = AppMode::YearOverview;
+    }
+
+    pub fn close_year_overview(&mut self) {
+        self.mode = AppMode::Normal;
+    }
+
+    pub fn year_prev(&mut self) {
+        self.view_year -= 1;
+    }
+
+    pub fn year_next(&mut self) {
+        self.view_year += 1;
+    }
+
+    pub fn year_today(&mut self) {
+        if let Some(ref nd) = self.today {
+            self.view_year = nd.year;
+            self.view_month = nd.month;
+        }
     }
 
     pub fn apply_goto(&mut self) {
@@ -534,10 +568,12 @@ impl App {
                 gy == self.view_year && gm == self.view_month && gd == day
             });
             let is_saturday = cell_idx % 7 == 6;
+            let is_sunday = cell_idx % 7 == 0;
             current_cells.push(Some(CalendarCell {
                 day,
                 is_today,
                 is_saturday,
+                is_sunday,
                 is_goto_target,
                 ad_day: ad_date.day(),
             }));
