@@ -13,7 +13,7 @@ repository = "https://github.com/harilvfs/npltz"
 readme = "./.github/README.md"
 license = "MIT"
 categories = ["command-line-utilities"]
-keywords = ["nepali-patro", "calendar", "bikram-sambat", "tui", "terminal"]
+keywords = ["nepali-calendar", "calendar", "bikram-sambat", "tui", "terminal"]
 
 [package]
 name = "npltz"
