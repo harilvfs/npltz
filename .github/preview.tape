@@ -111,4 +111,8 @@ Type@200ms "2061" Sleep 1s Enter
 
 Sleep 1s
 
+Type "y"
+
+Sleep 1s
+
 Type "q"
