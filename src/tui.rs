@@ -1,6 +1,6 @@
 use crate::app::{App, AppMode};
 use crate::config::Config;
-use crate::{log, ui};
+use crate::{log, theme, ui};
 use crossterm::event::{
     self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, MouseEvent, MouseEventKind,
 };
@@ -184,6 +184,34 @@ fn handle_mouse(app: &mut App, mouse: MouseEvent) {
             }
             MouseEventKind::ScrollDown => {
                 app.help_scroll = (app.help_scroll + 3).min(app.help_max_scroll);
+            }
+            _ => {}
+        },
+        AppMode::ThemeSelector => match mouse.kind {
+            MouseEventKind::ScrollUp => {
+                app.theme_selector_prev();
+            }
+            MouseEventKind::ScrollDown => {
+                app.theme_selector_next();
+            }
+            MouseEventKind::Down(crossterm::event::MouseButton::Left) => {
+                let (term_w, term_h) = terminal_size().unwrap_or((80, 24));
+                let popup_w = term_w * 50 / 100;
+                let popup_h = term_h * 40 / 100;
+                let _popup_x = (term_w - popup_w) / 2;
+                let popup_y = (term_h - popup_h) / 2;
+
+                let inner_y = popup_y + 1;
+                let list_start = inner_y + 1;
+                let list_end = popup_y + popup_h - 2;
+
+                if mouse.row >= list_start && mouse.row < list_end {
+                    let item_index = (mouse.row - list_start) as usize;
+                    if item_index < theme::THEME_NAMES.len() {
+                        app.theme_selector_selected = item_index;
+                        app.apply_selected_theme();
+                    }
+                }
             }
             _ => {}
         },
