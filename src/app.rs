@@ -1,4 +1,6 @@
-use crate::calendar::{self, NepaliDate, get_days_in_month, month_ad_range, month_start_weekday};
+use crate::calendar::{
+    self, BS_EPOCH_YEAR, NepaliDate, get_days_in_month, month_ad_range, month_start_weekday,
+};
 use crate::config::Config;
 use crate::theme::Theme;
 use crate::{log, theme};
@@ -330,6 +332,9 @@ impl App {
     }
 
     pub fn navigate_next(&mut self) {
+        if self.view_year >= BS_MAX && self.view_month >= 12 {
+            return;
+        }
         if self.view_month >= 12 {
             self.view_month = 1;
             self.view_year += 1;
@@ -341,6 +346,9 @@ impl App {
     }
 
     pub fn navigate_prev(&mut self) {
+        if self.view_year <= BS_EPOCH_YEAR && self.view_month <= 1 {
+            return;
+        }
         if self.view_month <= 1 {
             self.view_month = 12;
             self.view_year -= 1;
@@ -352,12 +360,18 @@ impl App {
     }
 
     pub fn navigate_year_next(&mut self) {
+        if self.view_year >= BS_MAX {
+            return;
+        }
         self.view_year += 1;
         self.build_view();
         log::Log::info(&format!("Navigate year next: {}", self.view_year));
     }
 
     pub fn navigate_year_prev(&mut self) {
+        if self.view_year <= BS_EPOCH_YEAR {
+            return;
+        }
         self.view_year -= 1;
         self.build_view();
         log::Log::info(&format!("Navigate year prev: {}", self.view_year));
@@ -445,11 +459,15 @@ impl App {
     }
 
     pub fn year_prev(&mut self) {
-        self.view_year -= 1;
+        if self.view_year > BS_EPOCH_YEAR {
+            self.view_year -= 1;
+        }
     }
 
     pub fn year_next(&mut self) {
-        self.view_year += 1;
+        if self.view_year < BS_MAX {
+            self.view_year += 1;
+        }
     }
 
     pub fn year_today(&mut self) {

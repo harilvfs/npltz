@@ -1,6 +1,6 @@
-use crate::app::{App, AppMode, BS_MAX};
+use crate::app::{App, AppMode};
 use crate::config::Config;
-use crate::{calendar, log, theme, ui};
+use crate::{log, theme, ui};
 use crossterm::event::{
     self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, MouseEvent, MouseEventKind,
 };
@@ -217,14 +217,10 @@ fn handle_mouse(app: &mut App, mouse: MouseEvent) {
         },
         AppMode::YearOverview => match mouse.kind {
             MouseEventKind::ScrollUp => {
-                if app.view_year > calendar::BS_EPOCH_YEAR {
-                    app.year_prev();
-                }
+                app.year_prev();
             }
             MouseEventKind::ScrollDown => {
-                if app.view_year < BS_MAX {
-                    app.year_next();
-                }
+                app.year_next();
             }
             MouseEventKind::Down(crossterm::event::MouseButton::Left) => {
                 let (term_w, term_h) = terminal_size().unwrap_or((80, 24));

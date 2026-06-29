@@ -97,6 +97,9 @@ pub fn ad_to_bs(ad_year: i32, ad_month: u32, ad_day: u32) -> Option<NepaliDate> 
 }
 
 pub fn bs_to_ad(bs_year: i32, bs_month: u32, bs_day: u32) -> Option<NaiveDate> {
+    if !(1..=12).contains(&bs_month) || bs_day < 1 {
+        return None;
+    }
     let epoch_ad = NaiveDate::from_ymd_opt(AD_EPOCH.0, AD_EPOCH.1, AD_EPOCH.2)?;
     let mut total_days: i64 = 0;
     let mut year = BS_EPOCH_YEAR;
@@ -117,6 +120,9 @@ pub fn bs_to_ad(bs_year: i32, bs_month: u32, bs_day: u32) -> Option<NaiveDate> {
 }
 
 pub fn get_days_in_month(bs_year: i32, bs_month: u32) -> Option<u32> {
+    if !(1..=12).contains(&bs_month) {
+        return None;
+    }
     let yd = get_year_data(bs_year)?;
     Some(yd.months[bs_month as usize - 1])
 }
