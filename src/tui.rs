@@ -1,6 +1,6 @@
-use crate::app::{App, AppMode};
+use crate::app::{App, AppMode, BS_MAX};
 use crate::config::Config;
-use crate::{log, theme, ui};
+use crate::{calendar, log, theme, ui};
 use crossterm::event::{
     self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, MouseEvent, MouseEventKind,
 };
@@ -210,6 +210,53 @@ fn handle_mouse(app: &mut App, mouse: MouseEvent) {
                     if item_index < theme::THEME_NAMES.len() {
                         app.theme_selector_selected = item_index;
                         app.apply_selected_theme();
+                    }
+                }
+            }
+            _ => {}
+        },
+        AppMode::YearOverview => match mouse.kind {
+            MouseEventKind::ScrollUp => {
+                if app.view_year > calendar::BS_EPOCH_YEAR {
+                    app.year_prev();
+                }
+            }
+            MouseEventKind::ScrollDown => {
+                if app.view_year < BS_MAX {
+                    app.year_next();
+                }
+            }
+            MouseEventKind::Down(crossterm::event::MouseButton::Left) => {
+                let (term_w, term_h) = terminal_size().unwrap_or((80, 24));
+                let popup_w = term_w * 95 / 100;
+                let popup_h = term_h * 95 / 100;
+                let popup_x = (term_w - popup_w) / 2;
+                let popup_y = (term_h - popup_h) / 2;
+
+                let inner_x = popup_x + 1;
+                let inner_y = popup_y + 1;
+                let inner_w = popup_w.saturating_sub(2);
+                let inner_h = popup_h.saturating_sub(2);
+
+                let gap_x = 2u16;
+                let cols = 3u16;
+                let rows = 4u16;
+                let usable_w = inner_w.saturating_sub(gap_x * (cols - 1));
+                let usable_h = inner_h;
+                let col_w = usable_w / cols;
+                let row_h = usable_h / rows;
+
+                let rel_x = mouse.column.saturating_sub(inner_x);
+                let rel_y = mouse.row.saturating_sub(inner_y);
+
+                if rel_x < inner_w && rel_y < inner_h {
+                    let col = (rel_x / (col_w + gap_x)).min(cols - 1);
+                    let row = (rel_y / row_h).min(rows - 1);
+                    let month = (row * cols + col + 1) as u32;
+                    if (1..=12).contains(&month) {
+                        app.view_month = month;
+                        app.build_view();
+                        app.close_year_overview();
                     }
                 }
             }

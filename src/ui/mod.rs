@@ -29,7 +29,7 @@ pub fn render(frame: &mut Frame, app: &mut App) {
             app.help_max_scroll = max_scroll;
         }
         AppMode::YearOverview => {
-            let overview_area = centered_rect(85, 85, area);
+            let overview_area = centered_rect(95, 95, area);
             year_overview::render(frame, overview_area, app);
         }
         AppMode::Normal => {}

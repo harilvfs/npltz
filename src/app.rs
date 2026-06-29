@@ -250,7 +250,7 @@ pub struct CalendarRow {
     pub cells: Vec<Option<CalendarCell>>,
 }
 
-const BS_MAX: i32 = 2099;
+pub const BS_MAX: i32 = 2099;
 
 impl App {
     pub fn new(theme_name: &str) -> Self {
