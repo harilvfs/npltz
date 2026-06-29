@@ -1,4 +1,50 @@
 
+## [1.1.3](https://github.com/harilvfs/npltz/compare/v1.1.2...v1.1.3) - 2026-06-29
+
+
+### 🚀 Features
+
+
+- [9f7673d](https://github.com/harilvfs/npltz/commit/9f7673d1979fbc8201c146a1652b2062d16026dd)  *(tui)* Add mouse support and increase popup size for `year overview` by @harilvfs
+
+
+
+### 🐛 Bug Fixes
+
+
+- [973a1dc](https://github.com/harilvfs/npltz/commit/973a1dc58c369b3b10a0bce3dcf5fbf0e8cd6369)  *(tui)* Handle infinite scroll and panic crash by @harilvfs
+
+
+
+### 🚜 Refactor
+
+
+- [741ff70](https://github.com/harilvfs/npltz/commit/741ff7021dbf80e7fe8b463e073de9b1221f71bf)  *(help)* Change style and add mouse support in help popup by @harilvfs
+
+- [abde584](https://github.com/harilvfs/npltz/commit/abde58492248afe603d4ca007ba88c6cbb118754)  *(goto)* Improve layouting/work of goto popup by @harilvfs
+
+
+
+### 🎨 Styling
+
+
+- [fb08a33](https://github.com/harilvfs/npltz/commit/fb08a3303d90677d5f5934269f00438e4acd1afc)  *(tui)* Redone styling of theme selector popup by @harilvfs
+
+
+
+### ⚙️ Miscellaneous Tasks
+
+
+- [94651f6](https://github.com/harilvfs/npltz/commit/94651f66d3dfa94fa02484180a992fecd43f81c4)  *(app)* Update npltz description by @harilvfs
+
+- [07afb59](https://github.com/harilvfs/npltz/commit/07afb597f1d644db1834b4af31314489c09bbb59)  *(docs)* Correct typo for warning info by @harilvfs
+
+- [4bd5e30](https://github.com/harilvfs/npltz/commit/4bd5e30073ee706d1021fc2666a49c66c8db1033)  *(preview)* Add year-overview command to tape by @harilvfs
+
+- [71f86c3](https://github.com/harilvfs/npltz/commit/71f86c35bb51b72795bf0c42f1974204a8757e77)  *(cargo)* Correct keywords metadata by @harilvfs
+
+
+
 ## [1.1.2](https://github.com/harilvfs/npltz/compare/v1.1.1...v1.1.2) - 2026-06-28
 
 
