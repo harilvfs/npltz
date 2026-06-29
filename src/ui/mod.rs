@@ -24,7 +24,7 @@ pub fn render(frame: &mut Frame, app: &mut App) {
             goto_popup::render(frame, goto_area, app);
         }
         AppMode::Help => {
-            let help_area = centered_rect(45, 55, area);
+            let help_area = centered_rect(60, 65, area);
             let max_scroll = help_popup::render(frame, help_area, app);
             app.help_max_scroll = max_scroll;
         }

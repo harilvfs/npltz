@@ -32,6 +32,7 @@ pub struct Theme {
     pub fg:        Color,
     pub primary:   Color,
     pub secondary: Color,
+    pub success:   Color,
     pub warning:   Color,
     pub error:     Color,
 }
@@ -44,6 +45,7 @@ impl Theme {
             fg:        Color::Rgb(205, 214, 244),
             primary:   Color::Rgb(137, 180, 250),
             secondary: Color::Rgb(173, 216, 190),
+            success:   Color::Rgb(166, 227, 161),
             warning:   Color::Rgb(250, 179, 135),
             error:     Color::Rgb(243, 139, 168),
         }
@@ -56,6 +58,7 @@ impl Theme {
             fg:        Color::Rgb(248, 248, 242),
             primary:   Color::Rgb(189, 147, 249),
             secondary: Color::Rgb(139, 233, 253),
+            success:   Color::Rgb(80, 250, 123),
             warning:   Color::Rgb(241, 250, 140),
             error:     Color::Rgb(255, 85, 85),
         }
@@ -68,6 +71,7 @@ impl Theme {
             fg:        Color::Rgb(235, 219, 178),
             primary:   Color::Rgb(184, 187, 38),
             secondary: Color::Rgb(131, 165, 152),
+            success:   Color::Rgb(184, 187, 38),
             warning:   Color::Rgb(214, 93, 14),
             error:     Color::Rgb(204, 36, 29),
         }
@@ -80,6 +84,7 @@ impl Theme {
             fg:        Color::Rgb(216, 222, 233),
             primary:   Color::Rgb(136, 192, 208),
             secondary: Color::Rgb(163, 190, 140),
+            success:   Color::Rgb(163, 190, 140),
             warning:   Color::Rgb(235, 203, 139),
             error:     Color::Rgb(191, 97, 106),
         }
@@ -92,6 +97,7 @@ impl Theme {
             fg:        Color::Rgb(224, 222, 244),
             primary:   Color::Rgb(196, 167, 231),
             secondary: Color::Rgb(156, 207, 216),
+            success:   Color::Rgb(49, 116, 143),
             warning:   Color::Rgb(246, 193, 119),
             error:     Color::Rgb(235, 111, 146),
         }

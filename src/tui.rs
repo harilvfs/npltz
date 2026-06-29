@@ -157,27 +157,36 @@ fn handle_goto_key(app: &mut App, key: KeyCode) {
 }
 
 fn handle_mouse(app: &mut App, mouse: MouseEvent) {
-    if app.mode != AppMode::Normal {
-        return;
-    }
-    match mouse.kind {
-        MouseEventKind::Down(crossterm::event::MouseButton::Left) => {
-            let (term_w, term_h) = terminal_size().unwrap_or((80, 24));
-            let nav_row = term_h.saturating_sub(4);
-            if mouse.row >= nav_row {
-                if mouse.column < term_w / 2 {
-                    app.navigate_prev();
-                } else {
-                    app.navigate_next();
+    match app.mode {
+        AppMode::Normal => match mouse.kind {
+            MouseEventKind::Down(crossterm::event::MouseButton::Left) => {
+                let (term_w, term_h) = terminal_size().unwrap_or((80, 24));
+                let nav_row = term_h.saturating_sub(4);
+                if mouse.row >= nav_row {
+                    if mouse.column < term_w / 2 {
+                        app.navigate_prev();
+                    } else {
+                        app.navigate_next();
+                    }
                 }
             }
-        }
-        MouseEventKind::ScrollUp => {
-            app.navigate_prev();
-        }
-        MouseEventKind::ScrollDown => {
-            app.navigate_next();
-        }
+            MouseEventKind::ScrollUp => {
+                app.navigate_prev();
+            }
+            MouseEventKind::ScrollDown => {
+                app.navigate_next();
+            }
+            _ => {}
+        },
+        AppMode::Help => match mouse.kind {
+            MouseEventKind::ScrollUp => {
+                app.help_scroll = app.help_scroll.saturating_sub(3);
+            }
+            MouseEventKind::ScrollDown => {
+                app.help_scroll = (app.help_scroll + 3).min(app.help_max_scroll);
+            }
+            _ => {}
+        },
         _ => {}
     }
 }
