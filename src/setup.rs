@@ -15,7 +15,7 @@ pub fn run_setup(dry_run: bool) -> crate::error::Result<()> {
     #[cfg(target_os = "linux")]
     const DESKTOP_FILE: &str = "[Desktop Entry]
 Name=npltz
-Comment=A terminal-based Nepali calendar BS (Bikram Sambat) viewer
+Comment=Nepali BS Calendar (Patro) TUI for Terminal
 Exec=npltz
 Icon=utilities-terminal
 Type=Application

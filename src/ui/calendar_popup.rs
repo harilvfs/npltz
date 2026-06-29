@@ -15,7 +15,7 @@ pub fn render(frame: &mut Frame, area: Rect, app: &mut App) {
     frame.render_widget(Clear, area);
 
     let block = Block::default()
-        .title(" Nepali Calendar Patro ")
+        .title(" Nepali BS Calendar (Patro) ")
         .title_alignment(Alignment::Center)
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)

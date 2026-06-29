@@ -10,7 +10,7 @@ pub fn styles() -> clap::builder::Styles {
 }
 
 #[derive(Parser)]
-#[command(name = "npltz", about = "Nepali Patro in your terminal", styles = styles())]
+#[command(name = "npltz", about = "Nepali BS Calendar (Patro) TUI for Terminal", styles = styles())]
 pub struct Cli {
     #[arg(
         short = 'v',
