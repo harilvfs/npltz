@@ -148,8 +148,12 @@ fn handle_goto_key(app: &mut App, key: KeyCode) {
     match key {
         KeyCode::Esc | KeyCode::Char('q') | KeyCode::Char('g') => app.close_goto(),
         KeyCode::Enter => app.apply_goto(),
-        KeyCode::Char(c) if c.is_ascii_digit() || c == '-' => app.goto_input.push(c),
+        KeyCode::Char(c) if c.is_ascii_digit() || c == '-' => {
+            app.goto_error = None;
+            app.goto_input.push(c);
+        }
         KeyCode::Backspace => {
+            app.goto_error = None;
             app.goto_input.pop();
         }
         _ => {}
