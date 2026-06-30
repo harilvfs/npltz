@@ -18,12 +18,8 @@ mod tests {
     #[test]
     fn test_ad_dates_in_cells() {
         let app = test_app();
-        let has_ad_dates = app
-            .calendar_rows
-            .iter()
-            .flat_map(|r| &r.cells)
-            .flatten()
-            .any(|c| c.ad_day > 0 && c.ad_day <= 31);
+        let has_ad_dates =
+            app.calendar_rows.iter().flat_map(|r| &r.cells).any(|c| c.ad_day > 0 && c.ad_day <= 31);
         assert!(has_ad_dates);
     }
 
@@ -199,8 +195,7 @@ mod tests {
     #[test]
     fn test_saturday_detection() {
         let app = test_app();
-        let has_saturday =
-            app.calendar_rows.iter().flat_map(|r| &r.cells).flatten().any(|c| c.is_saturday);
+        let has_saturday = app.calendar_rows.iter().flat_map(|r| &r.cells).any(|c| c.is_saturday);
         assert!(has_saturday);
     }
 }
@@ -237,6 +232,11 @@ pub struct App {
 
     pub help_scroll:     u16,
     pub help_max_scroll: u16,
+
+    pub month_jump_pending: bool,
+
+    pub hover_bs_day:  Option<u32>,
+    pub hover_ad_date: Option<String>,
 }
 
 pub struct CalendarCell {
@@ -249,7 +249,7 @@ pub struct CalendarCell {
 }
 
 pub struct CalendarRow {
-    pub cells: Vec<Option<CalendarCell>>,
+    pub cells: Vec<CalendarCell>,
 }
 
 pub const BS_MAX: i32 = 2099;
@@ -276,6 +276,11 @@ impl App {
 
             help_scroll: 0,
             help_max_scroll: 0,
+
+            month_jump_pending: false,
+
+            hover_bs_day: None,
+            hover_ad_date: None,
         };
         app.update();
         app
@@ -303,6 +308,11 @@ impl App {
 
             help_scroll: 0,
             help_max_scroll: 0,
+
+            month_jump_pending: false,
+
+            hover_bs_day: None,
+            hover_ad_date: None,
         };
         app.build_view();
         app
@@ -538,6 +548,41 @@ impl App {
         log::Log::info(&format!("Goto: {}/{}", year, month));
     }
 
+    pub fn jump_to_month(&mut self, month: u32) {
+        if (1..=12).contains(&month) {
+            self.view_month = month;
+            self.build_view();
+            log::Log::info(&format!("Jump to month {}", month));
+        }
+    }
+
+    pub fn update_hover(&mut self, row_idx: usize, col_idx: usize) {
+        if let Some(row) = self.calendar_rows.get(row_idx)
+            && let Some(cell) = row.cells.get(col_idx)
+        {
+            if cell.day == 0 {
+                self.hover_bs_day = None;
+                self.hover_ad_date = None;
+                return;
+            }
+            let day = cell.day;
+            self.hover_bs_day = Some(day);
+            if let Some(ad) = calendar::bs_to_ad(self.view_year, self.view_month, day) {
+                self.hover_ad_date = Some(ad.format("%A, %B %d, %Y").to_string());
+            } else {
+                self.hover_ad_date = None;
+            }
+            return;
+        }
+        self.hover_bs_day = None;
+        self.hover_ad_date = None;
+    }
+
+    pub fn clear_hover(&mut self) {
+        self.hover_bs_day = None;
+        self.hover_ad_date = None;
+    }
+
     pub fn prev_month_info(&self) -> (u32, i32) {
         if self.view_month <= 1 {
             (12, self.view_year - 1)
@@ -569,12 +614,18 @@ impl App {
             format!("{} - {}", ad_start.format("%b %d"), ad_end.format("%b %d, %Y"),);
 
         let mut rows: Vec<CalendarRow> = Vec::new();
-        let mut current_cells: Vec<Option<CalendarCell>> = Vec::new();
-        let mut cell_idx = 0usize;
+        let mut current_cells: Vec<CalendarCell> = Vec::new();
 
         for _ in 0..start_wd {
-            current_cells.push(None);
-            cell_idx += 1;
+            let col = current_cells.len();
+            current_cells.push(CalendarCell {
+                day:            0,
+                is_today:       false,
+                is_saturday:    col % 7 == 6,
+                is_sunday:      col.is_multiple_of(7),
+                is_goto_target: false,
+                ad_day:         0,
+            });
         }
 
         for day in 1..=days {
@@ -585,17 +636,17 @@ impl App {
             let is_goto_target = self.goto_date_key.is_some_and(|(gy, gm, gd)| {
                 gy == self.view_year && gm == self.view_month && gd == day
             });
-            let is_saturday = cell_idx % 7 == 6;
-            let is_sunday = cell_idx.is_multiple_of(7);
-            current_cells.push(Some(CalendarCell {
+            let col = current_cells.len();
+            let is_saturday = col % 7 == 6;
+            let is_sunday = col.is_multiple_of(7);
+            current_cells.push(CalendarCell {
                 day,
                 is_today,
                 is_saturday,
                 is_sunday,
                 is_goto_target,
                 ad_day: ad_date.day(),
-            }));
-            cell_idx += 1;
+            });
 
             if current_cells.len() == 7 {
                 rows.push(CalendarRow { cells: current_cells });
@@ -605,11 +656,21 @@ impl App {
 
         if !current_cells.is_empty() {
             while current_cells.len() < 7 {
-                current_cells.push(None);
+                let col = current_cells.len();
+                current_cells.push(CalendarCell {
+                    day:            0,
+                    is_today:       false,
+                    is_saturday:    col % 7 == 6,
+                    is_sunday:      col.is_multiple_of(7),
+                    is_goto_target: false,
+                    ad_day:         0,
+                });
             }
             rows.push(CalendarRow { cells: current_cells });
         }
 
         self.calendar_rows = rows;
+        self.hover_bs_day = None;
+        self.hover_ad_date = None;
     }
 }
