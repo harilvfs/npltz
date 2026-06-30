@@ -402,10 +402,12 @@ impl App {
             .position(|t| theme::display_name(t) == self.theme.name)
             .unwrap_or(0);
         self.mode = AppMode::ThemeSelector;
+        log::Log::info("Theme selector opened");
     }
 
     pub fn close_theme_selector(&mut self) {
         self.mode = AppMode::Normal;
+        log::Log::info("Theme selector closed");
     }
 
     pub fn theme_selector_next(&mut self) {
@@ -443,40 +445,48 @@ impl App {
         self.goto_input.clear();
         self.goto_error = None;
         self.mode = AppMode::Goto;
+        log::Log::info("Goto opened");
     }
 
     pub fn close_goto(&mut self) {
         self.mode = AppMode::Normal;
         self.goto_error = None;
+        log::Log::info("Goto closed");
     }
 
     pub fn open_help(&mut self) {
         self.help_scroll = 0;
         self.mode = AppMode::Help;
+        log::Log::info("Help opened");
     }
 
     pub fn close_help(&mut self) {
         self.help_scroll = 0;
         self.mode = AppMode::Normal;
+        log::Log::info("Help closed");
     }
 
     pub fn open_year_overview(&mut self) {
         self.mode = AppMode::YearOverview;
+        log::Log::info(&format!("Year overview opened ({})", self.view_year));
     }
 
     pub fn close_year_overview(&mut self) {
         self.mode = AppMode::Normal;
+        log::Log::info("Year overview closed");
     }
 
     pub fn year_prev(&mut self) {
         if self.view_year > BS_EPOCH_YEAR {
             self.view_year -= 1;
+            log::Log::info(&format!("Year overview prev: {}", self.view_year));
         }
     }
 
     pub fn year_next(&mut self) {
         if self.view_year < BS_MAX {
             self.view_year += 1;
+            log::Log::info(&format!("Year overview next: {}", self.view_year));
         }
     }
 

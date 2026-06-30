@@ -71,6 +71,7 @@ fn run_app(
         app.update();
 
         if app.should_quit {
+            log::Log::info("TUI quit");
             break;
         }
     }
