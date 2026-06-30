@@ -3,10 +3,13 @@ use crate::error::{NpltzError, Result};
 use calendar::NepaliDate;
 use chrono::{Datelike, Local, NaiveDate};
 use std::fs;
+use std::io::{self, Write};
 
 pub fn show_today(json: bool) -> Result<()> {
     let now = Local::now();
     let nd = calendar::ad_to_bs(now.year(), now.month(), now.day());
+
+    let mut out = io::stdout();
 
     if json {
         let obj = serde_json::json!({
@@ -24,12 +27,13 @@ pub fn show_today(json: bool) -> Result<()> {
             "ad_month": now.month(),
             "ad_day": now.day(),
         });
-        println!("{}", serde_json::to_string_pretty(&obj).unwrap());
+        let _ = writeln!(out, "{}", serde_json::to_string_pretty(&obj).unwrap());
         return Ok(());
     }
 
     if let Some(ref nd) = nd {
-        println!(
+        let _ = writeln!(
+            out,
             "BS : {:04}/{:02}/{:02}  ({} {}, {} {})",
             nd.year,
             nd.month,
@@ -40,10 +44,11 @@ pub fn show_today(json: bool) -> Result<()> {
             nd.year
         );
     } else {
-        println!("BS : N/A");
+        let _ = writeln!(out, "BS : N/A");
     }
 
-    println!(
+    let _ = writeln!(
+        out,
         "AD : {}  ({}, {} {}, {})",
         now.format("%Y/%m/%d"),
         now.format("%A"),
@@ -51,7 +56,7 @@ pub fn show_today(json: bool) -> Result<()> {
         now.day(),
         now.year()
     );
-    println!("Time : {}", now.format("%I:%M:%S %p"));
+    let _ = writeln!(out, "Time : {}", now.format("%I:%M:%S %p"));
     Ok(())
 }
 
@@ -59,6 +64,7 @@ pub fn show_ad_date(date_str: &str, json: bool) -> Result<()> {
     let date = NaiveDate::parse_from_str(date_str, "%Y-%m-%d")
         .map_err(|_| NpltzError::InvalidDate("Invalid date format. Use YYYY-MM-DD".into()))?;
     let nd = calendar::ad_to_bs(date.year(), date.month(), date.day());
+    let mut out = io::stdout();
 
     if json {
         let obj = serde_json::json!({
@@ -73,12 +79,13 @@ pub fn show_ad_date(date_str: &str, json: bool) -> Result<()> {
             "ad_month": date.month(),
             "ad_day": date.day(),
         });
-        println!("{}", serde_json::to_string_pretty(&obj).unwrap());
+        let _ = writeln!(out, "{}", serde_json::to_string_pretty(&obj).unwrap());
         return Ok(());
     }
 
     if let Some(ref nd) = nd {
-        println!(
+        let _ = writeln!(
+            out,
             "BS : {:04}/{:02}/{:02}  ({} {}, {} {})",
             nd.year,
             nd.month,
@@ -89,10 +96,11 @@ pub fn show_ad_date(date_str: &str, json: bool) -> Result<()> {
             nd.year
         );
     } else {
-        println!("BS : N/A");
+        let _ = writeln!(out, "BS : N/A");
     }
 
-    println!(
+    let _ = writeln!(
+        out,
         "AD : {}  ({}, {} {}, {})",
         date.format("%Y/%m/%d"),
         date.format("%A"),
@@ -116,6 +124,7 @@ pub fn show_bs_date(date_str: &str, json: bool) -> Result<()> {
     let ad = calendar::bs_to_ad(year, month, day);
     let weekday = ad.map_or(0, |d| d.format("%w").to_string().parse().unwrap_or(0));
     let nd = NepaliDate { year, month, day, weekday };
+    let mut out = io::stdout();
 
     if json {
         let obj = serde_json::json!({
@@ -128,11 +137,12 @@ pub fn show_bs_date(date_str: &str, json: bool) -> Result<()> {
             "bs_day": day,
             "bs_month_name": nd.month_name(),
         });
-        println!("{}", serde_json::to_string_pretty(&obj).unwrap());
+        let _ = writeln!(out, "{}", serde_json::to_string_pretty(&obj).unwrap());
         return Ok(());
     }
 
-    println!(
+    let _ = writeln!(
+        out,
         "BS : {:04}/{:02}/{:02}  ({} {}, {} {})",
         nd.year,
         nd.month,
@@ -143,7 +153,8 @@ pub fn show_bs_date(date_str: &str, json: bool) -> Result<()> {
         nd.year
     );
     if let Some(ad) = ad {
-        println!(
+        let _ = writeln!(
+            out,
             "AD : {}  ({}, {} {}, {})",
             ad.format("%Y/%m/%d"),
             ad.format("%A"),
@@ -152,7 +163,7 @@ pub fn show_bs_date(date_str: &str, json: bool) -> Result<()> {
             ad.year()
         );
     } else {
-        println!("AD : N/A");
+        let _ = writeln!(out, "AD : N/A");
     }
     Ok(())
 }
@@ -160,13 +171,15 @@ pub fn show_bs_date(date_str: &str, json: bool) -> Result<()> {
 pub fn convert_ad_to_bs(date_str: &str) -> Result<()> {
     let date = NaiveDate::parse_from_str(date_str, "%Y-%m-%d")
         .map_err(|_| NpltzError::InvalidDate("Invalid date format. Use YYYY-MM-DD".into()))?;
+    let mut out = io::stdout();
     match calendar::ad_to_bs(date.year(), date.month(), date.day()) {
         Some(nd) => {
-            println!("{}", nd.format_long());
+            let _ = writeln!(out, "{}", nd.format_long());
         }
         None => {
             let bs_end = calendar::BS_EPOCH_YEAR + 124;
-            println!(
+            let _ = writeln!(
+                out,
                 "Date out of range. Supports AD ~{}-{} (BS {}-{})",
                 1918,
                 2042,
@@ -187,14 +200,23 @@ pub fn convert_bs_to_ad(date_str: &str) -> Result<()> {
     let month: u32 =
         parts[1].parse().map_err(|_| NpltzError::InvalidDate("Invalid month".into()))?;
     let day: u32 = parts[2].parse().map_err(|_| NpltzError::InvalidDate("Invalid day".into()))?;
+    let mut out = io::stdout();
 
     match calendar::bs_to_ad(year, month, day) {
         Some(ad) => {
-            println!("{}, {} {}, {}", ad.format("%A"), ad.format("%B"), ad.day(), ad.year());
+            let _ = writeln!(
+                out,
+                "{}, {} {}, {}",
+                ad.format("%A"),
+                ad.format("%B"),
+                ad.day(),
+                ad.year()
+            );
         }
         None => {
             let bs_end = calendar::BS_EPOCH_YEAR + 124;
-            println!(
+            let _ = writeln!(
+                out,
                 "Date out of range. Supports BS {}-{} (AD ~{}-{})",
                 calendar::BS_EPOCH_YEAR,
                 bs_end,
@@ -210,11 +232,13 @@ pub fn show_upcoming(n: u32) -> Result<()> {
     let now = Local::now();
     let mut ad_date = NaiveDate::from_ymd_opt(now.year(), now.month(), now.day())
         .ok_or_else(|| NpltzError::InvalidDate("Invalid current date".into()))?;
+    let mut out = io::stdout();
 
     for i in 0..n {
         let nd = calendar::ad_to_bs(ad_date.year(), ad_date.month(), ad_date.day());
         if let Some(ref date) = nd {
-            println!(
+            let _ = writeln!(
+                out,
                 "BS {:04}-{:02}-{:02} ({}) → AD {} ({})",
                 date.year,
                 date.month,
@@ -224,7 +248,7 @@ pub fn show_upcoming(n: u32) -> Result<()> {
                 ad_date.format("%A"),
             );
         } else {
-            println!("AD {} (out of BS range)", ad_date.format("%Y-%m-%d"));
+            let _ = writeln!(out, "AD {} (out of BS range)", ad_date.format("%Y-%m-%d"));
         }
         if i < n - 1 {
             ad_date += chrono::Duration::days(1);
@@ -250,20 +274,24 @@ pub fn show_week() -> Result<()> {
         })
         .unwrap_or(0);
 
-    println!(
+    let mut out = io::stdout();
+
+    let _ = writeln!(
+        out,
         "Week {} of {} ({})",
         week_num,
         today_bs.as_ref().map(|n| n.year).unwrap_or(0),
         today_bs.as_ref().map(|n| n.month_name()).unwrap_or(""),
     );
-    println!();
+    let _ = writeln!(out);
 
     for i in 0..7 {
         let date = sunday + chrono::Duration::days(i);
         let nd = calendar::ad_to_bs(date.year(), date.month(), date.day());
         if let Some(ref d) = nd {
             let marker = if i == weekday { " *" } else { "" };
-            println!(
+            let _ = writeln!(
+                out,
                 "{:<4} {:02}  {:<8} {:02}  → {} {}{}",
                 d.day_name(),
                 d.day,
@@ -367,6 +395,7 @@ pub fn export_ics(month: Option<&str>, count: Option<u32>, output: Option<&str>)
 
     fs::write(out_path, &ics_content)?;
 
-    println!("Exported BS calendar to {out_path}");
+    let mut out = io::stdout();
+    let _ = writeln!(out, "Exported BS calendar to {out_path}");
     Ok(())
 }

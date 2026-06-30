@@ -21,13 +21,15 @@ use crate::tui::run_tui;
 use clap::{CommandFactory, Parser};
 use config::Config;
 use error::{NpltzError, Result};
+use std::io::{self, Write};
 
 pub fn run() -> Result<()> {
     log::Log::init();
     let cli = Cli::parse();
+    let mut out = io::stdout();
 
     if cli.version {
-        println!("npltz v{}", env!("CARGO_PKG_VERSION"));
+        let _ = writeln!(out, "npltz v{}", env!("CARGO_PKG_VERSION"));
         return Ok(());
     }
 
@@ -36,11 +38,12 @@ pub fn run() -> Result<()> {
         if theme == "default" {
             config.theme = None;
             config.save()?;
-            println!("Default theme restored.");
+            let _ = writeln!(out, "Default theme restored.");
         } else if theme::is_valid_theme(theme) {
             config.theme = Some(theme.to_string());
             config.save()?;
-            println!("{} has been set as your default theme.", theme::display_name(theme));
+            let _ =
+                writeln!(out, "{} has been set as your default theme.", theme::display_name(theme));
         } else {
             let msg = format!(
                 "Unknown theme '{}'. Valid themes: {}",
@@ -73,7 +76,7 @@ pub fn run() -> Result<()> {
         }
         Some(Commands::Completions { shell }) => {
             let mut cmd = Cli::command();
-            clap_complete::generate(shell, &mut cmd, "npltz", &mut std::io::stdout());
+            clap_complete::generate(shell, &mut cmd, "npltz", &mut out);
         }
         Some(Commands::Setup { dry_run }) => {
             setup::run_setup(dry_run)?;
