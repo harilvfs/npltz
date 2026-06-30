@@ -30,7 +30,7 @@ pub fn render(frame: &mut Frame, area: Rect, app: &mut App) {
         Layout::horizontal([Constraint::Length(sb_w), Constraint::Min(0)]).areas(inner);
 
     render_sidebar(frame, sidebar_area, app);
-    render_content(frame, content_area, app);
+    render_content(frame, content_area, app, inner);
 
     frame.render_widget(block, area);
 }
@@ -169,7 +169,7 @@ fn render_sidebar(frame: &mut Frame, area: Rect, app: &App) {
     frame.render_widget(block, area);
 }
 
-fn render_content(frame: &mut Frame, area: Rect, app: &mut App) {
+fn render_content(frame: &mut Frame, area: Rect, app: &mut App, full_area: Rect) {
     let [month_hdr_area, day_hdr_area, grid_area, hover_area, nav_area] = Layout::vertical([
         Constraint::Length(1),
         Constraint::Length(1),
@@ -283,6 +283,8 @@ fn render_content(frame: &mut Frame, area: Rect, app: &mut App) {
     frame.render_widget(Paragraph::new(grid_lines).alignment(Alignment::Center), grid_area);
 
     let hover_style = Style::default().fg(app.theme.secondary).add_modifier(Modifier::ITALIC);
+    let full_hover_area =
+        Rect { x: full_area.x, y: hover_area.y, width: full_area.width, height: 1 };
     if let Some(ref ad_date) = app.hover_ad_date {
         let bs_day = app.hover_bs_day.unwrap_or(0);
         let month_name = calendar::english_month_name(app.view_month);
@@ -290,7 +292,7 @@ fn render_content(frame: &mut Frame, area: Rect, app: &mut App) {
         frame.render_widget(
             Paragraph::new(Line::from(Span::styled(text, hover_style)))
                 .alignment(Alignment::Center),
-            hover_area,
+            full_hover_area,
         );
     } else {
         frame.render_widget(
@@ -299,7 +301,7 @@ fn render_content(frame: &mut Frame, area: Rect, app: &mut App) {
                 Style::default().fg(app.theme.secondary).add_modifier(Modifier::DIM),
             )))
             .alignment(Alignment::Center),
-            hover_area,
+            full_hover_area,
         );
     }
 
