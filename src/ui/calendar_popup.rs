@@ -170,10 +170,11 @@ fn render_sidebar(frame: &mut Frame, area: Rect, app: &App) {
 }
 
 fn render_content(frame: &mut Frame, area: Rect, app: &mut App) {
-    let [month_hdr_area, day_hdr_area, grid_area, nav_area] = Layout::vertical([
+    let [month_hdr_area, day_hdr_area, grid_area, hover_area, nav_area] = Layout::vertical([
         Constraint::Length(1),
         Constraint::Length(1),
         Constraint::Min(0),
+        Constraint::Length(1),
         Constraint::Length(1),
     ])
     .areas(area);
@@ -213,71 +214,94 @@ fn render_content(frame: &mut Frame, area: Rect, app: &mut App) {
         Style::default().fg(app.theme.secondary).add_modifier(Modifier::DIM | Modifier::ITALIC);
     let sat_style = Style::default().fg(app.theme.error);
     let sun_style = Style::default().fg(app.theme.warning).add_modifier(Modifier::BOLD);
+    let hover_style =
+        Style::default().fg(app.theme.bg).bg(app.theme.secondary).add_modifier(Modifier::BOLD);
+    let hover_ad_style =
+        Style::default().fg(app.theme.bg).bg(app.theme.secondary).add_modifier(Modifier::ITALIC);
     let mut grid_lines: Vec<Line> = Vec::new();
     for row in &app.calendar_rows {
         let mut bs_spans = Vec::new();
         let mut ad_spans = Vec::new();
-        for cell_opt in &row.cells {
-            match cell_opt {
-                Some(cell) if cell.is_today => {
-                    let s = format!("{:^w$}", cell.day.to_string(), w = cell_w);
-                    bs_spans.push(Span::styled(
-                        s,
-                        Style::default()
-                            .fg(app.theme.bg)
-                            .bg(app.theme.primary)
-                            .add_modifier(Modifier::BOLD),
-                    ));
-                    let a = format!("{:^w$}", cell.ad_day.to_string(), w = cell_w);
-                    ad_spans.push(Span::styled(
-                        a,
-                        Style::default()
-                            .fg(app.theme.bg)
-                            .bg(app.theme.primary)
-                            .add_modifier(Modifier::ITALIC),
-                    ));
-                }
-                Some(cell) if cell.is_goto_target => {
-                    let s = format!("{:^w$}", format!("★{}", cell.day), w = cell_w);
-                    bs_spans.push(Span::styled(
-                        s,
-                        Style::default().fg(app.theme.primary).add_modifier(Modifier::BOLD),
-                    ));
-                    let a = format!("{:^w$}", format!("★{}", cell.ad_day), w = cell_w);
-                    ad_spans.push(Span::styled(
-                        a,
-                        Style::default().fg(app.theme.primary).add_modifier(Modifier::ITALIC),
-                    ));
-                }
-                Some(cell) if cell.is_saturday => {
-                    let s = format!("{:^w$}", cell.day.to_string(), w = cell_w);
-                    bs_spans.push(Span::styled(s, sat_style));
-                    let a = format!("{:^w$}", cell.ad_day.to_string(), w = cell_w);
-                    ad_spans.push(Span::styled(a, ad_style));
-                }
-                Some(cell) if cell.is_sunday => {
-                    let s = format!("{:^w$}", cell.day.to_string(), w = cell_w);
-                    bs_spans.push(Span::styled(s, sun_style));
-                    let a = format!("{:^w$}", cell.ad_day.to_string(), w = cell_w);
-                    ad_spans.push(Span::styled(a, ad_style));
-                }
-                Some(cell) => {
-                    let s = format!("{:^w$}", cell.day.to_string(), w = cell_w);
-                    bs_spans.push(Span::styled(s, Style::default().fg(app.theme.fg)));
-                    let a = format!("{:^w$}", cell.ad_day.to_string(), w = cell_w);
-                    ad_spans.push(Span::styled(a, ad_style));
-                }
-                None => {
-                    let s = format!("{:^w$}", "", w = cell_w);
-                    bs_spans.push(Span::styled(s.clone(), Style::default()));
-                    ad_spans.push(Span::styled(s, Style::default()));
-                }
+        for cell in &row.cells {
+            if cell.day == 0 {
+                let s = format!("{:^w$}", "", w = cell_w);
+                bs_spans.push(Span::styled(s.clone(), Style::default()));
+                ad_spans.push(Span::styled(s, Style::default()));
+            } else if cell.is_today {
+                let s = format!("{:^w$}", cell.day.to_string(), w = cell_w);
+                bs_spans.push(Span::styled(
+                    s,
+                    Style::default()
+                        .fg(app.theme.bg)
+                        .bg(app.theme.primary)
+                        .add_modifier(Modifier::BOLD),
+                ));
+                let a = format!("{:^w$}", cell.ad_day.to_string(), w = cell_w);
+                ad_spans.push(Span::styled(
+                    a,
+                    Style::default()
+                        .fg(app.theme.bg)
+                        .bg(app.theme.primary)
+                        .add_modifier(Modifier::ITALIC),
+                ));
+            } else if cell.is_goto_target {
+                let s = format!("{:^w$}", format!("★{}", cell.day), w = cell_w);
+                bs_spans.push(Span::styled(
+                    s,
+                    Style::default().fg(app.theme.primary).add_modifier(Modifier::BOLD),
+                ));
+                let a = format!("{:^w$}", format!("★{}", cell.ad_day), w = cell_w);
+                ad_spans.push(Span::styled(
+                    a,
+                    Style::default().fg(app.theme.primary).add_modifier(Modifier::ITALIC),
+                ));
+            } else if app.hover_bs_day == Some(cell.day) && app.hover_ad_date.is_some() {
+                let s = format!("{:^w$}", cell.day.to_string(), w = cell_w);
+                bs_spans.push(Span::styled(s, hover_style));
+                let a = format!("{:^w$}", cell.ad_day.to_string(), w = cell_w);
+                ad_spans.push(Span::styled(a, hover_ad_style));
+            } else if cell.is_saturday {
+                let s = format!("{:^w$}", cell.day.to_string(), w = cell_w);
+                bs_spans.push(Span::styled(s, sat_style));
+                let a = format!("{:^w$}", cell.ad_day.to_string(), w = cell_w);
+                ad_spans.push(Span::styled(a, ad_style));
+            } else if cell.is_sunday {
+                let s = format!("{:^w$}", cell.day.to_string(), w = cell_w);
+                bs_spans.push(Span::styled(s, sun_style));
+                let a = format!("{:^w$}", cell.ad_day.to_string(), w = cell_w);
+                ad_spans.push(Span::styled(a, ad_style));
+            } else {
+                let s = format!("{:^w$}", cell.day.to_string(), w = cell_w);
+                bs_spans.push(Span::styled(s, Style::default().fg(app.theme.fg)));
+                let a = format!("{:^w$}", cell.ad_day.to_string(), w = cell_w);
+                ad_spans.push(Span::styled(a, ad_style));
             }
         }
         grid_lines.push(Line::from(bs_spans));
         grid_lines.push(Line::from(ad_spans));
     }
     frame.render_widget(Paragraph::new(grid_lines).alignment(Alignment::Center), grid_area);
+
+    let hover_style = Style::default().fg(app.theme.secondary).add_modifier(Modifier::ITALIC);
+    if let Some(ref ad_date) = app.hover_ad_date {
+        let bs_day = app.hover_bs_day.unwrap_or(0);
+        let month_name = calendar::english_month_name(app.view_month);
+        let text = format!("BS {} {} {}  →  {}", app.view_year, month_name, bs_day, ad_date);
+        frame.render_widget(
+            Paragraph::new(Line::from(Span::styled(text, hover_style)))
+                .alignment(Alignment::Center),
+            hover_area,
+        );
+    } else {
+        frame.render_widget(
+            Paragraph::new(Line::from(Span::styled(
+                "hover over a date for AD preview",
+                Style::default().fg(app.theme.secondary).add_modifier(Modifier::DIM),
+            )))
+            .alignment(Alignment::Center),
+            hover_area,
+        );
+    }
 
     let (prev_m, prev_y) = app.prev_month_info();
     let (next_m, next_y) = app.next_month_info();

@@ -82,6 +82,17 @@ fn handle_normal_key(app: &mut App, key: KeyCode) {
         app.show_small_warning = false;
     }
 
+    if app.month_jump_pending {
+        app.month_jump_pending = false;
+        match key {
+            KeyCode::Char('1') => app.jump_to_month(10),
+            KeyCode::Char('2') => app.jump_to_month(11),
+            KeyCode::Char('3') => app.jump_to_month(12),
+            _ => {}
+        }
+        return;
+    }
+
     match key {
         KeyCode::Char('q') | KeyCode::Esc => app.should_quit = true,
         KeyCode::Right | KeyCode::Char('l') => app.navigate_next(),
@@ -93,6 +104,16 @@ fn handle_normal_key(app: &mut App, key: KeyCode) {
         KeyCode::Char('g') => app.open_goto(),
         KeyCode::Char('?') => app.open_help(),
         KeyCode::Char('y') => app.open_year_overview(),
+        KeyCode::Char('0') => app.month_jump_pending = true,
+        KeyCode::Char('1') => app.jump_to_month(1),
+        KeyCode::Char('2') => app.jump_to_month(2),
+        KeyCode::Char('3') => app.jump_to_month(3),
+        KeyCode::Char('4') => app.jump_to_month(4),
+        KeyCode::Char('5') => app.jump_to_month(5),
+        KeyCode::Char('6') => app.jump_to_month(6),
+        KeyCode::Char('7') => app.jump_to_month(7),
+        KeyCode::Char('8') => app.jump_to_month(8),
+        KeyCode::Char('9') => app.jump_to_month(9),
         _ => {}
     }
 }
@@ -179,6 +200,29 @@ fn handle_mouse(app: &mut App, mouse: MouseEvent) {
             }
             MouseEventKind::ScrollDown => {
                 app.navigate_next();
+            }
+            MouseEventKind::Moved => {
+                let (term_w, _term_h) = terminal_size().unwrap_or((80, 24));
+                let inner_w = term_w.saturating_sub(2);
+                let sb_w = 30u16.min(inner_w / 3);
+                let content_x = 1 + sb_w;
+                let content_w = inner_w.saturating_sub(sb_w);
+                let cell_w = (content_w.saturating_sub(2) / 7).clamp(3, 12);
+                let grid_total_w = cell_w * 7;
+                let grid_offset = content_w.saturating_sub(grid_total_w) / 2;
+
+                let grid_y_start: u16 = 4;
+                let rel_x = mouse.column.saturating_sub(content_x + grid_offset);
+                let rel_y = mouse.row.saturating_sub(grid_y_start);
+
+                let col = (rel_x / cell_w) as usize;
+                let row = (rel_y / 2) as usize;
+
+                if col < 7 && mouse.column >= content_x + grid_offset && mouse.row >= grid_y_start {
+                    app.update_hover(row, col);
+                } else {
+                    app.clear_hover();
+                }
             }
             _ => {}
         },
