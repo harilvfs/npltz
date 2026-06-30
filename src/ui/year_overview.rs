@@ -37,6 +37,25 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
     let col_w = usable_w / cols;
     let row_h = usable_h / rows;
 
+    let mut weekdays = [0u32; 12];
+    let mut days_in_months = [0u32; 12];
+    if let Some(first_wd) = calendar::month_start_weekday(app.view_year, 1) {
+        let mut wd = first_wd;
+        for m in 0..12 {
+            weekdays[m] = wd as u32;
+            if let Some(d) = calendar::get_days_in_month(app.view_year, (m + 1) as u32) {
+                days_in_months[m] = d;
+                wd = (wd + d as usize) % 7;
+            }
+        }
+    } else {
+        for m in 1..=12 {
+            let idx = (m - 1) as usize;
+            weekdays[idx] = calendar::month_start_weekday(app.view_year, m).unwrap_or(0) as u32;
+            days_in_months[idx] = calendar::get_days_in_month(app.view_year, m).unwrap_or(0);
+        }
+    }
+
     for month in 1u32..=12 {
         let col = ((month - 1) % 3) as u16;
         let row = ((month - 1) / 3) as u16;
@@ -45,11 +64,25 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
         let y = inner.y + row * (row_h + gap_y);
         let cell_area = Rect { x, y, width: col_w, height: row_h };
 
-        render_mini_month(frame, cell_area, app, month);
+        render_mini_month(
+            frame,
+            cell_area,
+            app,
+            month,
+            weekdays[(month - 1) as usize],
+            days_in_months[(month - 1) as usize],
+        );
     }
 }
 
-fn render_mini_month(frame: &mut Frame, area: Rect, app: &App, month: u32) {
+fn render_mini_month(
+    frame: &mut Frame,
+    area: Rect,
+    app: &App,
+    month: u32,
+    start_weekday: u32,
+    days_in_month: u32,
+) {
     if area.width < 10 || area.height < 2 {
         return;
     }
@@ -73,18 +106,12 @@ fn render_mini_month(frame: &mut Frame, area: Rect, app: &App, month: u32) {
         title_style,
     )));
 
-    let days_in_month = match calendar::get_days_in_month(app.view_year, month) {
-        Some(d) => d,
-        None => return,
-    };
-
-    let start_weekday = match calendar::month_start_weekday(app.view_year, month) {
-        Some(w) => w,
-        None => return,
-    };
+    if days_in_month == 0 {
+        return;
+    }
 
     let mut week_rows: Vec<Vec<u32>> = Vec::new();
-    let mut current_week: Vec<u32> = vec![0; start_weekday];
+    let mut current_week: Vec<u32> = vec![0; start_weekday as usize];
 
     for d in 1..=days_in_month {
         current_week.push(d);

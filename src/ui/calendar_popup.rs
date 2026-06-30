@@ -145,7 +145,6 @@ fn render_sidebar(frame: &mut Frame, area: Rect, app: &App) {
             }
         }
 
-        let ad_date = calendar::bs_to_ad(nd.year, nd.month, nd.day);
         if let Some(ref date) = ad_date {
             let week_num = date.iso_week().week();
             let last_day = chrono::NaiveDate::from_ymd_opt(date.year(), 12, 28).unwrap();

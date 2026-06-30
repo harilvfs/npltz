@@ -1,12 +1,13 @@
 use chrono::Local;
 use std::fs;
-use std::io::Write;
+use std::io::{BufWriter, Write};
 use std::path::PathBuf;
-use std::sync::OnceLock;
+use std::sync::{Mutex, OnceLock};
 
 const MAX_LOG_FILES: usize = 5;
 
 static SESSION_LOG: OnceLock<PathBuf> = OnceLock::new();
+static LOG_WRITER: OnceLock<Mutex<Option<BufWriter<fs::File>>>> = OnceLock::new();
 
 pub struct Log;
 
@@ -42,14 +43,21 @@ impl Log {
 
         let filename = Local::now().format("npltz-%Y%m%d-%H%M%S.log");
         let path = dir.join(filename.to_string());
-        let _ = SESSION_LOG.set(path);
+        let _ = SESSION_LOG.set(path.clone());
+
+        if let Ok(f) = fs::OpenOptions::new().create(true).append(true).open(&path) {
+            let _ = LOG_WRITER.set(Mutex::new(Some(BufWriter::new(f))));
+        }
     }
 
     fn write(level: &str, msg: &str) {
-        let Some(path) = SESSION_LOG.get() else { return };
+        let Some(writer) = LOG_WRITER.get() else { return };
         let ts = Local::now().format("%Y-%m-%d %H:%M:%S");
-        if let Ok(mut f) = fs::OpenOptions::new().create(true).append(true).open(path) {
+        if let Ok(mut guard) = writer.lock()
+            && let Some(ref mut f) = *guard
+        {
             let _ = writeln!(f, "[{ts}] [{level}] {msg}");
+            let _ = f.flush();
         }
     }
 
