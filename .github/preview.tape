@@ -113,6 +113,6 @@ Sleep 1s
 
 Type "y"
 
-Sleep 1s
+Sleep 2s
 
 Type "q"
