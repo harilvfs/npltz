@@ -1,4 +1,39 @@
 
+## [1.1.4](https://github.com/harilvfs/npltz/compare/v1.1.3...v1.1.4) - 2026-07-01
+
+
+### 🚀 Features
+
+
+- [600b41c](https://github.com/harilvfs/npltz/commit/600b41ca3223b3c6fb953e838fecb2ac5f693cc9)  *(tui)* Add month jump (1-9, 0+1-3) and hover AD preview (#38) by @harilvfs in [#38](https://github.com/harilvfs/npltz/pull/38)
+
+- [c905b28](https://github.com/harilvfs/npltz/commit/c905b28d3a407d9fa1fbfa1cfc75d4fb44c59c3b)  *(tui)* Make log to capture verbose output by @harilvfs
+
+
+
+### 🐛 Bug Fixes
+
+
+- [0b6a0dd](https://github.com/harilvfs/npltz/commit/0b6a0ddf3f47fc9c4f3ca1b18f109615ae2c79f1)  *(cli)* Replace println with writeln to prevent panic when stdout is not a terminal by @harilvfs
+
+
+
+### ⚡ Performance
+
+
+- [f356cff](https://github.com/harilvfs/npltz/commit/f356cff0e0f8a3098487a187d30510484bf6b442) Reduce redundant bs_to_ad calls and buffer log writes by @harilvfs
+
+
+
+### ⚙️ Miscellaneous Tasks
+
+
+- [e9c3153](https://github.com/harilvfs/npltz/commit/e9c3153b84e7b0c6c21c293329b6b7737778bc5d)  *(tui)* Make help popup width small by 10 by @harilvfs
+
+- [e2cf557](https://github.com/harilvfs/npltz/commit/e2cf557e6c56fd312159c61cf196a4eaa27558a1)  *(preview)* Increase time for year overview by @harilvfs
+
+
+
 ## [1.1.3](https://github.com/harilvfs/npltz/compare/v1.1.2...v1.1.3) - 2026-06-29
 
 
