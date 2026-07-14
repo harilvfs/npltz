@@ -1,4 +1,16 @@
 
+## [1.1.5](https://github.com/harilvfs/npltz/compare/v1.1.4...v1.1.5) - 2026-07-14
+
+
+### 🐛 Bug Fixes
+
+
+- [84e2c87](https://github.com/harilvfs/npltz/commit/84e2c87859c5c943810b91ca63c0a73a5e2ecb7e) Correct calendar data errors and off-by-one date conversion bug by @harilvfs
+
+- [29d3ad5](https://github.com/harilvfs/npltz/commit/29d3ad5d1707baecfd83d8343c869e0b125da2ea) Replace calendar data with verified source and fix epoch bug by @harilvfs
+
+
+
 ## [1.1.4](https://github.com/harilvfs/npltz/compare/v1.1.3...v1.1.4) - 2026-07-01
 
 
