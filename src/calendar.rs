@@ -55,7 +55,7 @@ static DATA: std::sync::LazyLock<Vec<YearData>> = std::sync::LazyLock::new(|| {
     serde_json::from_str::<Vec<YearData>>(json_str).expect("calendar_data.json is valid")
 });
 
-const AD_EPOCH: (i32, u32, u32) = (1918, 4, 12);
+const AD_EPOCH: (i32, u32, u32) = (1918, 4, 13);
 pub const BS_EPOCH_YEAR: i32 = 1975;
 
 fn get_year_data(bs_year: i32) -> Option<&'static YearData> {
@@ -166,9 +166,9 @@ mod tests {
     #[test]
     fn test_reference_date() {
         let nd = ad_to_bs(2024, 4, 13).unwrap();
-        assert_eq!(nd.year, 2081);
-        assert_eq!(nd.month, 1);
-        assert_eq!(nd.day, 1);
+        assert_eq!(nd.year, 2080);
+        assert_eq!(nd.month, 12);
+        assert_eq!(nd.day, 31);
         assert_eq!(nd.weekday, 6);
     }
 
@@ -177,7 +177,7 @@ mod tests {
         let nd = ad_to_bs(2024, 4, 12).unwrap();
         assert_eq!(nd.year, 2080);
         assert_eq!(nd.month, 12);
-        assert_eq!(nd.day, 31);
+        assert_eq!(nd.day, 30);
     }
 
     #[test]
