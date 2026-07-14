@@ -177,7 +177,7 @@ The generated man page is at `man/npltz.1`.
 
 ## How it Works
 
-npltz uses calendar data from the [`nepali-date-converter`](https://crates.io/crates/nepali-date-converter) project by [dhurbachy](https://github.com/dhurbachy). The data (`calendar_data.json`) is compiled into the binary at build time via `include_str!()`, so no external JSON files are needed at runtime. It contains day counts for each month of each BS year (1975-2099) and is used for converting AD (English) dates to BS (Bikram Sambat/Nepali) and vice versa, as well as knowing how many days to render for a given month in the TUI. Star his repo if you find it useful: <https://github.com/dhurbachy/Nepali-Date-Converter>.
+npltz uses calendar data from the [`bikram-sambat`](https://github.com/medic/bikram-sambat) project by [medic](https://github.com/medic). The data (`calendar_data.json`) is compiled into the binary at build time via `include_str!()`, so no external JSON files are needed at runtime. It contains day counts for each month of each BS year (1975-2090) and is used for converting AD (English) dates to BS (Bikram Sambat/Nepali) and vice versa, as well as knowing how many days to render for a given month in the TUI. Star his repo if you find it useful: <https://github.com/medic/bikram-sambat>.
 
 ## Contributing
 
@@ -189,7 +189,7 @@ Join the [Discord](https://discord.com/invite/8NJWstnUHd) for discussions and ya
 
 ## Thanks
 
-Special thanks to [dhurbachy](https://github.com/dhurbachy) for the [`Nepali-Date-Converter`](https://github.com/dhurbachy/Nepali-Date-Converter) library that made this tool possible, and to other open-source devs maintaining the awesome crates and tools that npltz depends on. Appreciate that.
+Special thanks to [medic](https://github.com/medic) for the [`bikram-sambat`](https://github.com/medic/bikram-sambat) library that provided the verified calendar data, and to other open-source devs maintaining the awesome crates and tools that npltz depends on. Appreciate that.
 
 ## License
 

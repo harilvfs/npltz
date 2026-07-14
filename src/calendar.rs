@@ -166,9 +166,9 @@ mod tests {
     #[test]
     fn test_reference_date() {
         let nd = ad_to_bs(2024, 4, 13).unwrap();
-        assert_eq!(nd.year, 2080);
-        assert_eq!(nd.month, 12);
-        assert_eq!(nd.day, 31);
+        assert_eq!(nd.year, 2081);
+        assert_eq!(nd.month, 1);
+        assert_eq!(nd.day, 1);
         assert_eq!(nd.weekday, 6);
     }
 
