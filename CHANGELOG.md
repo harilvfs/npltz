@@ -1,4 +1,23 @@
 
+## [1.1.6](https://github.com/harilvfs/npltz/compare/v1.1.5...v1.1.6) - 2026-07-16
+
+
+### 🚀 Features
+
+
+- [8e9a8bd](https://github.com/harilvfs/npltz/commit/8e9a8bd17e68089f6eb57a50387589ad24ef3b55)  *(uninstall)* Add promt for cargo-binstall by @harilvfs
+
+
+
+### ⚙️ Miscellaneous Tasks
+
+
+- [b6fe493](https://github.com/harilvfs/npltz/commit/b6fe4931727ad84efa67686a6d8841de9bd1e556)  *(readme)* Remove initial stage warning by @harilvfs
+
+- [c874f6b](https://github.com/harilvfs/npltz/commit/c874f6bf5c48eef75af7071c766050e64ae17ec6)  *(rust)* Cargo update / bump versions by @harilvfs
+
+
+
 ## [1.1.5](https://github.com/harilvfs/npltz/compare/v1.1.4...v1.1.5) - 2026-07-14
 
 
