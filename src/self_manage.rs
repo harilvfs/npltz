@@ -85,12 +85,13 @@ fn get_install_method() -> Result<InstallMethod> {
 }
 
 fn get_install_method_for_uninstall() -> Result<InstallMethod> {
-    print!("Installed via (c)argo or (i)nstall script? ");
+    print!("Installed via (c)argo, (b)install, or (i)nstall script? ");
     io::stdout().flush()?;
     let mut choice = String::new();
     io::stdin().read_line(&mut choice)?;
     match choice.trim().to_lowercase().as_str() {
         "c" | "cargo" => Ok(InstallMethod::Cargo),
+        "b" | "binstall" | "cargo-binstall" => Ok(InstallMethod::CargoBinstall),
         "i" | "install script" => Ok(InstallMethod::InstallScript),
         _ => Err(NpltzError::Config("Invalid choice. Please run the command again.".into())),
     }
