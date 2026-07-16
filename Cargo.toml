@@ -4,7 +4,7 @@ resolver = "2"
 default-members = ["."]
 
 [workspace.package]
-version = "1.1.5"
+version = "1.1.6"
 edition = "2024"
 description = "Nepali BS Calendar (Patro) TUI for Terminal"
 homepage = "https://github.com/harilvfs/npltz"
