@@ -14,9 +14,6 @@
 
 **[npltz](https://github.com/harilvfs/npltz)** a terminal-based Nepali calendar (Bikram Sambat) written in Rust using the [`ratatui`](https://github.com/ratatui-org/ratatui). It's designed to be simple: view Nepali dates with AD (English) support in your terminal.
 
-> [!WARNING]
-> npltz is in its early stages. If you run into bugs, please [open an issue](https://github.com/harilvfs/npltz/issues).
-
 <div align="center">
 
 [Installation](#installation) •
