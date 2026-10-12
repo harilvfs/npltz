@@ -111,8 +111,8 @@ pub fn bs_to_ad(bs_year: i32, bs_month: u32, bs_day: u32) -> Option<NaiveDate> {
     }
 
     let yd = get_year_data(bs_year)?;
-    for m in 0..(bs_month as usize - 1) {
-        total_days += yd.months[m] as i64;
+    for days in yd.months.iter().take(bs_month as usize - 1) {
+        total_days += *days as i64;
     }
     total_days += (bs_day - 1) as i64;
 
@@ -151,8 +151,8 @@ pub fn get_year_total_days(bs_year: i32) -> Option<u32> {
 pub fn get_day_of_year(bs_year: i32, bs_month: u32, bs_day: u32) -> Option<u32> {
     let yd = get_year_data(bs_year)?;
     let mut total = 0u32;
-    for m in 0..(bs_month as usize - 1) {
-        total += yd.months[m];
+    for days in yd.months.iter().take(bs_month as usize - 1) {
+        total += *days;
     }
     total += bs_day;
     Some(total)
