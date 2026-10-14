@@ -1,0 +1,4 @@
+#!/data/data/com.termux/files/usr/bin/sh
+# Print today's BS/AD date as a single line. Runs from
+# ~/.shortcuts/tasks/ (long-press volume-down + q, or Termux:Widget).
+npltz show --oneline

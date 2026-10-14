@@ -47,9 +47,7 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
         })
         .collect();
 
-    let list = List::new(items).highlight_style(
-        Style::default().bg(app.theme.primary).fg(app.theme.bg).add_modifier(Modifier::BOLD),
-    );
+    let list = List::new(items).highlight_style(app.theme.hl());
 
     let mut list_state = ListState::default();
     list_state.select(Some(app.theme_selector_selected));

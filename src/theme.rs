@@ -1,4 +1,4 @@
-use ratatui::style::Color;
+use ratatui::style::{Color, Modifier, Style};
 
 pub const THEME_NAMES: &[&str] = &["catppuccin-mocha", "dracula", "gruvbox", "nord", "rose-pine"];
 
@@ -35,6 +35,58 @@ pub struct Theme {
     pub success:   Color,
     pub warning:   Color,
     pub error:     Color,
+    /// Render without colors (NO_COLOR / --no-color).
+    pub plain:     bool,
+}
+
+impl Theme {
+    /// Strong highlight: the currently selected / today cell, list selection.
+    ///
+    /// In plain mode colors are all `Reset`, so contrast has to come from
+    /// reverse video instead of a foreground/background pair.
+    pub fn hl(&self) -> Style {
+        if self.plain {
+            Style::default().add_modifier(Modifier::REVERSED | Modifier::BOLD)
+        } else {
+            Style::default().fg(self.bg).bg(self.primary).add_modifier(Modifier::BOLD)
+        }
+    }
+
+    /// Softer highlight: hover, secondary accent on a filled background.
+    pub fn hl_soft(&self) -> Style {
+        if self.plain {
+            Style::default().add_modifier(Modifier::REVERSED)
+        } else {
+            Style::default().fg(self.bg).bg(self.secondary)
+        }
+    }
+
+    /// A "key badge" style (text sitting on a colored pill).
+    pub fn badge(&self, color: Color) -> Style {
+        if self.plain {
+            Style::default().add_modifier(Modifier::BOLD)
+        } else {
+            Style::default().fg(self.bg).bg(color).add_modifier(Modifier::BOLD)
+        }
+    }
+
+    /// Strip every color, keeping the layout and modifiers intact.
+    pub fn into_plain(mut self) -> Self {
+        self.plain = true;
+        self.bg = Color::Reset;
+        self.fg = Color::Reset;
+        self.primary = Color::Reset;
+        self.secondary = Color::Reset;
+        self.success = Color::Reset;
+        self.warning = Color::Reset;
+        self.error = Color::Reset;
+        self
+    }
+}
+
+/// `NO_COLOR` spec: present and non-empty disables color.
+pub fn no_color_requested() -> bool {
+    std::env::var_os("NO_COLOR").is_some_and(|v| !v.is_empty())
 }
 
 impl Theme {
@@ -48,6 +100,7 @@ impl Theme {
             success:   Color::Rgb(166, 227, 161),
             warning:   Color::Rgb(250, 179, 135),
             error:     Color::Rgb(243, 139, 168),
+            plain:     false,
         }
     }
 
@@ -61,6 +114,7 @@ impl Theme {
             success:   Color::Rgb(80, 250, 123),
             warning:   Color::Rgb(241, 250, 140),
             error:     Color::Rgb(255, 85, 85),
+            plain:     false,
         }
     }
 
@@ -74,6 +128,7 @@ impl Theme {
             success:   Color::Rgb(184, 187, 38),
             warning:   Color::Rgb(214, 93, 14),
             error:     Color::Rgb(204, 36, 29),
+            plain:     false,
         }
     }
 
@@ -87,6 +142,7 @@ impl Theme {
             success:   Color::Rgb(163, 190, 140),
             warning:   Color::Rgb(235, 203, 139),
             error:     Color::Rgb(191, 97, 106),
+            plain:     false,
         }
     }
 
@@ -100,6 +156,7 @@ impl Theme {
             success:   Color::Rgb(49, 116, 143),
             warning:   Color::Rgb(246, 193, 119),
             error:     Color::Rgb(235, 111, 146),
+            plain:     false,
         }
     }
 }

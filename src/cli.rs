@@ -30,6 +30,9 @@ pub struct Cli {
         help = "Set default theme (catppuccin-mocha, dracula, gruvbox, nord, rose-pine, or default to reset)"
     )]
     pub set_theme: Option<String>,
+
+    #[arg(long, global = true, help = "Disable colored output (NO_COLOR)")]
+    pub no_color: bool,
 }
 
 #[derive(Subcommand)]
@@ -51,6 +54,9 @@ pub enum Commands {
             help = "Print the next N BS dates with their AD equivalents"
         )]
         upcoming: Option<u32>,
+
+        #[arg(long, help = "Print one compact line (for prompts, widgets and notifications)")]
+        oneline: bool,
     },
     #[command(about = "Convert an AD date to Bikram Sambat (YYYY-MM-DD)")]
     Convert { date: String },
@@ -69,6 +75,14 @@ pub enum Commands {
     Update,
     #[command(about = "Show the current BS week")]
     Week,
+    #[command(about = "Print a BS month as plain ASCII (no TUI)", visible_alias = "cal")]
+    Month {
+        #[arg(long, value_name = "YYYY-MM", help = "BS month to print (default: current)")]
+        month: Option<String>,
+
+        #[arg(long, help = "Also print the matching AD day under each week")]
+        ad: bool,
+    },
     #[command(about = "Export BS dates to an iCalendar (.ics) file")]
     Export {
         #[arg(long, value_name = "YYYY-MM", help = "Start month (default: current BS month)")]
@@ -99,11 +113,12 @@ mod tests {
     fn test_cli_show() {
         let cli = Cli::try_parse_from(["npltz", "show"]).unwrap();
         match cli.command.unwrap() {
-            Commands::Show { date, bs, json, upcoming } => {
+            Commands::Show { date, bs, json, upcoming, oneline } => {
                 assert!(date.is_none());
                 assert!(bs.is_none());
                 assert!(!json);
                 assert!(upcoming.is_none());
+                assert!(!oneline);
             }
             _ => panic!("Expected Show command"),
         }
@@ -161,6 +176,45 @@ mod tests {
     fn test_cli_set_theme() {
         let cli = Cli::try_parse_from(["npltz", "--set-theme", "dracula"]).unwrap();
         assert_eq!(cli.set_theme.unwrap(), "dracula");
+    }
+
+    #[test]
+    fn test_cli_show_oneline() {
+        let cli = Cli::try_parse_from(["npltz", "show", "--oneline"]).unwrap();
+        match cli.command.unwrap() {
+            Commands::Show { oneline, .. } => assert!(oneline),
+            _ => panic!("Expected Show command"),
+        }
+    }
+
+    #[test]
+    fn test_cli_month_defaults() {
+        let cli = Cli::try_parse_from(["npltz", "month"]).unwrap();
+        match cli.command.unwrap() {
+            Commands::Month { month, ad } => {
+                assert!(month.is_none());
+                assert!(!ad);
+            }
+            _ => panic!("Expected Month command"),
+        }
+    }
+
+    #[test]
+    fn test_cli_month_alias_and_flags() {
+        let cli = Cli::try_parse_from(["npltz", "cal", "--month", "2081-03", "--ad"]).unwrap();
+        match cli.command.unwrap() {
+            Commands::Month { month, ad } => {
+                assert_eq!(month.unwrap(), "2081-03");
+                assert!(ad);
+            }
+            _ => panic!("Expected Month command"),
+        }
+    }
+
+    #[test]
+    fn test_cli_no_color_flag() {
+        let cli = Cli::try_parse_from(["npltz", "--no-color", "show"]).unwrap();
+        assert!(cli.no_color);
     }
 
     #[test]

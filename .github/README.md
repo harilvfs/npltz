@@ -92,7 +92,11 @@ npltz show                     # Today's date
 npltz show --date 2024-04-13   # Convert a specific AD date to BS
 npltz show --bs 2081-01-01     # Convert a specific BS date to AD
 npltz show --json              # Output as JSON
+npltz show --oneline           # One compact line (prompts, widgets, notifications)
 npltz show --upcoming 10       # Print the next 10 BS dates (replace 10 with any number)
+npltz month                    # ASCII month view (alias: cal)
+npltz month 2081-04            # A specific BS month
+npltz month --ad               # Print AD days under the BS days
 ```
 
 #### Week
@@ -118,6 +122,8 @@ npltz --set-theme default       # Reset to default
 ```
 
 Available themes: `catppuccin-mocha`, `dracula`, `gruvbox`, `nord`, `rose-pine`
+
+`NO_COLOR` is honored, and `npltz --no-color` forces a plain rendering (colors replaced by terminal defaults, highlights via reverse video only) for terminals where the palette does not cooperate.
 
 #### Setup (Completions & Man Pages)
 
@@ -171,6 +177,31 @@ cargo xtask man-pages
 ```
 
 The generated man page is at `man/npltz.1`.
+
+### Termux (Android)
+
+The TUI is designed to work in a phone-sized terminal: it degrades to a
+borderless layout in portrait, collapses the side panel into a one-line
+status, and follows resizes/rotation live. Since Termux has no mouse, `Tab`
+enables a day cursor that the arrow keys (or `hjkl`) then move around the
+grid, crossing month boundaries.
+
+Quick glance without opening the TUI:
+
+```sh
+npltz show --oneline    # BS 2083-06-29 Bihibar 29 · AD 2026-10-15 Thursday · 2d left
+npltz month             # ASCII month view
+```
+
+Ready-made helpers (session-menu shortcut, `~/.shortcuts/tasks/` one-liner,
+boot/daily notifications via `termux-api`, and an `extra-keys` layout with
+`Tab`, `Esc` and arrows) live in [`contrib/termux`](contrib/termux):
+
+```sh
+sh contrib/termux/setup.sh --boot --daily
+```
+
+See [contrib/termux/README.md](contrib/termux/README.md) for details.
 
 ## How it Works
 

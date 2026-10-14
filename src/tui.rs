@@ -1,6 +1,8 @@
 use crate::app::{App, AppMode};
 use crate::config::Config;
-use crate::{log, theme, ui};
+use crate::ui::{self, Popup};
+use crate::{log, theme};
+use chrono::{Local, Timelike};
 use crossterm::event::{
     self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, MouseEvent, MouseEventKind,
 };
@@ -10,10 +12,16 @@ use crossterm::terminal::{
 };
 use ratatui::Terminal;
 use ratatui::backend::CrosstermBackend;
+use ratatui::layout::Rect;
 use std::io;
 use std::time::Duration;
 
-pub fn run_tui() -> io::Result<()> {
+/// Idle poll interval. Nothing is redrawn unless something actually changed
+/// (key, mouse, resize or the clock minute), so this only decides how quickly
+/// a minute rollover is noticed.
+const TICK: Duration = Duration::from_millis(500);
+
+pub fn run_tui(no_color: bool) -> io::Result<()> {
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
@@ -23,11 +31,11 @@ pub fn run_tui() -> io::Result<()> {
 
     let config = Config::load();
     let theme_name = config.theme.clone().unwrap_or_else(|| "catppuccin-mocha".into());
-    let mut app = App::new(&theme_name);
+    let no_color = no_color || theme::no_color_requested();
+    let mut app = App::new(&theme_name, no_color);
     log::Log::info(&format!("TUI started (theme: {})", theme_name));
 
-    let tick_rate = Duration::from_millis(200);
-    let res = run_app(&mut terminal, &mut app, tick_rate);
+    let res = run_app(&mut terminal, &mut app);
 
     disable_raw_mode()?;
     execute!(terminal.backend_mut(), LeaveAlternateScreen, DisableMouseCapture)?;
@@ -41,25 +49,38 @@ pub fn run_tui() -> io::Result<()> {
     Ok(())
 }
 
-fn run_app(
-    terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
-    app: &mut App,
-    tick_rate: Duration,
-) -> io::Result<()> {
-    loop {
-        terminal.draw(|frame| ui::render(frame, app))?;
+fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, app: &mut App) -> io::Result<()> {
+    let mut dirty = true;
+    let mut last_minute = i32::MIN;
 
-        if event::poll(tick_rate)? {
+    loop {
+        let minute = Local::now().minute() as i32;
+        if dirty || minute != last_minute {
+            terminal.draw(|frame| ui::render(frame, app))?;
+            dirty = false;
+            last_minute = minute;
+        }
+
+        if event::poll(TICK)? {
             loop {
                 match event::read()? {
-                    Event::Key(key) => match app.mode {
-                        AppMode::Normal => handle_normal_key(app, key.code),
-                        AppMode::ThemeSelector => handle_theme_selector_key(app, key.code),
-                        AppMode::Goto => handle_goto_key(app, key.code),
-                        AppMode::Help => handle_help_key(app, key.code),
-                        AppMode::YearOverview => handle_year_overview_key(app, key.code),
-                    },
-                    Event::Mouse(mouse) => handle_mouse(app, mouse),
+                    Event::Key(key) => {
+                        match app.mode {
+                            AppMode::Normal => handle_normal_key(app, key.code),
+                            AppMode::ThemeSelector => handle_theme_selector_key(app, key.code),
+                            AppMode::Goto => handle_goto_key(app, key.code),
+                            AppMode::Help => handle_help_key(app, key.code),
+                            AppMode::YearOverview => handle_year_overview_key(app, key.code),
+                        }
+                        dirty = true;
+                    }
+                    Event::Mouse(mouse) => {
+                        handle_mouse(app, mouse);
+                        dirty = true;
+                    }
+                    // The soft keyboard resizing the terminal is the most
+                    // common event on a phone: repaint straight away.
+                    Event::Resize(_, _) => dirty = true,
                     _ => {}
                 }
                 if !event::poll(Duration::ZERO)? {
@@ -68,7 +89,9 @@ fn run_app(
             }
         }
 
-        app.update();
+        if app.update() {
+            dirty = true;
+        }
 
         if app.should_quit {
             log::Log::info("TUI quit");
@@ -79,10 +102,6 @@ fn run_app(
 }
 
 fn handle_normal_key(app: &mut App, key: KeyCode) {
-    if app.show_small_warning && key == KeyCode::Enter {
-        app.show_small_warning = false;
-    }
-
     if app.month_jump_pending {
         app.month_jump_pending = false;
         match key {
@@ -94,13 +113,54 @@ fn handle_normal_key(app: &mut App, key: KeyCode) {
         return;
     }
 
+    // Day cursor mode: arrows move between days instead of changing the
+    // month/year, and Esc leaves the mode instead of quitting.
+    if app.cursor {
+        match key {
+            KeyCode::Esc | KeyCode::Tab | KeyCode::BackTab => {
+                app.cursor_stop();
+                return;
+            }
+            KeyCode::Left | KeyCode::Char('h') => {
+                app.cursor_move(-1);
+                return;
+            }
+            KeyCode::Right | KeyCode::Char('l') => {
+                app.cursor_move(1);
+                return;
+            }
+            KeyCode::Up | KeyCode::Char('k') => {
+                app.cursor_move(-7);
+                return;
+            }
+            KeyCode::Down | KeyCode::Char('j') => {
+                app.cursor_move(7);
+                return;
+            }
+            KeyCode::Char('t') => {
+                app.cursor_today();
+                return;
+            }
+            _ => {}
+        }
+    }
+
     match key {
-        KeyCode::Char('q') | KeyCode::Esc => app.should_quit = true,
+        KeyCode::Char('q') => app.should_quit = true,
+        KeyCode::Esc => {
+            if app.cursor {
+                app.cursor_stop();
+            } else {
+                app.should_quit = true;
+            }
+        }
+        KeyCode::Tab | KeyCode::BackTab => app.cursor_start(),
         KeyCode::Right | KeyCode::Char('l') => app.navigate_next(),
         KeyCode::Left | KeyCode::Char('h') => app.navigate_prev(),
         KeyCode::Up | KeyCode::Char('k') => app.navigate_year_next(),
         KeyCode::Down | KeyCode::Char('j') => app.navigate_year_prev(),
         KeyCode::Char('t') => app.navigate_today(),
+        KeyCode::Char('a') => app.toggle_ad_rows(),
         KeyCode::Char('c') => app.open_theme_selector(),
         KeyCode::Char('g') => app.open_goto(),
         KeyCode::Char('?') => app.open_help(),
@@ -182,51 +242,63 @@ fn handle_goto_key(app: &mut App, key: KeyCode) {
     }
 }
 
+fn contains(r: Rect, x: u16, y: u16) -> bool {
+    x >= r.x && x < r.x + r.width && y >= r.y && y < r.y + r.height
+}
+
+/// Translate a screen position inside the grid to a (row, column) cell.
+fn cell_at(layout: &ui::CalendarLayout, x: u16, y: u16) -> Option<(usize, usize)> {
+    if layout.cell_w == 0 || !contains(layout.grid, x, y) {
+        return None;
+    }
+    let col = ((x - layout.grid.x) / layout.cell_w) as usize;
+    if col >= 7 {
+        return None;
+    }
+    // Two terminal rows per week when AD dates are drawn, one otherwise.
+    let row_step = if layout.show_ad { 2 } else { 1 };
+    let row = ((y - layout.grid.y) / row_step) as usize;
+    Some((row, col))
+}
+
 fn handle_mouse(app: &mut App, mouse: MouseEvent) {
+    let Some((w, h)) = terminal_size() else { return };
+    let area = Rect::new(0, 0, w, h);
+    let mode = ui::layout_mode(area);
+
     match app.mode {
-        AppMode::Normal => match mouse.kind {
-            MouseEventKind::Down(crossterm::event::MouseButton::Left) => {
-                let (term_w, term_h) = terminal_size().unwrap_or((80, 24));
-                let nav_row = term_h.saturating_sub(4);
-                if mouse.row >= nav_row {
-                    if mouse.column < term_w / 2 {
-                        app.navigate_prev();
-                    } else {
-                        app.navigate_next();
+        AppMode::Normal => {
+            let layout = ui::calendar_layout(area, mode, app.show_ad_rows);
+            match mouse.kind {
+                MouseEventKind::Down(crossterm::event::MouseButton::Left) => {
+                    if let Some((row, col)) = cell_at(&layout, mouse.column, mouse.row) {
+                        // Clicking a day pins it (same as pressing Tab).
+                        if let Some(cell) =
+                            app.calendar_rows.get(row).and_then(|r| r.cells.get(col))
+                            && cell.day > 0
+                        {
+                            app.cursor = true;
+                            app.selected_day = Some(cell.day);
+                        }
+                    } else if let Some(nav) = layout.nav
+                        && contains(nav, mouse.column, mouse.row)
+                    {
+                        if mouse.column < nav.x + nav.width / 2 {
+                            app.navigate_prev();
+                        } else {
+                            app.navigate_next();
+                        }
                     }
                 }
+                MouseEventKind::ScrollUp => app.navigate_prev(),
+                MouseEventKind::ScrollDown => app.navigate_next(),
+                MouseEventKind::Moved => match cell_at(&layout, mouse.column, mouse.row) {
+                    Some((row, col)) => app.update_hover(row, col),
+                    None => app.clear_hover(),
+                },
+                _ => {}
             }
-            MouseEventKind::ScrollUp => {
-                app.navigate_prev();
-            }
-            MouseEventKind::ScrollDown => {
-                app.navigate_next();
-            }
-            MouseEventKind::Moved => {
-                let (term_w, _term_h) = terminal_size().unwrap_or((80, 24));
-                let inner_w = term_w.saturating_sub(2);
-                let sb_w = 30u16.min(inner_w / 3);
-                let content_x = 1 + sb_w;
-                let content_w = inner_w.saturating_sub(sb_w);
-                let cell_w = (content_w.saturating_sub(2) / 7).clamp(3, 12);
-                let grid_total_w = cell_w * 7;
-                let grid_offset = content_w.saturating_sub(grid_total_w) / 2;
-
-                let grid_y_start: u16 = 4;
-                let rel_x = mouse.column.saturating_sub(content_x + grid_offset);
-                let rel_y = mouse.row.saturating_sub(grid_y_start);
-
-                let col = (rel_x / cell_w) as usize;
-                let row = (rel_y / 2) as usize;
-
-                if col < 7 && mouse.column >= content_x + grid_offset && mouse.row >= grid_y_start {
-                    app.update_hover(row, col);
-                } else {
-                    app.clear_hover();
-                }
-            }
-            _ => {}
-        },
+        }
         AppMode::Help => match mouse.kind {
             MouseEventKind::ScrollUp => {
                 app.help_scroll = app.help_scroll.saturating_sub(3);
@@ -236,77 +308,62 @@ fn handle_mouse(app: &mut App, mouse: MouseEvent) {
             }
             _ => {}
         },
-        AppMode::ThemeSelector => match mouse.kind {
-            MouseEventKind::ScrollUp => {
-                app.theme_selector_prev();
-            }
-            MouseEventKind::ScrollDown => {
-                app.theme_selector_next();
-            }
-            MouseEventKind::Down(crossterm::event::MouseButton::Left) => {
-                let (term_w, term_h) = terminal_size().unwrap_or((80, 24));
-                let popup_w = term_w * 50 / 100;
-                let popup_h = term_h * 40 / 100;
-                let _popup_x = (term_w - popup_w) / 2;
-                let popup_y = (term_h - popup_h) / 2;
-
-                let inner_y = popup_y + 1;
-                let list_start = inner_y + 1;
-                let list_end = popup_y + popup_h - 2;
-
-                if mouse.row >= list_start && mouse.row < list_end {
-                    let item_index = (mouse.row - list_start) as usize;
-                    if item_index < theme::THEME_NAMES.len() {
-                        app.theme_selector_selected = item_index;
-                        app.apply_selected_theme();
+        AppMode::ThemeSelector => {
+            let popup = ui::popup_rect(Popup::Theme, mode, area);
+            match mouse.kind {
+                MouseEventKind::ScrollUp => app.theme_selector_prev(),
+                MouseEventKind::ScrollDown => app.theme_selector_next(),
+                MouseEventKind::Down(crossterm::event::MouseButton::Left) => {
+                    // Block border (1) + "Current:" line (1) above the list,
+                    // border + 2-line help footer below it.
+                    let list_start = popup.y + 2;
+                    let list_end = popup.y + popup.height.saturating_sub(3);
+                    if mouse.row >= list_start && mouse.row < list_end {
+                        let item_index = (mouse.row - list_start) as usize;
+                        if item_index < theme::THEME_NAMES.len() {
+                            app.theme_selector_selected = item_index;
+                            app.apply_selected_theme();
+                        }
                     }
                 }
+                _ => {}
             }
-            _ => {}
-        },
-        AppMode::YearOverview => match mouse.kind {
-            MouseEventKind::ScrollUp => {
-                app.year_prev();
-            }
-            MouseEventKind::ScrollDown => {
-                app.year_next();
-            }
-            MouseEventKind::Down(crossterm::event::MouseButton::Left) => {
-                let (term_w, term_h) = terminal_size().unwrap_or((80, 24));
-                let popup_w = term_w * 95 / 100;
-                let popup_h = term_h * 95 / 100;
-                let popup_x = (term_w - popup_w) / 2;
-                let popup_y = (term_h - popup_h) / 2;
+        }
+        AppMode::YearOverview => {
+            let popup = ui::popup_rect(Popup::Year, mode, area);
+            match mouse.kind {
+                MouseEventKind::ScrollUp => app.year_prev(),
+                MouseEventKind::ScrollDown => app.year_next(),
+                MouseEventKind::Down(crossterm::event::MouseButton::Left) => {
+                    let inner_x = popup.x + 1;
+                    let inner_y = popup.y + 1;
+                    let inner_w = popup.width.saturating_sub(2);
+                    let inner_h = popup.height.saturating_sub(2);
 
-                let inner_x = popup_x + 1;
-                let inner_y = popup_y + 1;
-                let inner_w = popup_w.saturating_sub(2);
-                let inner_h = popup_h.saturating_sub(2);
+                    let gap_x = 2u16;
+                    let cols = 3u16;
+                    let rows = 4u16;
+                    let usable_w = inner_w.saturating_sub(gap_x * (cols - 1));
+                    let col_w = usable_w / cols;
+                    let row_h = inner_h / rows;
 
-                let gap_x = 2u16;
-                let cols = 3u16;
-                let rows = 4u16;
-                let usable_w = inner_w.saturating_sub(gap_x * (cols - 1));
-                let usable_h = inner_h;
-                let col_w = usable_w / cols;
-                let row_h = usable_h / rows;
+                    let rel_x = mouse.column.saturating_sub(inner_x);
+                    let rel_y = mouse.row.saturating_sub(inner_y);
 
-                let rel_x = mouse.column.saturating_sub(inner_x);
-                let rel_y = mouse.row.saturating_sub(inner_y);
-
-                if rel_x < inner_w && rel_y < inner_h {
-                    let col = (rel_x / (col_w + gap_x)).min(cols - 1);
-                    let row = (rel_y / row_h).min(rows - 1);
-                    let month = (row * cols + col + 1) as u32;
-                    if (1..=12).contains(&month) {
-                        app.view_month = month;
-                        app.build_view();
-                        app.close_year_overview();
+                    if rel_x < inner_w && rel_y < inner_h && col_w > 0 && row_h > 0 {
+                        let col = (rel_x / (col_w + gap_x)).min(cols - 1);
+                        let row = (rel_y / row_h).min(rows - 1);
+                        let month = (row * cols + col + 1) as u32;
+                        if (1..=12).contains(&month) {
+                            app.view_month = month;
+                            app.build_view();
+                            app.close_year_overview();
+                        }
                     }
                 }
+                _ => {}
             }
-            _ => {}
-        },
+        }
         _ => {}
     }
 }
