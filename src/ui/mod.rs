@@ -52,6 +52,9 @@ pub(crate) struct CalendarLayout {
     pub keys:     Option<Rect>,
     pub show_ad:  bool,
     pub cell_w:   u16,
+    /// X of the first day cell: the grid is drawn centred inside `grid`, so
+    /// this accounts for the leftover space on the left.
+    pub grid_x:   u16,
 }
 
 pub(crate) fn calendar_layout(area: Rect, mode: Mode, want_ad: bool) -> CalendarLayout {
@@ -129,6 +132,8 @@ pub(crate) fn calendar_layout(area: Rect, mode: Mode, want_ad: bool) -> Calendar
     });
 
     let cell_w = if grid.width >= 7 { (grid.width / 7).min(12) } else { 1 };
+    let grid_width = cell_w * 7;
+    let grid_x = grid.x + grid.width.saturating_sub(grid_width) / 2;
 
     CalendarLayout {
         bordered,
@@ -142,6 +147,7 @@ pub(crate) fn calendar_layout(area: Rect, mode: Mode, want_ad: bool) -> Calendar
         keys,
         show_ad,
         cell_w,
+        grid_x,
     }
 }
 

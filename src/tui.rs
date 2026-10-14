@@ -251,7 +251,10 @@ fn cell_at(layout: &ui::CalendarLayout, x: u16, y: u16) -> Option<(usize, usize)
     if layout.cell_w == 0 || !contains(layout.grid, x, y) {
         return None;
     }
-    let col = ((x - layout.grid.x) / layout.cell_w) as usize;
+    // The grid is drawn centred inside its rect; measure from the first cell,
+    // not from the rect edge, or hovering points at the wrong day.
+    let rel_x = x.checked_sub(layout.grid_x)?;
+    let col = (rel_x / layout.cell_w) as usize;
     if col >= 7 {
         return None;
     }
@@ -370,4 +373,51 @@ fn handle_mouse(app: &mut App, mouse: MouseEvent) {
 
 fn terminal_size() -> Option<(u16, u16)> {
     crossterm::terminal::size().ok()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The grid is drawn centred inside its rect, so a point inside the last
+    /// day column must map to column 6 even when the rect is much wider than
+    /// the grid itself (this is the desktop hover bug: hovering the far right
+    /// of a wide rect used to hit nothing, or the wrong day).
+    #[test]
+    fn cell_at_accounts_for_centred_grid() {
+        let area = Rect::new(0, 0, 120, 40);
+        let layout = ui::calendar_layout(area, ui::Mode::Wide, false);
+
+        // Right edge of the last day column, as rendered.
+        let last_col_x = layout.grid_x + layout.cell_w * 6;
+        let (row, col) = cell_at(&layout, last_col_x + 1, layout.grid.y).expect("hit");
+        assert_eq!(col, 6, "far right of the grid must be Saturday");
+        assert_eq!(row, 0);
+
+        // Just left of the first cell is padding: no hit.
+        assert!(cell_at(&layout, layout.grid_x.saturating_sub(1), layout.grid.y).is_none());
+
+        // Right padding (beyond the 7 columns) is also a miss.
+        let past_grid = layout.grid_x + layout.cell_w * 7;
+        if past_grid < layout.grid.x + layout.grid.width {
+            assert!(cell_at(&layout, past_grid, layout.grid.y).is_none());
+        }
+
+        // Two rows down with AD rows shown skips one visual row per week.
+        let ad_layout = ui::calendar_layout(area, ui::Mode::Wide, true);
+        if ad_layout.show_ad {
+            let (_, col) =
+                cell_at(&ad_layout, ad_layout.grid_x, ad_layout.grid.y + 3).expect("hit");
+            assert_eq!(col, 0);
+        }
+    }
+
+    /// A narrow phone-sized grid fills its rect, so hits still work there.
+    #[test]
+    fn cell_at_on_narrow_screen() {
+        let area = Rect::new(0, 0, 45, 16);
+        let layout = ui::calendar_layout(area, ui::Mode::Narrow, false);
+        let (row, col) = cell_at(&layout, layout.grid_x, layout.grid.y).expect("hit");
+        assert_eq!((row, col), (0, 0));
+    }
 }
