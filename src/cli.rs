@@ -77,8 +77,11 @@ pub enum Commands {
     Week,
     #[command(about = "Print a BS month as plain ASCII (no TUI)", visible_alias = "cal")]
     Month {
-        #[arg(long, value_name = "YYYY-MM", help = "BS month to print (default: current)")]
+        #[arg(value_name = "YYYY-MM", help = "BS month to print (default: current)")]
         month: Option<String>,
+
+        #[arg(long = "month", value_name = "YYYY-MM", help = "Same as the positional argument")]
+        month_flag: Option<String>,
 
         #[arg(long, help = "Also print the matching AD day under each week")]
         ad: bool,
@@ -191,8 +194,22 @@ mod tests {
     fn test_cli_month_defaults() {
         let cli = Cli::try_parse_from(["npltz", "month"]).unwrap();
         match cli.command.unwrap() {
-            Commands::Month { month, ad } => {
+            Commands::Month { month, month_flag, ad } => {
                 assert!(month.is_none());
+                assert!(month_flag.is_none());
+                assert!(!ad);
+            }
+            _ => panic!("Expected Month command"),
+        }
+    }
+
+    #[test]
+    fn test_cli_month_positional() {
+        let cli = Cli::try_parse_from(["npltz", "month", "2081-03"]).unwrap();
+        match cli.command.unwrap() {
+            Commands::Month { month, month_flag, ad } => {
+                assert_eq!(month.unwrap(), "2081-03");
+                assert!(month_flag.is_none());
                 assert!(!ad);
             }
             _ => panic!("Expected Month command"),
@@ -203,8 +220,9 @@ mod tests {
     fn test_cli_month_alias_and_flags() {
         let cli = Cli::try_parse_from(["npltz", "cal", "--month", "2081-03", "--ad"]).unwrap();
         match cli.command.unwrap() {
-            Commands::Month { month, ad } => {
-                assert_eq!(month.unwrap(), "2081-03");
+            Commands::Month { month, month_flag, ad } => {
+                assert!(month.is_none());
+                assert_eq!(month_flag.unwrap(), "2081-03");
                 assert!(ad);
             }
             _ => panic!("Expected Month command"),

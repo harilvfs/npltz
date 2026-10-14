@@ -90,8 +90,8 @@ pub fn run() -> Result<()> {
         Some(Commands::Week) => {
             show_week()?;
         }
-        Some(Commands::Month { month, ad }) => {
-            show_month(month.as_deref(), ad)?;
+        Some(Commands::Month { month, month_flag, ad }) => {
+            show_month(month.or(month_flag).as_deref(), ad)?;
         }
         Some(Commands::Export { month, count, output }) => {
             export_ics(month.as_deref(), count, output.as_deref())?;
