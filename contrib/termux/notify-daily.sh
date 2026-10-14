@@ -9,10 +9,10 @@
 #       --period-ms 86400000 --job-id 8310 --persisted --network-not-required
 #
 # Minimum period allowed by Android is 900000 ms (15 min); 86400000 = 24 h.
-command -v termux-notification >/dev/null 2>&1 || exit 0
-command -v npltz >/dev/null 2>&1 || exit 0
+command -v termux-notification > /dev/null 2>&1 || exit 0
+command -v npltz > /dev/null 2>&1 || exit 0
 
-line=$(npltz show --oneline 2>/dev/null) || exit 0
+line=$(npltz show --oneline 2> /dev/null) || exit 0
 [ -n "$line" ] || exit 0
 
 termux-notification \
