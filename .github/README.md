@@ -201,7 +201,7 @@ boot/daily notifications via `termux-api`, and an `extra-keys` layout with
 npltz setup --termux --boot --daily
 ```
 
-See [contrib/termux/README.md](contrib/termux/README.md) for details.
+See [contrib/termux/README.md](https://github.com/harilvfs/npltz/blob/main/contrib/termux/README.md) for details.
 
 ## How it Works
 
