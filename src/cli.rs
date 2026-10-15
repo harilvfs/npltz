@@ -224,7 +224,6 @@ mod tests {
         }
     }
 
-    /// `--boot`/`--daily` only make sense with `--termux`.
     #[test]
     fn test_cli_setup_boot_requires_termux() {
         assert!(Cli::try_parse_from(["npltz", "setup", "--boot"]).is_err());

@@ -10,20 +10,16 @@ use ratatui::layout::Rect;
 use ratatui::style::Style;
 use ratatui::text::Span;
 
-/// Grid height: two rows per week when AD dates are shown, one otherwise.
+/// Grid rows: two per week when AD dates are shown, one otherwise.
 const GRID_ROWS_AD: u16 = 12;
 const GRID_ROWS_PLAIN: u16 = 6;
 
 const SIDEBAR_WIDTH: u16 = 30;
 
-/// How much chrome the current terminal can afford.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Mode {
-    /// Desktop: side panel with today's details, full grid.
     Wide,
-    /// Tablet / landscape phone: status line instead of the side panel.
     Medium,
-    /// Phone portrait: no borders, short labels, minimum chrome.
     Narrow,
 }
 
@@ -37,8 +33,8 @@ pub(crate) fn layout_mode(area: Rect) -> Mode {
     }
 }
 
-/// Where every piece of the calendar goes. Computed once per frame and shared
-/// with the mouse handler so hit-testing can never drift from rendering.
+/// Computed once per frame and shared with the mouse handler, so hit-testing
+/// can never drift from rendering.
 #[derive(Debug)]
 pub(crate) struct CalendarLayout {
     pub bordered: bool,
@@ -52,8 +48,7 @@ pub(crate) struct CalendarLayout {
     pub keys:     Option<Rect>,
     pub show_ad:  bool,
     pub cell_w:   u16,
-    /// X of the first day cell: the grid is drawn centred inside `grid`, so
-    /// this accounts for the leftover space on the left.
+    /// X of the first day cell: the grid is drawn centred inside `grid`.
     pub grid_x:   u16,
 }
 
@@ -70,7 +65,6 @@ pub(crate) fn calendar_layout(area: Rect, mode: Mode, want_ad: bool) -> Calendar
         area
     };
 
-    // The side panel only where it does not starve the grid.
     let (sidebar, content) = if mode == Mode::Wide && inner.width >= 40 {
         let sb = SIDEBAR_WIDTH.min(inner.width / 3).max(1);
         (
@@ -86,7 +80,6 @@ pub(crate) fn calendar_layout(area: Rect, mode: Mode, want_ad: bool) -> Calendar
         (None, inner)
     };
 
-    // Rows below the grid: detail line, key hints and (wide/medium) the nav row.
     let after_total: u16 = if mode == Mode::Narrow { 2 } else { 3 };
     let fixed: u16 = 1 + u16::from(sidebar.is_none()) + 1; // title, status, header
     let avail = content.height.saturating_sub(fixed);
@@ -99,8 +92,7 @@ pub(crate) fn calendar_layout(area: Rect, mode: Mode, want_ad: bool) -> Calendar
     let has_keys = after >= 2;
     let has_nav = mode != Mode::Narrow && after >= 3;
 
-    // Centre the grid in whatever space is left over and pin the footer rows
-    // to the bottom, so a tall terminal does not end in a pile of blanks.
+    // Centre the grid; footers are pinned to the bottom below.
     let used = fixed + grid_rows + u16::from(has_detail) + u16::from(has_keys) + u16::from(has_nav);
     let pad_top = content.height.saturating_sub(used) / 2;
 
@@ -158,7 +150,6 @@ pub(crate) enum Popup {
     Year,
 }
 
-/// Popups grow on small screens so they stay readable on a phone.
 pub(crate) fn popup_rect(popup: Popup, mode: Mode, area: Rect) -> Rect {
     let (w, h) = match (popup, mode) {
         (Popup::Theme, Mode::Wide) => (50, 40),
@@ -175,9 +166,8 @@ pub(crate) fn popup_rect(popup: Popup, mode: Mode, area: Rect) -> Rect {
     centered_rect(w, h, area)
 }
 
-/// Join styled segments with `sep`, dropping the lowest-priority ones (from
-/// the end) until the line fits `width`. The first segment is hard-truncated
-/// only when it cannot fit on its own.
+/// Join segments with `sep`, dropping the lowest-priority ones (from the end)
+/// until the line fits `width`.
 pub(crate) fn fit_spans(
     segments: Vec<(String, Style)>,
     sep: &str,
@@ -205,7 +195,7 @@ pub(crate) fn fit_spans(
             out.push(Span::raw(sep.to_string()));
         }
         if i == 0 && len(text) > width {
-            // Never exceed the budget: clip and mark the cut.
+            // Clip the first segment and mark the cut with an ellipsis.
             let cut: String = text.chars().take(width.saturating_sub(1)).collect();
             out.push(Span::styled(format!("{cut}\u{2026}"), *style));
         } else {
@@ -253,7 +243,6 @@ pub(crate) fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
 
 pub(crate) const DAY_HEADER: [&str; 7] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-/// Day headers shrink with the cell width instead of overflowing.
 pub(crate) fn day_labels(cell_w: u16) -> [&'static str; 7] {
     if cell_w >= 5 {
         DAY_HEADER
@@ -377,8 +366,6 @@ mod tests {
         assert_eq!(day_labels(1)[0], "S");
     }
 
-    /// Render real frames at phone, tablet and desktop sizes: layouts that
-    /// overflow or compute an invalid rect show up as panics here.
     #[test]
     fn test_render_every_size_without_panicking() {
         use crate::app::AppMode;
@@ -417,8 +404,7 @@ mod tests {
         }
     }
 
-    /// Not a test: `cargo test dump_frames -- --ignored --nocapture` prints
-    /// rendered frames so layouts can be eyeballed without a phone handy.
+    /// Not a test: `cargo test dump_frames -- --ignored --nocapture` prints rendered frames.
     #[test]
     #[ignore]
     fn dump_frames() {

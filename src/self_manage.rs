@@ -28,11 +28,8 @@ fn client() -> Result<reqwest::blocking::Client> {
         .map_err(|e| NpltzError::Config(format!("Failed to create HTTP client: {e}")))
 }
 
-/// Fetch a URL as text.
-///
-/// With the `online` feature this uses the bundled TLS stack, otherwise it
-/// falls back to whatever HTTP client the system already has (curl/wget) so
-/// the default offline build stays small but `npltz update` keeps working.
+/// Fetch a URL as text: bundled TLS with the `online` feature, else the system
+/// curl/wget, so the default build stays small but `npltz update` keeps working.
 #[cfg(feature = "online")]
 fn http_get(url: &str) -> Result<String> {
     let resp = client()?

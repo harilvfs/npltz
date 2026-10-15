@@ -234,10 +234,8 @@ https://github.com/harilvfs/npltz/issues
     Ok(())
 }
 
-/// Termux-only extras: a session-menu shortcut, a one-line background task,
-/// an `extra-keys` layout and (optionally) boot/daily notifications. These
-/// mirror `contrib/termux/setup.sh` for people who installed npltz as a
-/// binary and do not want to fetch the script.
+/// Termux extras: session-menu shortcut, one-line task, extra-keys layout and
+/// optional boot/daily notifications. Mirrors `contrib/termux/setup.sh`.
 #[cfg(not(target_os = "windows"))]
 fn termux_extras(
     dry_run: bool,
@@ -281,7 +279,6 @@ fn termux_extras(
         println!("! not a Termux environment, installing the extras anyway");
     }
 
-    /// Write a file with the given mode, creating parent directories.
     fn write_exec(
         path: &std::path::Path,
         content: &str,

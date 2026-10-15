@@ -7,8 +7,7 @@ use std::time::{Duration, Instant};
 
 const MAX_LOG_FILES: usize = 5;
 
-/// Flush at most once per second: the TUI logs on every keypress and an
-/// fsync-ish flush per keystroke is wasted work on flash storage.
+/// Rate-limit flushes: a per-keypress fsync wastes battery and flash on mobile.
 const FLUSH_INTERVAL: Duration = Duration::from_secs(1);
 
 static SESSION_LOG: OnceLock<PathBuf> = OnceLock::new();

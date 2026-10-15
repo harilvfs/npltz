@@ -54,7 +54,6 @@ fn clip(text: &str, width: usize) -> String {
     }
 }
 
-/// Left/right padded single line, never wider than `width`.
 fn centered(text: String, width: usize, style: Style) -> Line<'static> {
     let text = clip(&text, width);
     let len = text.chars().count();
@@ -67,11 +66,6 @@ fn centered(text: String, width: usize, style: Style) -> Line<'static> {
     ])
 }
 
-// ---------------------------------------------------------------- sidebar
-
-/// The side panel is built as independent sections and only as many of them
-/// are kept as the height allows, so nothing is silently cut off on short
-/// screens.
 fn render_sidebar(frame: &mut Frame, area: Rect, app: &App) {
     let block = Block::default()
         .borders(Borders::ALL)
@@ -155,8 +149,6 @@ fn sidebar_sections(app: &App, width: u16) -> Vec<Vec<Line<'static>>> {
 
     sections
 }
-
-// ------------------------------------------------------------------ lines
 
 fn render_title(frame: &mut Frame, area: Rect, app: &App) {
     let title_style = Style::default().fg(app.theme.primary).add_modifier(Modifier::BOLD);
@@ -254,7 +246,6 @@ fn render_grid(frame: &mut Frame, area: Rect, app: &App, layout: &super::Calenda
     frame.render_widget(Paragraph::new(grid_lines).alignment(Alignment::Center), area);
 }
 
-/// Today, in compact form for narrow/medium terminals.
 fn status_line(app: &App, width: u16) -> Line<'static> {
     let theme = &app.theme;
     let now = Local::now();
@@ -284,8 +275,6 @@ fn status_line(app: &App, width: u16) -> Line<'static> {
     Line::from(fit_spans(segs, " \u{b7} ", width))
 }
 
-/// Selected (or hovered) day in both calendars, plus a hint when nothing is
-/// selected.
 fn detail_line(app: &App, width: u16) -> Line<'static> {
     let theme = &app.theme;
 
@@ -341,8 +330,7 @@ fn nav_line(app: &App, width: u16) -> Line<'static> {
     }
 }
 
-/// Shortcuts, most important first: the tail is dropped when the terminal is
-/// narrow instead of wrapping.
+/// Shortcuts, most important first; the tail is dropped when narrow instead of wrapping.
 fn keys_line(app: &App, width: u16) -> Line<'static> {
     let key = Style::default().fg(app.theme.secondary).add_modifier(Modifier::BOLD);
     let hints = [

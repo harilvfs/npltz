@@ -40,10 +40,7 @@ pub struct Theme {
 }
 
 impl Theme {
-    /// Strong highlight: the currently selected / today cell, list selection.
-    ///
-    /// In plain mode colors are all `Reset`, so contrast has to come from
-    /// reverse video instead of a foreground/background pair.
+    /// In plain mode every color is `Reset`, so contrast comes from reverse video.
     pub fn hl(&self) -> Style {
         if self.plain {
             Style::default().add_modifier(Modifier::REVERSED | Modifier::BOLD)
@@ -52,7 +49,6 @@ impl Theme {
         }
     }
 
-    /// Softer highlight: hover, secondary accent on a filled background.
     pub fn hl_soft(&self) -> Style {
         if self.plain {
             Style::default().add_modifier(Modifier::REVERSED)
@@ -61,7 +57,6 @@ impl Theme {
         }
     }
 
-    /// A "key badge" style (text sitting on a colored pill).
     pub fn badge(&self, color: Color) -> Style {
         if self.plain {
             Style::default().add_modifier(Modifier::BOLD)
@@ -70,7 +65,6 @@ impl Theme {
         }
     }
 
-    /// Strip every color, keeping the layout and modifiers intact.
     pub fn into_plain(mut self) -> Self {
         self.plain = true;
         self.bg = Color::Reset;

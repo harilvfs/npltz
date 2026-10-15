@@ -346,8 +346,7 @@ pub fn show_week() -> Result<()> {
     Ok(())
 }
 
-/// Print one BS month as plain ASCII. No alternate screen and no raw mode, so
-/// it scrolls, pipes and copies like any other terminal output.
+/// Plain ASCII, no alternate screen or raw mode, so it scrolls and pipes like normal output.
 pub fn show_month(month: Option<&str>, show_ad: bool) -> Result<()> {
     let now = Local::now();
     let today_bs = calendar::ad_to_bs(now.year(), now.month(), now.day());

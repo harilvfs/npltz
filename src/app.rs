@@ -340,12 +340,8 @@ pub struct App {
     pub hover_bs_day:  Option<u32>,
     pub hover_ad_date: Option<String>,
 
-    /// Draw the AD row under each BS week (hidden automatically when the
-    /// terminal is too short, toggled with `a`).
     pub show_ad_rows: bool,
-    /// Day currently pointed at by the keyboard cursor.
     pub selected_day: Option<u32>,
-    /// Whether arrow keys move the day cursor instead of changing month/year.
     pub cursor:       bool,
 }
 
@@ -437,8 +433,7 @@ impl App {
         app
     }
 
-    /// Refresh "today". Returns `true` when the calendar date rolled over
-    /// (or ran for the first time) so the UI knows it must redraw.
+    /// Returns `true` when the calendar date rolled over (or first run), so the UI redraws.
     pub fn update(&mut self) -> bool {
         let now = Local::now();
         let (y, m, d) = (now.year(), now.month(), now.day());
@@ -715,8 +710,6 @@ impl App {
         self.hover_ad_date = None;
     }
 
-    /// Turn the day cursor on (`Tab`), starting on today when the displayed
-    /// month contains it.
     pub fn cursor_start(&mut self) {
         let day = match self.today_key {
             Some((y, m, d)) if y == self.view_year && m == self.view_month => d,
@@ -727,15 +720,13 @@ impl App {
         log::Log::info(&format!("Day cursor on: {}/{}/{}", self.view_year, self.view_month, day));
     }
 
-    /// Turn the day cursor off (`Tab` / `Esc`).
     pub fn cursor_stop(&mut self) {
         self.cursor = false;
         self.selected_day = None;
         log::Log::info("Day cursor off");
     }
 
-    /// Move the cursor by `delta` days, stepping into the neighbouring month
-    /// when it walks off either edge.
+    /// Steps into the neighbouring month when it walks off either edge.
     pub fn cursor_move(&mut self, delta: i32) {
         if !self.cursor {
             return;
@@ -761,7 +752,6 @@ impl App {
         ));
     }
 
-    /// Jump back to today while the cursor is active.
     pub fn cursor_today(&mut self) {
         self.navigate_today();
         if let Some((y, m, d)) = self.today_key
@@ -778,7 +768,6 @@ impl App {
         log::Log::info(&format!("AD rows: {}", if self.show_ad_rows { "on" } else { "off" }));
     }
 
-    /// Day whose AD date should be shown: keyboard cursor wins over hover.
     pub fn focus_day(&self) -> Option<u32> {
         self.selected_day.or(self.hover_bs_day)
     }

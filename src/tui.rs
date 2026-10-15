@@ -16,9 +16,8 @@ use ratatui::layout::Rect;
 use std::io;
 use std::time::Duration;
 
-/// Idle poll interval. Nothing is redrawn unless something actually changed
-/// (key, mouse, resize or the clock minute), so this only decides how quickly
-/// a minute rollover is noticed.
+/// Idle poll interval. Nothing is redrawn unless something changed, so this only
+/// decides how quickly a minute rollover is noticed.
 const TICK: Duration = Duration::from_millis(500);
 
 pub fn run_tui(no_color: bool) -> io::Result<()> {
@@ -78,8 +77,6 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, app: &mut App)
                         handle_mouse(app, mouse);
                         dirty = true;
                     }
-                    // The soft keyboard resizing the terminal is the most
-                    // common event on a phone: repaint straight away.
                     Event::Resize(_, _) => dirty = true,
                     _ => {}
                 }
@@ -113,8 +110,7 @@ fn handle_normal_key(app: &mut App, key: KeyCode) {
         return;
     }
 
-    // Day cursor mode: arrows move between days instead of changing the
-    // month/year, and Esc leaves the mode instead of quitting.
+    // In cursor mode arrows move between days and Esc leaves the mode instead of quitting.
     if app.cursor {
         match key {
             KeyCode::Esc | KeyCode::Tab | KeyCode::BackTab => {
@@ -246,19 +242,16 @@ fn contains(r: Rect, x: u16, y: u16) -> bool {
     x >= r.x && x < r.x + r.width && y >= r.y && y < r.y + r.height
 }
 
-/// Translate a screen position inside the grid to a (row, column) cell.
 fn cell_at(layout: &ui::CalendarLayout, x: u16, y: u16) -> Option<(usize, usize)> {
     if layout.cell_w == 0 || !contains(layout.grid, x, y) {
         return None;
     }
-    // The grid is drawn centred inside its rect; measure from the first cell,
-    // not from the rect edge, or hovering points at the wrong day.
+    // The grid is centred in its rect, so measure from the first cell, not the edge.
     let rel_x = x.checked_sub(layout.grid_x)?;
     let col = (rel_x / layout.cell_w) as usize;
     if col >= 7 {
         return None;
     }
-    // Two terminal rows per week when AD dates are drawn, one otherwise.
     let row_step = if layout.show_ad { 2 } else { 1 };
     let row = ((y - layout.grid.y) / row_step) as usize;
     Some((row, col))
@@ -275,7 +268,7 @@ fn handle_mouse(app: &mut App, mouse: MouseEvent) {
             match mouse.kind {
                 MouseEventKind::Down(crossterm::event::MouseButton::Left) => {
                     if let Some((row, col)) = cell_at(&layout, mouse.column, mouse.row) {
-                        // Clicking a day pins it (same as pressing Tab).
+                        // Clicking a day pins it, like Tab.
                         if let Some(cell) =
                             app.calendar_rows.get(row).and_then(|r| r.cells.get(col))
                             && cell.day > 0
@@ -317,8 +310,7 @@ fn handle_mouse(app: &mut App, mouse: MouseEvent) {
                 MouseEventKind::ScrollUp => app.theme_selector_prev(),
                 MouseEventKind::ScrollDown => app.theme_selector_next(),
                 MouseEventKind::Down(crossterm::event::MouseButton::Left) => {
-                    // Block border (1) + "Current:" line (1) above the list,
-                    // border + 2-line help footer below it.
+                    // +2 = border + "Current:" line; -3 = border + 2-line footer.
                     let list_start = popup.y + 2;
                     let list_end = popup.y + popup.height.saturating_sub(3);
                     if mouse.row >= list_start && mouse.row < list_end {
@@ -379,31 +371,25 @@ fn terminal_size() -> Option<(u16, u16)> {
 mod tests {
     use super::*;
 
-    /// The grid is drawn centred inside its rect, so a point inside the last
-    /// day column must map to column 6 even when the rect is much wider than
-    /// the grid itself (this is the desktop hover bug: hovering the far right
-    /// of a wide rect used to hit nothing, or the wrong day).
+    /// Guards the desktop hover bug: a point in the last column must map to
+    /// column 6 even though the grid is centred in a much wider rect.
     #[test]
     fn cell_at_accounts_for_centred_grid() {
         let area = Rect::new(0, 0, 120, 40);
         let layout = ui::calendar_layout(area, ui::Mode::Wide, false);
 
-        // Right edge of the last day column, as rendered.
         let last_col_x = layout.grid_x + layout.cell_w * 6;
         let (row, col) = cell_at(&layout, last_col_x + 1, layout.grid.y).expect("hit");
         assert_eq!(col, 6, "far right of the grid must be Saturday");
         assert_eq!(row, 0);
 
-        // Just left of the first cell is padding: no hit.
         assert!(cell_at(&layout, layout.grid_x.saturating_sub(1), layout.grid.y).is_none());
 
-        // Right padding (beyond the 7 columns) is also a miss.
         let past_grid = layout.grid_x + layout.cell_w * 7;
         if past_grid < layout.grid.x + layout.grid.width {
             assert!(cell_at(&layout, past_grid, layout.grid.y).is_none());
         }
 
-        // Two rows down with AD rows shown skips one visual row per week.
         let ad_layout = ui::calendar_layout(area, ui::Mode::Wide, true);
         if ad_layout.show_ad {
             let (_, col) =
@@ -412,7 +398,6 @@ mod tests {
         }
     }
 
-    /// A narrow phone-sized grid fills its rect, so hits still work there.
     #[test]
     fn cell_at_on_narrow_screen() {
         let area = Rect::new(0, 0, 45, 16);
