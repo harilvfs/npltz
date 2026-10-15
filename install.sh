@@ -4,6 +4,16 @@ set -e
 REPO="harilvfs/npltz"
 BINARY="npltz"
 
+CHANNEL="stable"
+case "${1:-}" in
+    --dev) CHANNEL="dev" ;;
+    "") ;;
+    *)
+        echo "usage: install.sh [--dev]" >&2
+        exit 1
+        ;;
+esac
+
 if [ -n "$TERMUX_VERSION" ] || [ -d "/data/data/com.termux" ]; then
     IS_ANDROID=true
 else

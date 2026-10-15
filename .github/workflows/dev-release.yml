@@ -86,7 +86,7 @@ jobs:
           prerelease: true
           generate_release_notes: true
           body: |
-            Unstable build straight from `main` — **not** a tagged release.
+            Unstable build straight from `main` **not** a tagged release.
             Report problems with the tag and commit SHA.
 
       - name: Upload Linux assets
