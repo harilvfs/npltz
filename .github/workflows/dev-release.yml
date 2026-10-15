@@ -22,7 +22,6 @@ jobs:
         id: meta
         run: |
           TAG="dev-$(date +%Y%m%d)-$(git rev-parse --short HEAD)"
-          echo "tag=$TAG" >> "$GITHUB_ENV"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - name: Install Rust (nightly) with MUSL targets
@@ -81,8 +80,8 @@ jobs:
       - name: Create dev prerelease
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: ${{ env.TAG }}
-          name: ${{ env.TAG }}
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: ${{ steps.meta.outputs.tag }}
           draft: false
           prerelease: true
           generate_release_notes: true
@@ -99,6 +98,7 @@ jobs:
             npltz-aarch64-unknown-linux-musl.sha256
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.meta.outputs.tag }}
 
   macos:
     runs-on: macos-14
