@@ -79,6 +79,15 @@ detect_target() {
 }
 
 get_latest_version() {
+    if [ "$CHANNEL" = "dev" ]; then
+        _tag=$(curl -fsL "https://api.github.com/repos/$REPO/releases?per_page=25" 2> /dev/null |
+              grep '"tag_name"' | cut -d'"' -f4 | grep '^dev-' | head -1)
+        case "$_tag" in
+            dev-*) echo "$_tag" ;;
+            *) echo "" ;;
+        esac
+        return
+    fi
     _tag=$(curl -fsL "https://api.github.com/repos/$REPO/releases/latest" 2> /dev/null |
           grep '"tag_name"' | head -1 | cut -d'"' -f4)
     case "$_tag" in
@@ -100,6 +109,10 @@ if [ -z "$VERSION" ]; then
 fi
 
 echo "Installing $BINARY $VERSION ($TARGET)"
+
+if [ "$CHANNEL" = "dev" ]; then
+    echo "warning: this is an UNSTABLE dev build, not for daily use" >&2
+fi
 
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
