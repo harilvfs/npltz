@@ -1,12 +1,17 @@
 #[cfg(target_os = "windows")]
-pub fn run_setup(_dry_run: bool) -> crate::error::Result<()> {
+pub fn run_setup(
+    _dry_run: bool,
+    _termux: bool,
+    _boot: bool,
+    _daily: bool,
+) -> crate::error::Result<()> {
     println!("Setup is not required on Windows.");
     println!("Shell completions and man pages are not available for this platform.");
     Ok(())
 }
 
 #[cfg(not(target_os = "windows"))]
-pub fn run_setup(dry_run: bool) -> crate::error::Result<()> {
+pub fn run_setup(dry_run: bool, termux: bool, boot: bool, daily: bool) -> crate::error::Result<()> {
     use crate::cli::Cli;
     use clap::CommandFactory;
     use std::fs;
@@ -214,11 +219,147 @@ https://github.com/harilvfs/npltz/issues
         }
     }
 
+    if termux {
+        termux_extras(dry_run, boot, daily, &mut installed)?;
+    }
+
     for msg in &installed {
         if dry_run {
             println!("  {msg}");
         } else {
             println!("✓ {msg}");
+        }
+    }
+
+    Ok(())
+}
+
+/// Termux extras: session-menu shortcut, one-line task, extra-keys layout and
+/// optional boot/daily notifications. Mirrors `contrib/termux/setup.sh`.
+#[cfg(not(target_os = "windows"))]
+fn termux_extras(
+    dry_run: bool,
+    boot: bool,
+    daily: bool,
+    installed: &mut Vec<String>,
+) -> crate::error::Result<()> {
+    use std::fs;
+    use std::os::unix::fs::PermissionsExt;
+
+    const SHORTCUT: &str = concat!(
+        "#!/data/data/com.termux/files/usr/bin/sh\n",
+        "# Open the npltz TUI from the Termux session menu.\n",
+        "exec npltz \"$@\"\n",
+    );
+    const TASK_TODAY: &str = concat!(
+        "#!/data/data/com.termux/files/usr/bin/sh\n",
+        "# Print today's BS/AD date as a single line.\n",
+        "npltz show --oneline\n",
+    );
+    const NOTIFY_SCRIPT: &str = concat!(
+        "#!/data/data/com.termux/files/usr/bin/sh\n",
+        "# Post a notification with today's BS date.\n",
+        "command -v termux-notification > /dev/null 2>&1 || exit 0\n",
+        "command -v npltz > /dev/null 2>&1 || exit 0\n",
+        "line=$(npltz show --oneline 2> /dev/null) || exit 0\n",
+        "[ -n \"$line\" ] || exit 0\n",
+        "termux-notification \\\n",
+        "    --id npltz-today \\\n",
+        "    --title \"Today in Bikram Sambat\" \\\n",
+        "    --content \"$line\" \\\n",
+        "    --priority low\n",
+    );
+    const EXTRA_KEYS: &str = "[\n  [\"Esc\", \"Tab\", \"h\", \"j\", \"k\", \"l\", \"q\"],\n  [\"CTRL\", \"left\", \"down\", \"up\", \"right\", \"a\", \"?\"]\n]\n";
+
+    let Some(home) = dirs::home_dir() else {
+        return Err(crate::error::NpltzError::Config("cannot determine home directory".into()));
+    };
+
+    if !dry_run && !(std::env::var("TERMUX_VERSION").is_ok() || std::env::var("PREFIX").is_ok()) {
+        println!("! not a Termux environment, installing the extras anyway");
+    }
+
+    fn write_exec(
+        path: &std::path::Path,
+        content: &str,
+        mode: u32,
+        dry_run: bool,
+    ) -> crate::error::Result<()> {
+        if dry_run {
+            return Ok(());
+        }
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)?;
+            // Termux ignores shortcuts in directories readable by others.
+            let _ = fs::set_permissions(parent, fs::Permissions::from_mode(0o700));
+        }
+        fs::write(path, content)?;
+        fs::set_permissions(path, fs::Permissions::from_mode(mode))?;
+        Ok(())
+    }
+
+    let shortcuts = home.join(".shortcuts");
+    let tasks = shortcuts.join("tasks");
+
+    let shortcut_path = shortcuts.join("npltz");
+    write_exec(&shortcut_path, SHORTCUT, 0o755, dry_run)?;
+    installed.push(format!("termux shortcut → {}", shortcut_path.display()));
+
+    let task_path = tasks.join("npltz-today");
+    write_exec(&task_path, TASK_TODAY, 0o755, dry_run)?;
+    installed.push(format!("termux task → {}", task_path.display()));
+
+    // Never clobber a layout the user may have edited.
+    let keys_path = home.join(".termux/extra-keys.json");
+    if keys_path.exists() {
+        installed.push(format!("termux extra keys → {} (kept existing)", keys_path.display()));
+    } else {
+        write_exec(&keys_path, EXTRA_KEYS, 0o644, dry_run)?;
+        installed.push(format!("termux extra keys → {}", keys_path.display()));
+    }
+
+    if boot {
+        let boot_path = home.join(".termux/boot/10-npltz-notify.sh");
+        write_exec(&boot_path, NOTIFY_SCRIPT, 0o755, dry_run)?;
+        installed.push(format!("termux boot notify → {}", boot_path.display()));
+        if !dry_run {
+            println!("  note: the boot script needs the termux-api package and app");
+        }
+    }
+
+    if daily {
+        let daily_path = tasks.join("npltz-notify-daily");
+        write_exec(&daily_path, NOTIFY_SCRIPT, 0o755, dry_run)?;
+        installed.push(format!("termux daily notify → {}", daily_path.display()));
+        if dry_run {
+            installed.push("termux job scheduler → would register daily job".to_string());
+        } else {
+            match std::process::Command::new("termux-job-scheduler")
+                .args(["-s"])
+                .arg(&daily_path)
+                .args([
+                    "--period-ms",
+                    "86400000",
+                    "--job-id",
+                    "8310",
+                    "--persisted",
+                    "--network-not-required",
+                ])
+                .status()
+            {
+                Ok(s) if s.success() => {
+                    installed.push("termux job scheduler → daily job registered".to_string());
+                }
+                Ok(_) => installed.push(
+                    "termux job scheduler → failed to register (is termux-api installed?)"
+                        .to_string(),
+                ),
+                Err(_) => installed.push(
+                    "termux job scheduler → not found, run: termux-job-scheduler -s ... \
+                     (see contrib/termux/README.md)"
+                        .to_string(),
+                ),
+            }
         }
     }
 

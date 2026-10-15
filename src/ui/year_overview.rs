@@ -96,8 +96,7 @@ fn render_mini_month(
     let day_style = Style::default().fg(app.theme.fg);
     let sun_style = Style::default().fg(app.theme.warning);
     let sat_style = Style::default().fg(app.theme.error);
-    let today_style =
-        Style::default().fg(app.theme.bg).bg(app.theme.primary).add_modifier(Modifier::BOLD);
+    let today_style = app.theme.hl();
 
     let mut lines: Vec<Line> = Vec::new();
 

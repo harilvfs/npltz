@@ -1,0 +1,287 @@
+name: Dev Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up dev tag
+        id: meta
+        run: |
+          TAG="dev-$(date +%Y%m%d)-$(git rev-parse --short HEAD)"
+          echo "tag=$TAG" >> "$GITHUB_ENV"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Install Rust (nightly) with MUSL targets
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: nightly-2025-12-31
+          targets: x86_64-unknown-linux-musl,aarch64-unknown-linux-musl
+
+      - name: Install rust-src
+        run: rustup component add rust-src --toolchain nightly-2025-12-31
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v6
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-registry-
+
+      - name: Cache Cargo index
+        uses: actions/cache@v6
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-index-
+
+      - name: Install musl-tools
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+
+      - name: Install cross-rs for cross-compilation
+        run: cargo install cross
+
+      - name: Build x86_64 binary
+        run: |
+          cargo build \
+            --release \
+            --verbose \
+            --target-dir=build \
+            --target=x86_64-unknown-linux-musl
+
+      - name: Build aarch64 binary (with cross)
+        run: |
+          cross build \
+            --release \
+            --verbose \
+            --target-dir=build \
+            --target=aarch64-unknown-linux-musl
+
+      - name: Rename binaries
+        run: |
+          cp build/x86_64-unknown-linux-musl/release/npltz npltz-x86_64-unknown-linux-musl
+          cp build/aarch64-unknown-linux-musl/release/npltz npltz-aarch64-unknown-linux-musl
+          chmod +x npltz-x86_64-unknown-linux-musl npltz-aarch64-unknown-linux-musl
+          sha256sum npltz-x86_64-unknown-linux-musl > npltz-x86_64-unknown-linux-musl.sha256
+          sha256sum npltz-aarch64-unknown-linux-musl > npltz-aarch64-unknown-linux-musl.sha256
+
+      - name: Create dev prerelease
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ env.TAG }}
+          name: ${{ env.TAG }}
+          draft: false
+          prerelease: true
+          generate_release_notes: true
+          body: |
+            Unstable build straight from `main` — **not** a tagged release.
+            Report problems with the tag and commit SHA.
+
+      - name: Upload Linux assets
+        run: |
+          gh release upload "$TAG" \
+            npltz-x86_64-unknown-linux-musl \
+            npltz-x86_64-unknown-linux-musl.sha256 \
+            npltz-aarch64-unknown-linux-musl \
+            npltz-aarch64-unknown-linux-musl.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  macos:
+    runs-on: macos-14
+    needs: release
+    strategy:
+      matrix:
+        target:
+          - x86_64-apple-darwin
+          - aarch64-apple-darwin
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Install Rust (nightly)
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: nightly-2025-12-31
+          targets: ${{ matrix.target }}
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v6
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-registry-${{ matrix.target }}-
+
+      - name: Cache Cargo index
+        uses: actions/cache@v6
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-index-${{ matrix.target }}-
+
+      - name: Build binary
+        run: |
+          cargo build \
+            --release \
+            --verbose \
+            --target-dir=build \
+            --target=${{ matrix.target }}
+
+      - name: Rename binary
+        run: |
+          cp build/${{ matrix.target }}/release/npltz npltz-${{ matrix.target }}
+          shasum -a 256 npltz-${{ matrix.target }} > npltz-${{ matrix.target }}.sha256
+
+      - name: Upload macOS asset
+        run: |
+          gh release upload ${{ needs.release.outputs.tag }} \
+            npltz-${{ matrix.target }} \
+            npltz-${{ matrix.target }}.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  windows:
+    runs-on: windows-latest
+    needs: release
+    strategy:
+      matrix:
+        target:
+          - x86_64-pc-windows-msvc
+          - aarch64-pc-windows-msvc
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Install Rust (nightly)
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: nightly-2025-12-31
+          targets: ${{ matrix.target }}
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v6
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-registry-${{ matrix.target }}-
+
+      - name: Cache Cargo index
+        uses: actions/cache@v6
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-index-${{ matrix.target }}-
+
+      - name: Build binary
+        run: |
+          cargo build `
+            --release `
+            --verbose `
+            --target-dir=build `
+            --target=${{ matrix.target }}
+
+      - name: Rename binary
+        run: |
+          Copy-Item "build/${{ matrix.target }}/release/npltz.exe" "npltz-${{ matrix.target }}.exe"
+
+      - name: Generate checksum
+        shell: bash
+        run: sha256sum "npltz-${{ matrix.target }}.exe" > "npltz-${{ matrix.target }}.exe.sha256"
+
+      - name: Upload Windows asset
+        run: |
+          gh release upload ${{ needs.release.outputs.tag }} `
+            npltz-${{ matrix.target }}.exe `
+            npltz-${{ matrix.target }}.exe.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  android:
+    runs-on: ubuntu-latest
+    needs: release
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Install Rust (nightly) with Android targets
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: nightly-2025-12-31
+          targets: aarch64-linux-android,armv7-linux-androideabi
+
+      - name: Install rust-src
+        run: rustup component add rust-src --toolchain nightly-2025-12-31
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v6
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-android-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-registry-android-
+
+      - name: Cache Cargo index
+        uses: actions/cache@v6
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-android-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-index-android-
+
+      - name: Install cross
+        run: cargo install cross
+
+      - name: Build aarch64 Android binary
+        run: |
+          cross build \
+            --release \
+            --target-dir=build \
+            --target=aarch64-linux-android
+
+      - name: Build armv7 Android binary
+        run: |
+          cross build \
+            --release \
+            --target-dir=build \
+            --target=armv7-linux-androideabi
+
+      - name: Rename binaries
+        run: |
+          cp build/aarch64-linux-android/release/npltz npltz-aarch64-linux-android
+          cp build/armv7-linux-androideabi/release/npltz npltz-armv7-linux-androideabi
+          chmod +x npltz-aarch64-linux-android npltz-armv7-linux-androideabi
+          sha256sum npltz-aarch64-linux-android > npltz-aarch64-linux-android.sha256
+          sha256sum npltz-armv7-linux-androideabi > npltz-armv7-linux-androideabi.sha256
+
+      - name: Upload Android assets
+        run: |
+          gh release upload ${{ needs.release.outputs.tag }} \
+            npltz-aarch64-linux-android \
+            npltz-aarch64-linux-android.sha256 \
+            npltz-armv7-linux-androideabi \
+            npltz-armv7-linux-androideabi.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

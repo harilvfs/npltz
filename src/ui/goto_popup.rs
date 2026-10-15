@@ -48,20 +48,11 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
 
     let hint = Line::from(vec![
         Span::styled("Format: ", Style::default().fg(app.theme.secondary)),
-        Span::styled(
-            "YYYY",
-            Style::default().fg(app.theme.bg).bg(app.theme.primary).add_modifier(Modifier::BOLD),
-        ),
+        Span::styled("YYYY", app.theme.badge(app.theme.primary)),
         Span::styled(" or ", Style::default().fg(app.theme.fg)),
-        Span::styled(
-            "YYYY-MM",
-            Style::default().fg(app.theme.bg).bg(app.theme.primary).add_modifier(Modifier::BOLD),
-        ),
+        Span::styled("YYYY-MM", app.theme.badge(app.theme.primary)),
         Span::styled(" or ", Style::default().fg(app.theme.fg)),
-        Span::styled(
-            "YYYY-MM-DD",
-            Style::default().fg(app.theme.bg).bg(app.theme.primary).add_modifier(Modifier::BOLD),
-        ),
+        Span::styled("YYYY-MM-DD", app.theme.badge(app.theme.primary)),
     ]);
     frame.render_widget(Paragraph::new(hint), layout[3]);
 

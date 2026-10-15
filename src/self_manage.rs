@@ -20,11 +20,55 @@ enum InstallMethod {
     InstallScript,
 }
 
+#[cfg(feature = "online")]
 fn client() -> Result<reqwest::blocking::Client> {
     reqwest::blocking::Client::builder()
         .user_agent("npltz")
         .build()
         .map_err(|e| NpltzError::Config(format!("Failed to create HTTP client: {e}")))
+}
+
+/// Fetch a URL as text: bundled TLS with the `online` feature, else the system
+/// curl/wget, so the default build stays small but `npltz update` keeps working.
+#[cfg(feature = "online")]
+fn http_get(url: &str) -> Result<String> {
+    let resp = client()?
+        .get(url)
+        .send()
+        .map_err(|e| NpltzError::Config(format!("Failed to fetch {url}: {e}")))?;
+
+    if !resp.status().is_success() {
+        return Err(NpltzError::Config(format!("Failed to fetch {url}: HTTP {}", resp.status())));
+    }
+
+    resp.text().map_err(|e| NpltzError::Config(format!("Failed to read response: {e}")))
+}
+
+#[cfg(not(feature = "online"))]
+fn http_get(url: &str) -> Result<String> {
+    const ATTEMPTS: &[(&str, &[&str])] = &[("curl", &["-fsSL"]), ("wget", &["-qO-"])];
+
+    for (cmd, args) in ATTEMPTS {
+        let Ok(output) = std::process::Command::new(cmd).args(*args).arg(url).output() else {
+            continue;
+        };
+        if output.status.success() {
+            return Ok(String::from_utf8_lossy(&output.stdout).into_owned());
+        }
+        if !output.stderr.is_empty() {
+            // The tool exists but failed (offline,404, ...) - report that.
+            return Err(NpltzError::Config(format!(
+                "{cmd} failed: {}",
+                String::from_utf8_lossy(&output.stderr).trim()
+            )));
+        }
+    }
+
+    Err(NpltzError::Config(
+        "No HTTP client available. Install curl or wget, or build npltz with \
+         `--features online` to bundle one."
+            .into(),
+    ))
 }
 
 fn command_exists(command: &str) -> bool {
@@ -38,17 +82,9 @@ fn command_exists(command: &str) -> bool {
 }
 
 fn get_latest_version() -> Result<String> {
-    let resp = client()?
-        .get(format!("https://api.github.com/repos/{REPO}/releases/latest"))
-        .send()
-        .map_err(|e| NpltzError::Config(format!("Failed to check for updates: {e}")))?;
+    let body = http_get(&format!("https://api.github.com/repos/{REPO}/releases/latest"))?;
 
-    if !resp.status().is_success() {
-        return Err(NpltzError::Config("Failed to fetch latest version from GitHub".into()));
-    }
-
-    let release: Release = resp
-        .json()
+    let release: Release = serde_json::from_str(&body)
         .map_err(|e| NpltzError::Config(format!("Failed to parse GitHub response: {e}")))?;
 
     Ok(release.tag_name.trim_start_matches('v').to_string())
@@ -164,19 +200,8 @@ pub fn update() -> Result<()> {
                 let script_url =
                     format!("https://raw.githubusercontent.com/{REPO}/main/install.sh");
 
-                let resp = client()?.get(&script_url).send().map_err(|e| {
+                let script = http_get(&script_url).map_err(|e| {
                     NpltzError::Config(format!("Failed to download install script: {e}"))
-                })?;
-
-                if !resp.status().is_success() {
-                    return Err(NpltzError::Config(format!(
-                        "Failed to download install script: HTTP {}",
-                        resp.status()
-                    )));
-                }
-
-                let script = resp.text().map_err(|e| {
-                    NpltzError::Config(format!("Failed to read install script: {e}"))
                 })?;
 
                 let mut child = std::process::Command::new("sh")

@@ -198,6 +198,109 @@ mod tests {
         let has_saturday = app.calendar_rows.iter().flat_map(|r| &r.cells).any(|c| c.is_saturday);
         assert!(has_saturday);
     }
+
+    #[test]
+    fn test_cursor_starts_on_first_day_without_today() {
+        let mut app = test_app();
+        app.cursor_start();
+        assert!(app.cursor);
+        assert_eq!(app.selected_day, Some(1));
+    }
+
+    #[test]
+    fn test_cursor_stop_clears_selection() {
+        let mut app = test_app();
+        app.cursor_start();
+        app.cursor_stop();
+        assert!(!app.cursor);
+        assert_eq!(app.selected_day, None);
+    }
+
+    #[test]
+    fn test_cursor_move_within_month() {
+        let mut app = test_app();
+        app.cursor_start();
+        app.cursor_move(1);
+        assert_eq!(app.selected_day, Some(2));
+        assert_eq!((app.view_year, app.view_month), (2081, 1));
+        app.cursor_move(-1);
+        assert_eq!(app.selected_day, Some(1));
+    }
+
+    #[test]
+    fn test_cursor_move_forward_crosses_month() {
+        let mut app = test_app();
+        let last = get_days_in_month(2081, 1).unwrap();
+        app.cursor = true;
+        app.selected_day = Some(last);
+        app.cursor_move(1);
+        assert_eq!((app.view_year, app.view_month), (2081, 2));
+        assert_eq!(app.selected_day, Some(1));
+    }
+
+    #[test]
+    fn test_cursor_move_backward_crosses_month() {
+        let mut app = test_app();
+        app.cursor = true;
+        app.selected_day = Some(1);
+        app.cursor_move(-1);
+        assert_eq!((app.view_year, app.view_month), (2080, 12));
+        let prev_days = get_days_in_month(2080, 12).unwrap();
+        assert_eq!(app.selected_day, Some(prev_days));
+    }
+
+    #[test]
+    fn test_cursor_move_does_nothing_when_off() {
+        let mut app = test_app();
+        app.selected_day = Some(10);
+        app.cursor_move(1);
+        assert_eq!(app.selected_day, Some(10));
+        assert_eq!((app.view_year, app.view_month), (2081, 1));
+    }
+
+    #[test]
+    fn test_cursor_today() {
+        let mut app = test_app();
+        app.today_key = Some((2083, 5, 10));
+        app.cursor_today();
+        assert!(app.cursor);
+        assert_eq!((app.view_year, app.view_month, app.selected_day), (2083, 5, Some(10)));
+    }
+
+    #[test]
+    fn test_focus_day_prefers_cursor() {
+        let mut app = test_app();
+        app.hover_bs_day = Some(9);
+        assert_eq!(app.focus_day(), Some(9));
+        app.selected_day = Some(5);
+        assert_eq!(app.focus_day(), Some(5));
+    }
+
+    #[test]
+    fn test_selected_day_clamped_to_month_length() {
+        let mut app = test_app();
+        app.cursor = true;
+        app.selected_day = Some(32);
+        app.build_view();
+        let days = get_days_in_month(2081, 1).unwrap();
+        assert_eq!(app.selected_day, Some(days));
+    }
+
+    #[test]
+    fn test_ad_rows_toggle() {
+        let mut app = test_app();
+        assert!(app.show_ad_rows);
+        app.toggle_ad_rows();
+        assert!(!app.show_ad_rows);
+        app.toggle_ad_rows();
+        assert!(app.show_ad_rows);
+    }
+
+    #[test]
+    fn test_update_flags_fresh_date() {
+        let mut app = test_app();
+        assert!(app.update());
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -210,10 +313,9 @@ pub enum AppMode {
 }
 
 pub struct App {
-    pub should_quit:        bool,
-    pub show_small_warning: bool,
-    pub mode:               AppMode,
-    pub theme:              Theme,
+    pub should_quit: bool,
+    pub mode:        AppMode,
+    pub theme:       Theme,
 
     pub today:            Option<NepaliDate>,
     pub view_year:        i32,
@@ -237,6 +339,10 @@ pub struct App {
 
     pub hover_bs_day:  Option<u32>,
     pub hover_ad_date: Option<String>,
+
+    pub show_ad_rows: bool,
+    pub selected_day: Option<u32>,
+    pub cursor:       bool,
 }
 
 pub struct CalendarCell {
@@ -255,11 +361,13 @@ pub struct CalendarRow {
 pub const BS_MAX: i32 = 2090;
 
 impl App {
-    pub fn new(theme_name: &str) -> Self {
-        let theme = theme::from_name(theme_name);
+    pub fn new(theme_name: &str, no_color: bool) -> Self {
+        let mut theme = theme::from_name(theme_name);
+        if no_color {
+            theme = theme.into_plain();
+        }
         let mut app = App {
             should_quit: false,
-            show_small_warning: true,
             mode: AppMode::Normal,
             theme,
             today: None,
@@ -281,6 +389,10 @@ impl App {
 
             hover_bs_day: None,
             hover_ad_date: None,
+
+            show_ad_rows: true,
+            selected_day: None,
+            cursor: false,
         };
         app.update();
         app
@@ -291,7 +403,6 @@ impl App {
         let theme = theme::from_name(theme_name);
         let mut app = App {
             should_quit: false,
-            show_small_warning: false,
             mode: AppMode::Normal,
             theme,
             today: None,
@@ -313,12 +424,17 @@ impl App {
 
             hover_bs_day: None,
             hover_ad_date: None,
+
+            show_ad_rows: true,
+            selected_day: None,
+            cursor: false,
         };
         app.build_view();
         app
     }
 
-    pub fn update(&mut self) {
+    /// Returns `true` when the calendar date rolled over (or first run), so the UI redraws.
+    pub fn update(&mut self) -> bool {
         let now = Local::now();
         let (y, m, d) = (now.year(), now.month(), now.day());
 
@@ -339,6 +455,7 @@ impl App {
                 }
             }
         }
+        today_changed
     }
 
     pub fn navigate_next(&mut self) {
@@ -593,6 +710,68 @@ impl App {
         self.hover_ad_date = None;
     }
 
+    pub fn cursor_start(&mut self) {
+        let day = match self.today_key {
+            Some((y, m, d)) if y == self.view_year && m == self.view_month => d,
+            _ => 1,
+        };
+        self.selected_day = Some(day);
+        self.cursor = true;
+        log::Log::info(&format!("Day cursor on: {}/{}/{}", self.view_year, self.view_month, day));
+    }
+
+    pub fn cursor_stop(&mut self) {
+        self.cursor = false;
+        self.selected_day = None;
+        log::Log::info("Day cursor off");
+    }
+
+    /// Steps into the neighbouring month when it walks off either edge.
+    pub fn cursor_move(&mut self, delta: i32) {
+        if !self.cursor {
+            return;
+        }
+        let cur = self.selected_day.unwrap_or(1) as i64 + i64::from(delta);
+        let days = get_days_in_month(self.view_year, self.view_month).unwrap_or(30) as i64;
+
+        if (1..=days).contains(&cur) {
+            self.selected_day = Some(cur as u32);
+        } else if cur < 1 {
+            self.navigate_prev();
+            let prev_days = get_days_in_month(self.view_year, self.view_month).unwrap_or(30) as i64;
+            self.selected_day = Some((prev_days + cur) as u32);
+        } else {
+            self.navigate_next();
+            self.selected_day = Some((cur - days) as u32);
+        }
+        log::Log::info(&format!(
+            "Day cursor: {}/{}/{}",
+            self.view_year,
+            self.view_month,
+            self.selected_day.unwrap_or(0)
+        ));
+    }
+
+    pub fn cursor_today(&mut self) {
+        self.navigate_today();
+        if let Some((y, m, d)) = self.today_key
+            && y == self.view_year
+            && m == self.view_month
+        {
+            self.selected_day = Some(d);
+            self.cursor = true;
+        }
+    }
+
+    pub fn toggle_ad_rows(&mut self) {
+        self.show_ad_rows = !self.show_ad_rows;
+        log::Log::info(&format!("AD rows: {}", if self.show_ad_rows { "on" } else { "off" }));
+    }
+
+    pub fn focus_day(&self) -> Option<u32> {
+        self.selected_day.or(self.hover_bs_day)
+    }
+
     pub fn prev_month_info(&self) -> (u32, i32) {
         if self.view_month <= 1 {
             (12, self.view_year - 1)
@@ -680,6 +859,13 @@ impl App {
         }
 
         self.calendar_rows = rows;
+
+        // The cursor may have been left pointing at a day this month lacks.
+        if let Some(sd) = self.selected_day
+            && sd > days
+        {
+            self.selected_day = Some(days);
+        }
         self.hover_bs_day = None;
         self.hover_ad_date = None;
     }

@@ -3,11 +3,20 @@ use std::fs;
 use std::io::{BufWriter, Write};
 use std::path::PathBuf;
 use std::sync::{Mutex, OnceLock};
+use std::time::{Duration, Instant};
 
 const MAX_LOG_FILES: usize = 5;
 
+/// Rate-limit flushes: a per-keypress fsync wastes battery and flash on mobile.
+const FLUSH_INTERVAL: Duration = Duration::from_secs(1);
+
 static SESSION_LOG: OnceLock<PathBuf> = OnceLock::new();
-static LOG_WRITER: OnceLock<Mutex<Option<BufWriter<fs::File>>>> = OnceLock::new();
+static LOGGER: OnceLock<Mutex<Logger>> = OnceLock::new();
+
+struct Logger {
+    writer:     Option<BufWriter<fs::File>>,
+    last_flush: Instant,
+}
 
 pub struct Log;
 
@@ -45,19 +54,27 @@ impl Log {
         let path = dir.join(filename.to_string());
         let _ = SESSION_LOG.set(path.clone());
 
-        if let Ok(f) = fs::OpenOptions::new().create(true).append(true).open(&path) {
-            let _ = LOG_WRITER.set(Mutex::new(Some(BufWriter::new(f))));
-        }
+        let writer = fs::OpenOptions::new().create(true).append(true).open(&path).ok();
+        let _ = LOGGER.set(Mutex::new(Logger {
+            writer:     writer.map(BufWriter::new),
+            last_flush: Instant::now(),
+        }));
     }
 
     fn write(level: &str, msg: &str) {
-        let Some(writer) = LOG_WRITER.get() else { return };
+        let Some(logger_cell) = LOGGER.get() else { return };
+        let Ok(mut guard) = logger_cell.lock() else {
+            return;
+        };
+        let logger = &mut *guard;
+        let Some(ref mut f) = logger.writer else { return };
+
         let ts = Local::now().format("%Y-%m-%d %H:%M:%S");
-        if let Ok(mut guard) = writer.lock()
-            && let Some(ref mut f) = *guard
-        {
-            let _ = writeln!(f, "[{ts}] [{level}] {msg}");
+        let _ = writeln!(f, "[{ts}] [{level}] {msg}");
+
+        if level == "ERROR" || logger.last_flush.elapsed() >= FLUSH_INTERVAL {
             let _ = f.flush();
+            logger.last_flush = Instant::now();
         }
     }
 

@@ -14,8 +14,8 @@ mod ui;
 pub use cli::{Cli, Commands};
 
 use crate::commands::{
-    convert_ad_to_bs, convert_bs_to_ad, export_ics, show_ad_date, show_bs_date, show_today,
-    show_upcoming, show_week,
+    convert_ad_to_bs, convert_bs_to_ad, export_ics, show_ad_date, show_bs_date, show_month,
+    show_today, show_upcoming, show_week,
 };
 use crate::tui::run_tui;
 use clap::{CommandFactory, Parser};
@@ -57,15 +57,15 @@ pub fn run() -> Result<()> {
     }
 
     match cli.command {
-        Some(Commands::Show { date, bs, json, upcoming }) => {
+        Some(Commands::Show { date, bs, json, upcoming, oneline }) => {
             if let Some(n) = upcoming {
                 show_upcoming(n)?;
             } else if let Some(bs_date) = bs {
-                show_bs_date(&bs_date, json)?;
+                show_bs_date(&bs_date, json, oneline)?;
             } else if let Some(ad_date) = date {
-                show_ad_date(&ad_date, json)?;
+                show_ad_date(&ad_date, json, oneline)?;
             } else {
-                show_today(json)?;
+                show_today(json, oneline)?;
             }
         }
         Some(Commands::Convert { date }) => {
@@ -78,8 +78,8 @@ pub fn run() -> Result<()> {
             let mut cmd = Cli::command();
             clap_complete::generate(shell, &mut cmd, "npltz", &mut out);
         }
-        Some(Commands::Setup { dry_run }) => {
-            setup::run_setup(dry_run)?;
+        Some(Commands::Setup { dry_run, termux, boot, daily }) => {
+            setup::run_setup(dry_run, termux, boot, daily)?;
         }
         Some(Commands::CheckUpdate) => {
             self_manage::check_update()?;
@@ -90,6 +90,9 @@ pub fn run() -> Result<()> {
         Some(Commands::Week) => {
             show_week()?;
         }
+        Some(Commands::Month { month, month_flag, ad }) => {
+            show_month(month.or(month_flag).as_deref(), ad)?;
+        }
         Some(Commands::Export { month, count, output }) => {
             export_ics(month.as_deref(), count, output.as_deref())?;
         }
@@ -97,7 +100,7 @@ pub fn run() -> Result<()> {
             self_manage::uninstall()?;
         }
         None => {
-            run_tui()?;
+            run_tui(cli.no_color)?;
         }
     }
     Ok(())

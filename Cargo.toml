@@ -39,6 +39,12 @@ include = [
 name = "npltz"
 path = "src/lib.rs"
 
+# `online` only powers `check-update` / `update`. The default build is fully
+# offline and stays small; without it, updates shell out to curl/wget instead.
+[features]
+default = []
+online = ["dep:reqwest"]
+
 [dependencies]
 ratatui = { version = "0.30", default-features = false, features = ["crossterm"] }
 crossterm = "0.29"
@@ -51,7 +57,7 @@ toml = "1.1"
 dirs = "7"
 thiserror = "2"
 clap_mangen = "0.3"
-reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"] }
+reqwest = { version = "0.12", optional = true, default-features = false, features = ["blocking", "json", "rustls-tls"] }
 
 [package.metadata.binstall]
 pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ target }{ archive-suffix }"

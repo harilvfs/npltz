@@ -1,0 +1,4 @@
+#!/data/data/com.termux/files/usr/bin/sh
+# Open the npltz TUI. Shows up in the Termux session menu (three-finger tap
+# or volume-down + q) as "npltz" when placed in ~/.shortcuts/.
+exec npltz "$@"

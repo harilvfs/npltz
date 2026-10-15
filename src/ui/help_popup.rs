@@ -39,7 +39,16 @@ const HELP_LINES: &[(&[&str], &[Kind])] = &[
     (&[], &[]),
     (&[" 0 ", " ", "Month 10-12 (then 1/2/3)"], &[Kind::NavKey, Kind::Body, Kind::Body]),
     (&[], &[]),
+    (&[" Tab ", " ", "Select a day (cursor mode)"], &[Kind::Key, Kind::Body, Kind::Body]),
+    (&[], &[]),
+    (
+        &[" arrows/hjkl ", " ", "Move the selected day while the cursor is on"],
+        &[Kind::NavKey, Kind::Body, Kind::Body],
+    ),
+    (&[], &[]),
     (&["Actions"], &[Kind::Header]),
+    (&[], &[]),
+    (&[" a ", " ", "Toggle AD date rows"], &[Kind::Key, Kind::Body, Kind::Body]),
     (&[], &[]),
     (&[" y ", " ", "Year overview"], &[Kind::Key, Kind::Body, Kind::Body]),
     (&[], &[]),
@@ -67,7 +76,10 @@ const HELP_LINES: &[(&[&str], &[Kind])] = &[
     (&[], &[]),
     (&[" q ", " ", "Quit"], &[Kind::Key, Kind::Body, Kind::Body]),
     (&[], &[]),
-    (&[" Esc ", " ", "Close popups / quit"], &[Kind::Key, Kind::Body, Kind::Body]),
+    (
+        &[" Esc ", " ", "Exit day cursor / close popups / quit"],
+        &[Kind::Key, Kind::Body, Kind::Body],
+    ),
     (&[], &[]),
     (&[" PgUp ", " ", "Scroll help up"], &[Kind::NavKey, Kind::Body, Kind::Body]),
     (&[], &[]),
@@ -79,8 +91,8 @@ const HELP_LINES: &[(&[&str], &[Kind])] = &[
 fn style_for(kind: Kind, theme: &Theme) -> Style {
     match kind {
         Kind::Header => Style::default().fg(theme.warning).add_modifier(Modifier::BOLD),
-        Kind::NavKey => Style::default().bg(theme.primary).fg(theme.bg),
-        Kind::Key => Style::default().bg(theme.success).fg(theme.bg),
+        Kind::NavKey => theme.badge(theme.primary),
+        Kind::Key => theme.badge(theme.success),
         Kind::Body => Style::default(),
     }
 }
