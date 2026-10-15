@@ -195,10 +195,10 @@ npltz month             # ASCII month view
 
 Ready-made helpers (session-menu shortcut, `~/.shortcuts/tasks/` one-liner,
 boot/daily notifications via `termux-api`, and an `extra-keys` layout with
-`Tab`, `Esc` and arrows) live in [`contrib/termux`](contrib/termux):
+`Tab`, `Esc` and arrows) are installed by the binary itself:
 
 ```sh
-sh contrib/termux/setup.sh --boot --daily
+npltz setup --termux --boot --daily
 ```
 
 See [contrib/termux/README.md](contrib/termux/README.md) for details.

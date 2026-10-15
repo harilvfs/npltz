@@ -68,6 +68,26 @@ pub enum Commands {
     Setup {
         #[arg(long, help = "Show what would be installed without making changes")]
         dry_run: bool,
+
+        #[arg(
+            long,
+            help = "Also install the Termux extras: session-menu shortcut, one-line task and extra keys"
+        )]
+        termux: bool,
+
+        #[arg(
+            long,
+            requires = "termux",
+            help = "Termux: post today's date as a notification at boot (needs termux-api)"
+        )]
+        boot: bool,
+
+        #[arg(
+            long,
+            requires = "termux",
+            help = "Termux: schedule a daily notification via termux-job-scheduler (needs termux-api)"
+        )]
+        daily: bool,
     },
     #[command(about = "Check for updates")]
     CheckUpdate,
@@ -188,6 +208,27 @@ mod tests {
             Commands::Show { oneline, .. } => assert!(oneline),
             _ => panic!("Expected Show command"),
         }
+    }
+
+    #[test]
+    fn test_cli_setup_termux_flags() {
+        let cli = Cli::try_parse_from(["npltz", "setup", "--termux", "--boot", "--daily"]).unwrap();
+        match cli.command.unwrap() {
+            Commands::Setup { dry_run, termux, boot, daily } => {
+                assert!(!dry_run);
+                assert!(termux);
+                assert!(boot);
+                assert!(daily);
+            }
+            _ => panic!("Expected Setup command"),
+        }
+    }
+
+    /// `--boot`/`--daily` only make sense with `--termux`.
+    #[test]
+    fn test_cli_setup_boot_requires_termux() {
+        assert!(Cli::try_parse_from(["npltz", "setup", "--boot"]).is_err());
+        assert!(Cli::try_parse_from(["npltz", "setup", "--daily"]).is_err());
     }
 
     #[test]

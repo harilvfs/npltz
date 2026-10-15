@@ -6,6 +6,17 @@ shortcut, a one-line "glance" task, boot/daily notifications, and an
 
 ## Install
 
+Everything below is written by the binary itself, so either way works:
+
+```sh
+npltz setup --termux               # shortcuts + extra keys
+npltz setup --termux --boot        # + notification on boot
+npltz setup --termux --daily       # + daily notification job
+npltz setup --termux --dry-run     # preview without writing anything
+```
+
+or, equivalently, through the wrapper script in this folder:
+
 ```sh
 sh contrib/termux/setup.sh            # shortcuts only
 sh contrib/termux/setup.sh --boot     # + notification on boot
@@ -36,13 +47,16 @@ them up.
 ## Extra keys
 
 The default Termux key row has no `Tab`, `Esc` or arrows, which makes the
-day cursor awkward. This repo ships a layout with them:
+day cursor awkward. `npltz setup --termux` writes one; to copy it manually
+from this repo:
 
 ```sh
 mkdir -p ~/.termux
 cp contrib/termux/extra-keys.json ~/.termux/extra-keys.json
 termux-reload-settings
 ```
+
+An existing `~/.termux/extra-keys.json` is never overwritten.
 
 ```
 Esc   Tab   h    j    k    l    q

@@ -78,8 +78,8 @@ pub fn run() -> Result<()> {
             let mut cmd = Cli::command();
             clap_complete::generate(shell, &mut cmd, "npltz", &mut out);
         }
-        Some(Commands::Setup { dry_run }) => {
-            setup::run_setup(dry_run)?;
+        Some(Commands::Setup { dry_run, termux, boot, daily }) => {
+            setup::run_setup(dry_run, termux, boot, daily)?;
         }
         Some(Commands::CheckUpdate) => {
             self_manage::check_update()?;
