@@ -1,4 +1,45 @@
 
+## [1.2.1](https://github.com/harilvfs/npltz/compare/v1.1.7...v1.2.1) - 2026-10-16
+
+
+### 🚀 Features
+
+
+- [6350750](https://github.com/harilvfs/npltz/commit/635075034643d9c3faff9e3e228e0b7d1aa22fc4)  *(ui)* Responsive mobile layout and termux support (#84) by @harilvfs in [#84](https://github.com/harilvfs/npltz/pull/84)
+
+- [8a9e7b9](https://github.com/harilvfs/npltz/commit/8a9e7b940d321a767f168c622547643e22447d63)  *(install)* --dev flag installs the latest dev prerelease by @harilvfs
+
+
+
+### 🐛 Bug Fixes
+
+
+- [3df8f2f](https://github.com/harilvfs/npltz/commit/3df8f2f3ef3774f5023b1672d5d106573f5ed223)  *(ci)* Use step output for dev release tag by @harilvfs
+
+- [e0359b1](https://github.com/harilvfs/npltz/commit/e0359b128673277c415d3b2a8d9cb00535056a2d)  *(docs)* Absolute url for the termux readme link by @harilvfs
+
+- [04ed347](https://github.com/harilvfs/npltz/commit/04ed347fb868c3bc214c344a2708a124db056339)  *(termux)* Pass --persisted a value and drop bogus --network flag by @harilvfs
+
+- [a70894e](https://github.com/harilvfs/npltz/commit/a70894e31e030d2516d892a3dcb819695873d91a)  *(termux)* Time out the job scheduler call so setup cannot hang by @harilvfs
+
+
+
+### 🚜 Refactor
+
+
+- [338aaff](https://github.com/harilvfs/npltz/commit/338aaffc8a1924e2f1030d4d70175513e3868bef)  *(calendar)* Use iterators instead of range loops by @harilvfs
+
+
+
+### ⚙️ Miscellaneous Tasks
+
+
+- [488acde](https://github.com/harilvfs/npltz/commit/488acde16c14fd488fc974142fd886f96df7fb46) Remove llm shit by @harilvfs
+
+- [53d9742](https://github.com/harilvfs/npltz/commit/53d9742aaac694ae01d60a5d661055b0494de632)  *(docs)* Use small hiphen by @harilvfs
+
+
+
 ## [1.1.6](https://github.com/harilvfs/npltz/compare/v1.1.5...v1.1.6) - 2026-07-16
 
 
