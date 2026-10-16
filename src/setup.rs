@@ -334,7 +334,9 @@ fn termux_extras(
         if dry_run {
             installed.push("termux job scheduler → would register daily job".to_string());
         } else {
-            let cmd = std::process::Command::new("termux-job-scheduler")
+            // termux-job-scheduler shells out to termux-api, which blocks on a
+            // socket reply from the app; kill it if it stalls so setup can't hang.
+            let spawned = std::process::Command::new("termux-job-scheduler")
                 .args(["-s"])
                 .arg(&daily_path)
                 .args([
@@ -347,26 +349,63 @@ fn termux_extras(
                     "--network",
                     "none",
                 ])
-                .output();
-            match cmd {
-                Ok(o) if o.status.success() => {
-                    installed.push("termux job scheduler → daily job registered".to_string());
-                }
-                Ok(o) => {
-                    let err = String::from_utf8_lossy(&o.stderr);
-                    let err = err.trim();
-                    if err.is_empty() {
-                        installed.push(
-                            "termux job scheduler → failed to register (is termux-api installed?)"
+                .stdout(std::process::Stdio::piped())
+                .stderr(std::process::Stdio::piped())
+                .spawn();
+            match spawned {
+                Ok(mut child) => {
+                    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+                    let mut status = None;
+                    loop {
+                        match child.try_wait() {
+                            Ok(Some(s)) => {
+                                status = Some(s);
+                                break;
+                            }
+                            Ok(None) => {
+                                if std::time::Instant::now() >= deadline {
+                                    let _ = child.kill();
+                                    let _ = child.wait();
+                                    break;
+                                }
+                                std::thread::sleep(std::time::Duration::from_millis(200));
+                            }
+                            Err(_) => break,
+                        }
+                    }
+                    match status {
+                        Some(s) if s.success() => {
+                            installed
+                                .push("termux job scheduler → daily job registered".to_string());
+                        }
+                        Some(_) => {
+                            use std::io::Read;
+                            let mut err = String::new();
+                            if let Some(mut e) = child.stderr.take() {
+                                let _ = e.read_to_string(&mut err);
+                            }
+                            let err = err.trim();
+                            if err.is_empty() {
+                                installed.push(
+                                    "termux job scheduler → failed to register (is termux-api \
+                                     installed and the Termux:API app open?)"
+                                        .to_string(),
+                                );
+                            } else {
+                                installed.push(format!(
+                                    "termux job scheduler → failed: {} — run manually: \
+                                     termux-job-scheduler -s {} --period-ms 86400000 --job-id 8310 \
+                                     --persisted true --network none",
+                                    err.lines().next().unwrap_or("unknown error"),
+                                    daily_path.display()
+                                ));
+                            }
+                        }
+                        None => installed.push(
+                            "termux job scheduler → timed out (Termux:API app may be \
+                             unresponsive); it may still register — verify: termux-job-scheduler -p"
                                 .to_string(),
-                        );
-                    } else {
-                        installed.push(format!(
-                            "termux job scheduler → failed: {} — run manually: termux-job-scheduler \
-                             -s {} --period-ms 86400000 --job-id 8310 --persisted true --network none",
-                            err.lines().next().unwrap_or("unknown error"),
-                            daily_path.display()
-                        ));
+                        ),
                     }
                 }
                 Err(_) => installed.push(
