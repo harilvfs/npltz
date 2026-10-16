@@ -334,7 +334,7 @@ fn termux_extras(
         if dry_run {
             installed.push("termux job scheduler → would register daily job".to_string());
         } else {
-            match std::process::Command::new("termux-job-scheduler")
+            let cmd = std::process::Command::new("termux-job-scheduler")
                 .args(["-s"])
                 .arg(&daily_path)
                 .args([
@@ -343,17 +343,32 @@ fn termux_extras(
                     "--job-id",
                     "8310",
                     "--persisted",
-                    "--network-not-required",
+                    "true",
+                    "--network",
+                    "none",
                 ])
-                .status()
-            {
-                Ok(s) if s.success() => {
+                .output();
+            match cmd {
+                Ok(o) if o.status.success() => {
                     installed.push("termux job scheduler → daily job registered".to_string());
                 }
-                Ok(_) => installed.push(
-                    "termux job scheduler → failed to register (is termux-api installed?)"
-                        .to_string(),
-                ),
+                Ok(o) => {
+                    let err = String::from_utf8_lossy(&o.stderr);
+                    let err = err.trim();
+                    if err.is_empty() {
+                        installed.push(
+                            "termux job scheduler → failed to register (is termux-api installed?)"
+                                .to_string(),
+                        );
+                    } else {
+                        installed.push(format!(
+                            "termux job scheduler → failed: {} — run manually: termux-job-scheduler \
+                             -s {} --period-ms 86400000 --job-id 8310 --persisted true --network none",
+                            err.lines().next().unwrap_or("unknown error"),
+                            daily_path.display()
+                        ));
+                    }
+                }
                 Err(_) => installed.push(
                     "termux job scheduler → not found, run: termux-job-scheduler -s ... \
                      (see contrib/termux/README.md)"

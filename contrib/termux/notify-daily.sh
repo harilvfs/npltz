@@ -6,7 +6,7 @@
 # or manually:
 #
 #   termux-job-scheduler -s "$HOME/.shortcuts/tasks/npltz-notify-daily" \
-#       --period-ms 86400000 --job-id 8310 --persisted --network-not-required
+#       --period-ms 86400000 --job-id 8310 --persisted true --network none
 #
 # Minimum period allowed by Android is 900000 ms (15 min); 86400000 = 24 h.
 command -v termux-notification > /dev/null 2>&1 || exit 0
