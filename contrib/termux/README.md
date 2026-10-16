@@ -63,10 +63,10 @@ Esc   Tab   h    j    k    l    q
 CTRL  ←    ↓    ↑    →    a    ?
 ```
 
-- `h` / `l` — previous / next month (`Tab` + arrows move by day instead)
-- `Tab` — start/stop the day cursor, arrows then move ±1 / ±7 days
-- `a` — show/hide the AD sub-row under each BS week
-- `?` — help, `q` — quit (in cursor mode, `Esc` leaves the cursor first)
+- `h` / `l` - previous / next month (`Tab` + arrows move by day instead)
+- `Tab` - start/stop the day cursor, arrows then move ±1 / ±7 days
+- `a` - show/hide the AD sub-row under each BS week
+- `?` - help, `q` - quit (in cursor mode, `Esc` leaves the cursor first)
 
 ## Notes
 
