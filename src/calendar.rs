@@ -158,6 +158,17 @@ pub fn get_day_of_year(bs_year: i32, bs_month: u32, bs_day: u32) -> Option<u32> 
     Some(total)
 }
 
+/// bs weeks are seven-day blocks from baisakh 1, not iso weeks.
+pub fn get_week_of_year(bs_year: i32, bs_month: u32, bs_day: u32) -> Option<u32> {
+    let day_of_year = get_day_of_year(bs_year, bs_month, bs_day)?;
+    Some(day_of_year.div_ceil(7))
+}
+
+pub fn get_weeks_in_year(bs_year: i32) -> Option<u32> {
+    let total_days = get_year_total_days(bs_year)?;
+    Some(total_days.div_ceil(7))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -205,6 +216,15 @@ mod tests {
     fn test_weekday_range() {
         let wd = month_start_weekday(2081, 1).unwrap();
         assert!(wd < 7);
+    }
+
+    #[test]
+    fn test_bs_week_blocks() {
+        assert_eq!(get_week_of_year(2081, 1, 1), Some(1));
+        assert_eq!(get_week_of_year(2081, 1, 7), Some(1));
+        assert_eq!(get_week_of_year(2081, 1, 8), Some(2));
+        assert_eq!(get_week_of_year(2081, 12, 31), Some(53));
+        assert_eq!(get_weeks_in_year(2081), Some(53));
     }
 
     #[test]

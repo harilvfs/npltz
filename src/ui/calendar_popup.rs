@@ -139,12 +139,11 @@ fn sidebar_sections(app: &App, width: u16) -> Vec<Vec<Line<'static>>> {
         }
     }
 
-    if let Some(ref d) = ad_date {
-        let last_day = chrono::NaiveDate::from_ymd_opt(d.year(), 12, 28).unwrap_or(*d);
-        sections.push(vec![center(
-            format!("Week {}/{}", d.iso_week().week(), last_day.iso_week().week()),
-            dim,
-        )]);
+    if let (Some(week), Some(weeks)) = (
+        calendar::get_week_of_year(nd.year, nd.month, nd.day),
+        calendar::get_weeks_in_year(nd.year),
+    ) {
+        sections.push(vec![center(format!("Week {}/{}", week, weeks), dim)]);
     }
 
     sections

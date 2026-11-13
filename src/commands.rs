@@ -308,10 +308,7 @@ pub fn show_week() -> Result<()> {
     let today_bs = calendar::ad_to_bs(now.year(), now.month(), now.day());
     let week_num = today_bs
         .as_ref()
-        .map(|nd| {
-            let day_of_year = calendar::get_day_of_year(nd.year, nd.month, nd.day).unwrap_or(0);
-            (day_of_year - 1) / 7 + 1
-        })
+        .and_then(|nd| calendar::get_week_of_year(nd.year, nd.month, nd.day))
         .unwrap_or(0);
 
     let mut out = io::stdout();
