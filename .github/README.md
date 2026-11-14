@@ -12,7 +12,7 @@
 
 </div>
 
-**[npltz](https://github.com/harilvfs/npltz)** a terminal-based Nepali calendar (Bikram Sambat) written in Rust using the [`ratatui`](https://github.com/ratatui-org/ratatui). It's designed to be simple: view Nepali dates with AD (English) support in your terminal.
+**[npltz](https://github.com/harilvfs/npltz)** is a free and open-source, keyboard-driven Nepali calendar (Bikram Sambat) for your terminal, built in Rust with [`ratatui`](https://github.com/ratatui-org/ratatui). It keeps things simple: browse BS dates with matching AD dates, convert both ways, and export months to your calendar app, fully offline.
 
 > There is also a native Android app: **[npltz for Android](https://github.com/harilvfs/npltz-android)**.
 
@@ -27,9 +27,20 @@
 
 ## Preview
 
-<img src="https://raw.githubusercontent.com/harilvfs/npltz/refs/heads/main/.github/preview.gif"/>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/harilvfs/npltz/refs/heads/main/.github/preview.gif" alt="npltz preview" />
+</p>
 
 > Preview by: [vhs](https://github.com/charmbracelet/vhs)
+
+## Features
+
+- Month view with BS dates and the matching AD dates, navigable with the keyboard.
+- Date conversion both ways: AD → BS and BS → AD, with one-line output for scripts, prompts and notifications.
+- Export BS months as `.ics` for your calendar app.
+- Five themes: `catppuccin-mocha`, `dracula`, `gruvbox`, `nord`, `rose-pine`, with `NO_COLOR` support.
+- Shell completions and a man page via `npltz setup`.
+- Works in Termux with a phone-friendly layout and a day cursor for navigation.
 
 ## Installation
 
@@ -224,6 +235,8 @@ Special thanks to [medic](https://github.com/medic) for the [`bikram-sambat`](ht
 ## License
 
 npltz is under the MIT license. See [LICENSE](https://github.com/harilvfs/npltz/blob/main/LICENSE) for details.
+
+Made with ❤️ by Hari Chalise.
 
 <!-- Badges -->
 
