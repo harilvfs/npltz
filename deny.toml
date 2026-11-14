@@ -9,9 +9,6 @@ allow = [
   "Unicode-3.0",
   "Unlicense",
   "Zlib",
-  "BSD-3-Clause",
-  "CDLA-Permissive-2.0",
-  "ISC",
 ]
 
 [licenses.private]
