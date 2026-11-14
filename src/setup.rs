@@ -345,14 +345,7 @@ fn termux_extras(
             let spawned = std::process::Command::new("termux-job-scheduler")
                 .args(["-s"])
                 .arg(&daily_path)
-                .args([
-                    "--period-ms",
-                    "86400000",
-                    "--job-id",
-                    "8310",
-                    "--persisted",
-                    "true",
-                ])
+                .args(["--period-ms", "86400000", "--job-id", "8310", "--persisted", "true"])
                 .stdout(std::process::Stdio::piped())
                 .stderr(std::process::Stdio::piped())
                 .spawn();

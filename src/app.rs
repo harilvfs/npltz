@@ -838,9 +838,7 @@ impl App {
             });
 
             if current_cells.len() == 7 {
-                rows.push(CalendarRow {
-                    cells: std::mem::take(&mut current_cells),
-                });
+                rows.push(CalendarRow { cells: std::mem::take(&mut current_cells) });
             }
         }
 
