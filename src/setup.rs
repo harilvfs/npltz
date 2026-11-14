@@ -323,7 +323,9 @@ fn termux_extras(
         write_exec(&boot_path, NOTIFY_SCRIPT, 0o755, dry_run)?;
         installed.push(format!("termux boot notify → {}", boot_path.display()));
         if !dry_run {
-            println!("  note: the boot script needs the termux-api package and app");
+            println!(
+                "  note: needs the termux-api package, the Termux:API app, and the\n  Termux:Boot app (com.termux.boot) — install Termux:Boot and open it once"
+            );
         }
     }
 
@@ -336,6 +338,10 @@ fn termux_extras(
         } else {
             // termux-job-scheduler shells out to termux-api, which blocks on a
             // socket reply from the app; kill it if it stalls so setup can't hang.
+            // no `--network` flag: termux-api defaults to `--network any`.
+            // `--network none` would set NETWORK_TYPE_NONE, which crashes
+            // termux-api's formatJobInfo (NPE on the null NetworkRequest) and
+            // pops a "Termux:API Error: Error in ResultReturner" notification.
             let spawned = std::process::Command::new("termux-job-scheduler")
                 .args(["-s"])
                 .arg(&daily_path)
@@ -346,8 +352,6 @@ fn termux_extras(
                     "8310",
                     "--persisted",
                     "true",
-                    "--network",
-                    "none",
                 ])
                 .stdout(std::process::Stdio::piped())
                 .stderr(std::process::Stdio::piped())
@@ -395,7 +399,7 @@ fn termux_extras(
                                 installed.push(format!(
                                     "termux job scheduler → failed: {} — run manually: \
                                      termux-job-scheduler -s {} --period-ms 86400000 --job-id 8310 \
-                                     --persisted true --network none",
+                                     --persisted true",
                                     err.lines().next().unwrap_or("unknown error"),
                                     daily_path.display()
                                 ));

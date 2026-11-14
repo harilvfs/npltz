@@ -11,7 +11,7 @@ Everything below is written by the binary itself, so either way works:
 ```sh
 npltz setup --termux               # shortcuts + extra keys
 npltz setup --termux --boot        # + notification on boot
-npltz setup --termux --daily       # + daily notification job
+npltz setup --termux --daily       # + daily notification job (24 h after registration)
 npltz setup --termux --dry-run     # preview without writing anything
 ```
 
@@ -20,7 +20,7 @@ or, equivalently, through the wrapper script in this folder:
 ```sh
 sh contrib/termux/setup.sh            # shortcuts only
 sh contrib/termux/setup.sh --boot     # + notification on boot
-sh contrib/termux/setup.sh --daily    # + daily 08:00 notification job
+sh contrib/termux/setup.sh --daily    # + daily notification job (24 h after registration)
 ```
 
 `--boot` and `--daily` need the `termux-api` package and the
@@ -38,6 +38,12 @@ pkg install termux-api
 | `~/.shortcuts/tasks/npltz-today`                  | Prints `npltz show --oneline` (Termux:Widget friendly). |
 | `~/.termux/boot/10-npltz-notify.sh`               | Posts today's BS date as a notification at boot. |
 | `~/.shortcuts/tasks/npltz-notify-daily`           | Same notification, run daily by `termux-job-scheduler`. |
+
+`--boot` additionally needs the [Termux:Boot](https://f-droid.org/en/packages/com.termux.boot/)
+app: install it, **open it once**, and keep it from being killed (on MIUI:
+Security app → Autostart → allow Termux:Boot). The job scheduler runs the
+daily script 24 h after registration, so re-run `npltz setup --termux --daily`
+at the time of day you want the notification.
 
 Both shortcut directories must be mode `0700` and the scripts executable —
 `setup.sh` takes care of that. After installing, restart the Termux session
@@ -90,3 +96,13 @@ rm -f ~/.shortcuts/npltz \
       ~/.termux/boot/10-npltz-notify.sh
 termux-job-scheduler --job-id 8310 --cancel
 ```
+
+## Troubleshooting
+
+- **"Termux:API Error: Error in ResultReturner" notification when running
+  setup** - caused by `--network none` on termux-api ≥ 0.53.0 (NPE in
+  `JobSchedulerAPI.formatJobInfo`). npltz no longer passes it; if you see the
+  error from a manual run, drop the `--network` flag.
+- **No notification at boot** - the Termux:Boot app must be installed and
+  opened once, and on MIUI/HyperOS it needs *Autostart* permission (Security
+  app → Manage apps → Termux:Boot → Autostart) plus "No restrictions" battery.
