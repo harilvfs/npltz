@@ -115,8 +115,7 @@ fn render_mini_month(
     for d in 1..=days_in_month {
         current_week.push(d);
         if current_week.len() == 7 {
-            week_rows.push(current_week);
-            current_week = Vec::new();
+            week_rows.push(std::mem::take(&mut current_week));
         }
     }
 

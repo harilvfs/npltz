@@ -838,8 +838,9 @@ impl App {
             });
 
             if current_cells.len() == 7 {
-                rows.push(CalendarRow { cells: current_cells });
-                current_cells = Vec::new();
+                rows.push(CalendarRow {
+                    cells: std::mem::take(&mut current_cells),
+                });
             }
         }
 

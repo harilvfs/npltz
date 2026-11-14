@@ -275,7 +275,7 @@ fn termux_extras(
         return Err(crate::error::NpltzError::Config("cannot determine home directory".into()));
     };
 
-    if !dry_run && !(std::env::var("TERMUX_VERSION").is_ok() || std::env::var("PREFIX").is_ok()) {
+    if !dry_run && std::env::var("TERMUX_VERSION").is_err() && std::env::var("PREFIX").is_err() {
         println!("! not a Termux environment, installing the extras anyway");
     }
 
