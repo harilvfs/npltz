@@ -11,12 +11,10 @@ Before making any core changes or adding a feature, open an issue first to discu
 First, look through the codebase to understand the project structure and how the TUI interacts. This will help you contribute in a way that is consistent with the project design.
 
 > [!WARNING]
-> Please do not submit slop PRs if you don't know anything about coding or Rust. The current code is already more like slop, so please don't submit more slop here.
-> I can usually understand what an AI slop PR looks like, and the PR description should be clear enough to reflect your changes.
-> I am not saying you can't use AI, but any slop here will just make the codebase more trash.
-> If you actually want to contribute to make the codebase better, and if you already have Rust experience, you are welcome to contribute here with any kind of changes.
-> Just make sure the PR should not be total slop, and it should not look like you don't know what you are doing and are just pasting whatever AI gives you.
+> Please do not submit slop PRs if you don't know anything about coding or Rust.
+>
 > But you can use AI to find bugs, trash code in the codebase, and improve things yourself without fully depending on AI. It is a good tool if you use it the right way.
+>
 > You should be able to explain what your PR actually does in the codebase, what you added, and why. All of that should be clearly provided in the PR description.
 
 If you are introducing any core functionality, you must write unit tests for it.
