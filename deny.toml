@@ -16,8 +16,10 @@ ignore = false
 
 [advisories]
 yanked = "deny"
-ignore = []
 version = 2
+# RUSTSEC-2026-0543: chrono is unmaintained, no safe upgrade available yet.
+# TODO: migrate to `jiff` (or `time`) and remove this ignore.
+ignore = ["RUSTSEC-2026-0543"]
 
 [bans]
 multiple-versions = "allow"
