@@ -1,4 +1,53 @@
 
+## [2.0.0](https://github.com/harilvfs/npltz/compare/v1.2.1...v2.0.0) - 2026-11-17
+
+
+### 🐛 Bug Fixes
+
+
+- [55bcbb8](https://github.com/harilvfs/npltz/commit/55bcbb80381bbb69d469efc62e88d1c11ce384d1)  *(calendar)* Use bs week blocks by @harilvfs
+
+- [0212a1a](https://github.com/harilvfs/npltz/commit/0212a1a9d9bee45b45c45b505526d0d567460b01)  *(lint)* Replace empty vec reassignment with mem::take by @harilvfs
+
+- [e3b3676](https://github.com/harilvfs/npltz/commit/e3b367681fb1b77c082a0710260c4e98c11eaecf)  *(termux)* Drop --network none from the daily job registration by @harilvfs
+
+
+
+### 📚 Documentation
+
+
+- [8264aa7](https://github.com/harilvfs/npltz/commit/8264aa7a09500f7f10e3897e733873c75c51da53) Link to the android app by @harilvfs
+
+- [a3523d4](https://github.com/harilvfs/npltz/commit/a3523d4cf2c48b9bad701a1ed51a0beac7e009be) Improve crate description by @harilvfs
+
+- [67e2719](https://github.com/harilvfs/npltz/commit/67e27190675f8530f4ddc22afec31742c6bcb222) Add features section and polish readme by @harilvfs
+
+- [881fb5b](https://github.com/harilvfs/npltz/commit/881fb5ba9e2e7fede7eceec21b5779aafbdd83d3)  *(contrib)* Correct some guide by @harilvfs
+
+- [cdcabc5](https://github.com/harilvfs/npltz/commit/cdcabc515801c5c5f1dd17768c69fe5c95892be9) Sync description across --help, man page and desktop entry by @harilvfs
+
+
+
+### 🎨 Styling
+
+
+- [2626d2a](https://github.com/harilvfs/npltz/commit/2626d2a5490c1af5c994df314695fdf4b6f7b966) Cargo fmt by @harilvfs
+
+
+
+### ⚙️ Miscellaneous Tasks
+
+
+- [d350089](https://github.com/harilvfs/npltz/commit/d35008939497691b014dcb14114e7dbdd5b22d86) Drop unused license allowances from deny.toml by @harilvfs
+
+- [5d41f31](https://github.com/harilvfs/npltz/commit/5d41f31f15b09c729c137492a8ea7b6152b23976)  *(shellfmt)* Use stable go toolchain for shfmt@latest by @harilvfs
+
+- [6965e6a](https://github.com/harilvfs/npltz/commit/6965e6a1ed61055f1d61e473ea9eb955d0a94609)  *(deny)* Ignore RUSTSEC-2026-0543 (chrono unmaintained) by @harilvfs
+
+- [04f374f](https://github.com/harilvfs/npltz/commit/04f374f3a52d34bcfb0545c586545e554c140e37)  *(platform)* Drop direct macOS and Windows support by @harilvfs [**breaking**]
+
+
+
 ## [1.2.1](https://github.com/harilvfs/npltz/compare/v1.1.7...v1.2.1) - 2026-10-16
 
 
