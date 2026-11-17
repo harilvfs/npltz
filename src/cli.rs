@@ -10,7 +10,11 @@ pub fn styles() -> clap::builder::Styles {
 }
 
 #[derive(Parser)]
-#[command(name = "npltz", about = "Nepali BS Calendar (Patro) TUI for Terminal", styles = styles())]
+#[command(
+    name = "npltz",
+    about = "Free and open-source Nepali (Bikram Sambat) calendar for your terminal. Browse BS dates with AD support, fully offline.",
+    styles = styles()
+)]
 pub struct Cli {
     #[arg(
         short = 'v',

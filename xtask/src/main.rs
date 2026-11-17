@@ -44,8 +44,8 @@ fn man_pages(sh: &xshell::Shell) -> anyhow::Result<()> {
     let mut cmd = npltz::Cli::command();
     cmd = cmd.name("npltz");
     cmd = cmd.long_about(
-        "A terminal-based Nepali calendar (Bikram Sambat) viewer with an interactive \
-TUI and CLI conversion tools.\n\n\
+        "Free and open-source Nepali (Bikram Sambat) calendar for your terminal. \
+Browse BS dates with AD support, fully offline.\n\n\
 npltz displays Nepali months with English dates alongside, \
 supports AD to BS conversion, and offers simplicity.",
     );

@@ -20,7 +20,7 @@ pub fn run_setup(dry_run: bool, termux: bool, boot: bool, daily: bool) -> crate:
     #[cfg(target_os = "linux")]
     const DESKTOP_FILE: &str = "[Desktop Entry]
 Name=npltz
-Comment=Nepali BS Calendar (Patro) TUI for Terminal
+Comment=Free and open-source Nepali (Bikram Sambat) calendar for your terminal
 Exec=npltz
 Icon=utilities-terminal
 Type=Application
@@ -111,8 +111,8 @@ Keywords=nepali;calendar;bikram-sambat;date;patro;tui;
     let mut cmd = Cli::command();
     cmd = cmd.name("npltz");
     cmd = cmd.long_about(
-        "A terminal-based Nepali calendar (Bikram Sambat) viewer with an interactive \
-TUI and CLI conversion tools.\n\n\
+        "Free and open-source Nepali (Bikram Sambat) calendar for your terminal. \
+Browse BS dates with AD support, fully offline.\n\n\
 npltz displays Nepali months with English dates alongside, \
 supports AD to BS conversion, and offers simplicity.",
     );
