@@ -1,16 +1,3 @@
-#[cfg(target_os = "windows")]
-pub fn run_setup(
-    _dry_run: bool,
-    _termux: bool,
-    _boot: bool,
-    _daily: bool,
-) -> crate::error::Result<()> {
-    println!("Setup is not required on Windows.");
-    println!("Shell completions and man pages are not available for this platform.");
-    Ok(())
-}
-
-#[cfg(not(target_os = "windows"))]
 pub fn run_setup(dry_run: bool, termux: bool, boot: bool, daily: bool) -> crate::error::Result<()> {
     use crate::cli::Cli;
     use clap::CommandFactory;
@@ -46,8 +33,6 @@ Keywords=nepali;calendar;bikram-sambat;date;patro;tui;
     fn bash_completion_dir() -> PathBuf {
         if is_termux() {
             termux_prefix().join("share/bash-completion/completions")
-        } else if cfg!(target_os = "macos") {
-            PathBuf::from("/usr/local/share/bash-completion/completions")
         } else if is_root() {
             PathBuf::from("/usr/share/bash-completion/completions")
         } else {
@@ -60,8 +45,6 @@ Keywords=nepali;calendar;bikram-sambat;date;patro;tui;
     fn zsh_completion_dir() -> PathBuf {
         if is_termux() {
             termux_prefix().join("share/zsh/site-functions")
-        } else if cfg!(target_os = "macos") {
-            PathBuf::from("/usr/local/share/zsh/site-functions")
         } else if is_root() {
             PathBuf::from("/usr/share/zsh/site-functions")
         } else {
@@ -74,8 +57,6 @@ Keywords=nepali;calendar;bikram-sambat;date;patro;tui;
     fn fish_completion_dir() -> PathBuf {
         if is_termux() {
             termux_prefix().join("share/fish/vendor_completions.d")
-        } else if cfg!(target_os = "macos") {
-            PathBuf::from("/usr/local/share/fish/vendor_completions.d")
         } else if is_root() {
             PathBuf::from("/usr/share/fish/vendor_completions.d")
         } else {
@@ -88,8 +69,6 @@ Keywords=nepali;calendar;bikram-sambat;date;patro;tui;
     fn man_dir() -> PathBuf {
         if is_termux() {
             termux_prefix().join("share/man/man1")
-        } else if cfg!(target_os = "macos") {
-            PathBuf::from("/usr/local/share/man/man1")
         } else if is_root() {
             PathBuf::from("/usr/share/man/man1")
         } else {
@@ -236,7 +215,6 @@ https://github.com/harilvfs/npltz/issues
 
 /// Termux extras: session-menu shortcut, one-line task, extra-keys layout and
 /// optional boot/daily notifications. Mirrors `contrib/termux/setup.sh`.
-#[cfg(not(target_os = "windows"))]
 fn termux_extras(
     dry_run: bool,
     boot: bool,

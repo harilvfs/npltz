@@ -44,19 +44,20 @@
 
 ## Installation
 
-### Linux / macOS / Termux
+### Linux / Termux
 
 ```sh
 curl -fsSL npltz.chalisehari.com.np/install | sh
 ```
 
-The install script auto-detects your platform and installs the correct binary.
+The install script detects your system (Linux or Termux) and architecture, then installs the correct binary.
 
-### Windows
+> [!NOTE]
+> Release binaries are published only for Linux and Termux. On other operating
+> systems you will need to compile from source; see
+> [Build from Source](#build-from-source) or `cargo install npltz`.
 
-Download the `.exe` from [releases](https://github.com/harilvfs/npltz/releases/latest) and add it to your PATH.
-
-### Cargo Binstall (All Platforms)
+### Cargo Binstall
 
 Downloads pre-built binaries instead of compiling:
 
@@ -64,7 +65,7 @@ Downloads pre-built binaries instead of compiling:
 cargo binstall npltz
 ```
 
-### Cargo Install (All Platforms)
+### Cargo Install
 
 Compiles from source (slower):
 
@@ -80,9 +81,6 @@ cd npltz
 cargo build --release
 ./build/release/npltz
 ```
-
-> [!CAUTION]
-> npltz has not been tested on macOS or Windows. If you run into any issues, please [open an issue](https://github.com/harilvfs/npltz/issues).
 
 ## Usage
 
@@ -147,7 +145,7 @@ npltz setup
 npltz setup --dry-run           # Preview without installing
 ```
 
-This detects your platform (Linux, macOS, Termux) and installs to the correct directories. Not required on Windows.
+This detects your environment (standard Linux or Termux) and installs to the appropriate directories.
 
 #### Check for Updates
 

@@ -57,20 +57,6 @@ detect_target() {
                     ;;
         esac
             ;;
-        Darwin)
-            case "$ARCH" in
-                x86_64)
-                    echo "x86_64-apple-darwin"
-                    ;;
-                arm64)
-                    echo "aarch64-apple-darwin"
-                    ;;
-                *)
-                    echo "unsupported architecture: $ARCH" >&2
-                    exit 1
-                    ;;
-        esac
-            ;;
         *)
             echo "unsupported OS: $OS" >&2
             exit 1
@@ -122,18 +108,11 @@ curl -fsSL "https://github.com/$REPO/releases/download/$VERSION/$ASSET" -o "$TMP
 curl -fsSL "https://github.com/$REPO/releases/download/$VERSION/$ASSET.sha256" -o "$TMPDIR/$ASSET.sha256"
 
 cd "$TMPDIR"
-if command -v sha256sum > /dev/null 2>&1; then
-    sha256sum -c "$ASSET.sha256"
-else
-    shasum -a 256 -c "$ASSET.sha256"
-fi
+sha256sum -c "$ASSET.sha256"
 chmod 755 "$ASSET"
 
 if [ "$IS_ANDROID" = "true" ]; then
     install -Dm755 "$ASSET" "$PREFIX/bin/$BINARY"
-elif [ "$(uname -s)" = "Darwin" ]; then
-    mkdir -p /usr/local/bin
-    install -m755 "$ASSET" "/usr/local/bin/$BINARY"
 else
     sudo mkdir -p /usr/local/bin
     sudo install -m755 "$ASSET" "/usr/local/bin/$BINARY"

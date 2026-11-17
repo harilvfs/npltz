@@ -42,8 +42,6 @@ body:
       description: "Which OS are you using?"
       options:
         - Linux
-        - MacOS
-        - Windows
         - Other (please specify below)
     validations:
       required: true
@@ -93,7 +91,7 @@ body:
     attributes:
       label: "Terminal Emulator"
       description: "Which terminal emulator are you using?"
-      placeholder: "e.g., Alacritty, Kitty, Ghostty, or Powershell(Windows) etc."
+      placeholder: "e.g., Alacritty, Kitty, Ghostty, etc."
     validations:
       required: false
 

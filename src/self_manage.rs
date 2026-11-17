@@ -2,10 +2,7 @@ use crate::error::{NpltzError, Result};
 use serde::Deserialize;
 use std::fs;
 use std::io::{self, Write};
-use std::path::PathBuf;
-
-#[cfg(not(target_os = "windows"))]
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 const REPO: &str = "harilvfs/npltz";
 
@@ -90,19 +87,16 @@ fn get_latest_version() -> Result<String> {
     Ok(release.tag_name.trim_start_matches('v').to_string())
 }
 
-#[cfg(not(target_os = "windows"))]
 fn is_termux() -> bool {
     std::env::var("TERMUX_VERSION").is_ok() || std::env::var("PREFIX").is_ok()
 }
 
-#[cfg(not(target_os = "windows"))]
 fn termux_prefix() -> PathBuf {
     std::env::var("PREFIX")
         .map(PathBuf::from)
         .unwrap_or_else(|_| PathBuf::from("/data/data/com.termux/files/usr"))
 }
 
-#[cfg(not(target_os = "windows"))]
 fn is_root() -> bool {
     std::env::var("EUID").is_ok_and(|v| v == "0")
 }
@@ -187,48 +181,32 @@ pub fn update() -> Result<()> {
             )?;
         }
         InstallMethod::InstallScript => {
-            #[cfg(target_os = "windows")]
-            {
-                println!("Automatic update is not available for Windows.");
-                println!("Please download the latest binary from:");
-                println!("  https://github.com/{REPO}/releases/latest");
-                println!("Or update with: cargo install npltz --force");
-            }
+            let script_url = format!("https://raw.githubusercontent.com/{REPO}/main/install.sh");
 
-            #[cfg(not(target_os = "windows"))]
-            {
-                let script_url =
-                    format!("https://raw.githubusercontent.com/{REPO}/main/install.sh");
+            let script = http_get(&script_url).map_err(|e| {
+                NpltzError::Config(format!("Failed to download install script: {e}"))
+            })?;
 
-                let script = http_get(&script_url).map_err(|e| {
-                    NpltzError::Config(format!("Failed to download install script: {e}"))
-                })?;
+            let mut child = std::process::Command::new("sh")
+                .stdin(std::process::Stdio::piped())
+                .spawn()
+                .map_err(|e| NpltzError::Config(format!("Failed to run install script: {e}")))?;
 
-                let mut child = std::process::Command::new("sh")
-                    .stdin(std::process::Stdio::piped())
-                    .spawn()
-                    .map_err(|e| {
-                        NpltzError::Config(format!("Failed to run install script: {e}"))
-                    })?;
+            child
+                .stdin
+                .take()
+                .ok_or_else(|| NpltzError::Config("Failed to pipe install script".into()))?
+                .write_all(script.as_bytes())
+                .map_err(|e| NpltzError::Config(format!("Failed to pipe install script: {e}")))?;
 
-                child
-                    .stdin
-                    .take()
-                    .ok_or_else(|| NpltzError::Config("Failed to pipe install script".into()))?
-                    .write_all(script.as_bytes())
-                    .map_err(|e| {
-                        NpltzError::Config(format!("Failed to pipe install script: {e}"))
-                    })?;
+            let status = child
+                .wait()
+                .map_err(|e| NpltzError::Config(format!("Install script failed: {e}")))?;
 
-                let status = child
-                    .wait()
-                    .map_err(|e| NpltzError::Config(format!("Install script failed: {e}")))?;
-
-                if !status.success() {
-                    return Err(NpltzError::Config(
-                        "Install script failed. Try manually: curl -fsSL npltz.chalisehari.com.np/install | sh".into(),
-                    ));
-                }
+            if !status.success() {
+                return Err(NpltzError::Config(
+                    "Install script failed. Try manually: curl -fsSL npltz.chalisehari.com.np/install | sh".into(),
+                ));
             }
         }
     }
@@ -251,95 +229,62 @@ pub fn uninstall() -> Result<()> {
             run_command(std::process::Command::new("cargo").arg("uninstall").arg("npltz"))?;
         }
         InstallMethod::InstallScript => {
-            #[cfg(target_os = "windows")]
-            {
-                let config_dir = dirs::config_dir()
-                    .unwrap_or_else(|| {
-                        PathBuf::from(std::env::var("USERPROFILE").unwrap_or_default())
-                    })
-                    .join("npltz");
+            let home = std::env::var("HOME").ok();
+            let is_termux = is_termux();
+            let is_root = is_root();
 
-                if config_dir.exists() {
-                    fs::remove_dir_all(&config_dir).ok();
-                    println!("  Removed {}", config_dir.display());
-                }
+            let mut files: Vec<PathBuf> = Vec::new();
 
-                if let Ok(exe_path) = std::env::current_exe() {
-                    println!(
-                        "\nPlease delete the binary manually after closing:\n  {}",
-                        exe_path.display()
-                    );
+            if is_termux {
+                let prefix = termux_prefix();
+                files.extend(vec![
+                    prefix.join("bin/npltz"),
+                    prefix.join("share/bash-completion/completions/npltz"),
+                    prefix.join("share/zsh/site-functions/_npltz"),
+                    prefix.join("share/fish/vendor_completions.d/npltz.fish"),
+                    prefix.join("share/man/man1/npltz.1"),
+                ]);
+            } else if is_root {
+                files.extend(vec![
+                    PathBuf::from("/usr/local/bin/npltz"),
+                    PathBuf::from("/usr/share/bash-completion/completions/npltz"),
+                    PathBuf::from("/usr/share/zsh/site-functions/_npltz"),
+                    PathBuf::from("/usr/share/fish/vendor_completions.d/npltz.fish"),
+                    PathBuf::from("/usr/share/man/man1/npltz.1"),
+                    PathBuf::from("/usr/share/applications/npltz.desktop"),
+                ]);
+            } else if let Some(ref h) = home {
+                let data = PathBuf::from(h).join(".local/share");
+                files.extend(vec![
+                    PathBuf::from("/usr/local/bin/npltz"),
+                    data.join("bash-completion/completions/npltz"),
+                    data.join("zsh/site-functions/_npltz"),
+                    data.join("fish/vendor_completions.d/npltz.fish"),
+                    data.join("man/man1/npltz.1"),
+                    data.join("applications/npltz.desktop"),
+                ]);
+            }
+
+            let use_sudo = !is_termux && !is_root;
+
+            for path in &files {
+                if path.exists() {
+                    if use_sudo {
+                        run_command(
+                            std::process::Command::new("sudo").arg("rm").arg("-f").arg(path),
+                        )?;
+                    } else {
+                        fs::remove_file(path).ok();
+                    }
+                    println!("  Removed {}", path.display());
                 }
             }
 
-            #[cfg(not(target_os = "windows"))]
-            {
-                let home = std::env::var("HOME").ok();
-                let is_termux = is_termux();
-                let is_root = is_root();
-                let is_macos = cfg!(target_os = "macos");
-
-                let mut files: Vec<PathBuf> = Vec::new();
-
-                if is_termux {
-                    let prefix = termux_prefix();
-                    files.extend(vec![
-                        prefix.join("bin/npltz"),
-                        prefix.join("share/bash-completion/completions/npltz"),
-                        prefix.join("share/zsh/site-functions/_npltz"),
-                        prefix.join("share/fish/vendor_completions.d/npltz.fish"),
-                        prefix.join("share/man/man1/npltz.1"),
-                    ]);
-                } else if is_macos {
-                    files.extend(vec![
-                        PathBuf::from("/usr/local/bin/npltz"),
-                        PathBuf::from("/usr/local/share/bash-completion/completions/npltz"),
-                        PathBuf::from("/usr/local/share/zsh/site-functions/_npltz"),
-                        PathBuf::from("/usr/local/share/fish/vendor_completions.d/npltz.fish"),
-                        PathBuf::from("/usr/local/share/man/man1/npltz.1"),
-                    ]);
-                } else if is_root {
-                    files.extend(vec![
-                        PathBuf::from("/usr/local/bin/npltz"),
-                        PathBuf::from("/usr/share/bash-completion/completions/npltz"),
-                        PathBuf::from("/usr/share/zsh/site-functions/_npltz"),
-                        PathBuf::from("/usr/share/fish/vendor_completions.d/npltz.fish"),
-                        PathBuf::from("/usr/share/man/man1/npltz.1"),
-                        PathBuf::from("/usr/share/applications/npltz.desktop"),
-                    ]);
-                } else if let Some(ref h) = home {
-                    let data = PathBuf::from(h).join(".local/share");
-                    files.extend(vec![
-                        PathBuf::from("/usr/local/bin/npltz"),
-                        data.join("bash-completion/completions/npltz"),
-                        data.join("zsh/site-functions/_npltz"),
-                        data.join("fish/vendor_completions.d/npltz.fish"),
-                        data.join("man/man1/npltz.1"),
-                        data.join("applications/npltz.desktop"),
-                    ]);
-                }
-
-                let use_sudo = !is_termux && !is_root && !is_macos;
-
-                for path in &files {
-                    if path.exists() {
-                        if use_sudo {
-                            run_command(
-                                std::process::Command::new("sudo").arg("rm").arg("-f").arg(path),
-                            )?;
-                        } else {
-                            fs::remove_file(path).ok();
-                        }
-                        println!("  Removed {}", path.display());
-                    }
-                }
-
-                if let Some(ref h) = home {
-                    let config_dir = Path::new(h).join(".config/npltz");
-                    if config_dir.exists() {
-                        fs::remove_dir_all(&config_dir).ok();
-                        println!("  Removed {}", config_dir.display());
-                    }
+            if let Some(ref h) = home {
+                let config_dir = Path::new(h).join(".config/npltz");
+                if config_dir.exists() {
+                    fs::remove_dir_all(&config_dir).ok();
+                    println!("  Removed {}", config_dir.display());
                 }
             }
         }
