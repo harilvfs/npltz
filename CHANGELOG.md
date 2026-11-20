@@ -1,4 +1,21 @@
 
+## [2.1.0](https://github.com/harilvfs/npltz/compare/v2.0.0...v2.1.0) - 2026-11-20
+
+
+### 🚀 Features
+
+
+- [73c5aee](https://github.com/harilvfs/npltz/commit/73c5aee37c95c4d16fdf41a2fbd4739acd97ffed)  *(tui)* Align themes and clock with Android (#100) by @harilvfs in [#100](https://github.com/harilvfs/npltz/pull/100)
+
+
+
+### 📚 Documentation
+
+
+- [7b2c0d1](https://github.com/harilvfs/npltz/commit/7b2c0d136f61cf97cbbabb7c2c635295e15d720d) Add Nepal to project credit by @harilvfs
+
+
+
 ## [2.0.0](https://github.com/harilvfs/npltz/compare/v1.2.1...v2.0.0) - 2026-11-17
 
 
