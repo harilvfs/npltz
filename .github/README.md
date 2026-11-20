@@ -234,7 +234,7 @@ Special thanks to [medic](https://github.com/medic) for the [`bikram-sambat`](ht
 
 npltz is under the MIT license. See [LICENSE](https://github.com/harilvfs/npltz/blob/main/LICENSE) for details.
 
-Made with ❤️ by Hari Chalise.
+Made with ❤️ by Hari Chalise in Nepal.
 
 <!-- Badges -->
 
