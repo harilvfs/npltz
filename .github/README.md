@@ -38,7 +38,7 @@
 - Month view with BS dates and the matching AD dates, navigable with the keyboard.
 - Date conversion both ways: AD → BS and BS → AD, with one-line output for scripts, prompts and notifications.
 - Export BS months as `.ics` for your calendar app.
-- Five themes: `catppuccin-mocha`, `dracula`, `gruvbox`, `nord`, `rose-pine`, with `NO_COLOR` support.
+- Nine themes: `catppuccin-mocha`, `dracula`, `everforest`, `gruvbox`, `light`, `nord`, `plain-dark`, `rose-pine`, `warm-reading`, with `NO_COLOR` support.
 - Shell completions and a man page via `npltz setup`.
 - Works in Termux with a phone-friendly layout and a day cursor for navigation.
 
@@ -132,7 +132,7 @@ npltz --set-theme catppuccin-mocha
 npltz --set-theme default       # Reset to default
 ```
 
-Available themes: `catppuccin-mocha`, `dracula`, `gruvbox`, `nord`, `rose-pine`
+Available themes: `catppuccin-mocha`, `dracula`, `everforest`, `gruvbox`, `light`, `nord`, `plain-dark`, `rose-pine`, `warm-reading`
 
 `NO_COLOR` is honored, and `npltz --no-color` forces a plain rendering (colors replaced by terminal defaults, highlights via reverse video only) for terminals where the palette does not cooperate.
 
