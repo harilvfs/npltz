@@ -1,13 +1,20 @@
 use crate::app::App;
 use crate::calendar;
-use chrono::{Datelike, Local};
+use chrono::{Datelike, FixedOffset, Utc};
 
 use super::{Mode, calendar_layout, day_labels, fit_spans};
 use ratatui::Frame;
 use ratatui::layout::{Alignment, Rect};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
+
 use ratatui::widgets::{Block, BorderType, Borders, Clear, Paragraph};
+
+fn nepal_now() -> chrono::DateTime<FixedOffset> {
+    let offset = FixedOffset::east_opt(5 * 60 * 60 + 45 * 60)
+        .expect("Nepal Standard Time is a valid fixed offset");
+    Utc::now().with_timezone(&offset)
+}
 
 pub fn render(frame: &mut Frame, area: Rect, app: &App, mode: Mode) {
     let layout = calendar_layout(area, mode, app.show_ad_rows);
@@ -88,7 +95,7 @@ fn render_sidebar(frame: &mut Frame, area: Rect, app: &App) {
 
 fn sidebar_sections(app: &App, width: u16) -> Vec<Vec<Line<'static>>> {
     let width = width as usize;
-    let now = Local::now();
+    let now = nepal_now();
     let theme = &app.theme;
 
     let label = Style::default().fg(theme.secondary);
@@ -100,7 +107,7 @@ fn sidebar_sections(app: &App, width: u16) -> Vec<Vec<Line<'static>>> {
     let sep = || Line::from(Span::styled("\u{2500}".repeat(width), sep_style));
 
     let mut sections: Vec<Vec<Line>> = Vec::new();
-    sections.push(vec![center("Nepali Time".into(), theme.hl())]);
+    sections.push(vec![center("Npltz".into(), theme.hl())]);
 
     let Some(ref nd) = app.today else {
         sections.push(vec![center("--".into(), dim)]);
@@ -247,7 +254,7 @@ fn render_grid(frame: &mut Frame, area: Rect, app: &App, layout: &super::Calenda
 
 fn status_line(app: &App, width: u16) -> Line<'static> {
     let theme = &app.theme;
-    let now = Local::now();
+    let now = nepal_now();
     let dim = Style::default().fg(theme.secondary).add_modifier(Modifier::DIM);
 
     let mut segs: Vec<(String, Style)> = Vec::new();

@@ -31,7 +31,7 @@ pub struct Cli {
     #[arg(
         long,
         global = true,
-        help = "Set default theme (catppuccin-mocha, dracula, gruvbox, nord, rose-pine, or default to reset)"
+        help = "Set default theme (catppuccin-mocha, dracula, everforest, gruvbox, light, nord, plain-dark, rose-pine, warm-reading, or default to reset)"
     )]
     pub set_theme: Option<String>,
 

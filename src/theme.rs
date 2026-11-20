@@ -1,8 +1,28 @@
 use ratatui::style::{Color, Modifier, Style};
 
-pub const THEME_NAMES: &[&str] = &["catppuccin-mocha", "dracula", "gruvbox", "nord", "rose-pine"];
+pub const THEME_NAMES: &[&str] = &[
+    "catppuccin-mocha",
+    "dracula",
+    "everforest",
+    "gruvbox",
+    "light",
+    "nord",
+    "plain-dark",
+    "rose-pine",
+    "warm-reading",
+];
 
-pub const THEME_DISPLAY: &[&str] = &["Catppuccin Mocha", "Dracula", "Gruvbox", "Nord", "Rosé Pine"];
+pub const THEME_DISPLAY: &[&str] = &[
+    "Catppuccin Mocha",
+    "Dracula",
+    "Everforest",
+    "Gruvbox",
+    "Light",
+    "Nord",
+    "Plain dark",
+    "Rosé Pine",
+    "Warm reading",
+];
 
 pub fn is_valid_theme(name: &str) -> bool {
     THEME_NAMES.contains(&name)
@@ -19,9 +39,13 @@ pub fn display_name(name: &str) -> &'static str {
 pub fn from_name(name: &str) -> Theme {
     match name {
         "dracula" => Theme::dracula(),
+        "everforest" => Theme::everforest(),
         "gruvbox" => Theme::gruvbox(),
+        "light" => Theme::light(),
         "nord" => Theme::nord(),
+        "plain-dark" => Theme::plain_dark(),
         "rose-pine" => Theme::rose_pine(),
+        "warm-reading" => Theme::warm_reading(),
         _ => Theme::catppuccin_mocha(),
     }
 }
@@ -150,6 +174,61 @@ impl Theme {
             success:   Color::Rgb(49, 116, 143),
             warning:   Color::Rgb(246, 193, 119),
             error:     Color::Rgb(235, 111, 146),
+            plain:     false,
+        }
+    }
+    pub fn everforest() -> Self {
+        Self {
+            name:      "Everforest".into(),
+            bg:        Color::Rgb(45, 53, 59),
+            fg:        Color::Rgb(211, 198, 170),
+            primary:   Color::Rgb(167, 192, 128),
+            secondary: Color::Rgb(127, 187, 179),
+            success:   Color::Rgb(167, 192, 128),
+            warning:   Color::Rgb(230, 152, 117),
+            error:     Color::Rgb(230, 126, 128),
+            plain:     false,
+        }
+    }
+
+    pub fn light() -> Self {
+        Self {
+            name:      "Light".into(),
+            bg:        Color::Rgb(246, 246, 244),
+            fg:        Color::Rgb(27, 27, 31),
+            primary:   Color::Rgb(63, 91, 158),
+            secondary: Color::Rgb(94, 110, 126),
+            success:   Color::Rgb(46, 125, 79),
+            warning:   Color::Rgb(138, 90, 0),
+            error:     Color::Rgb(179, 38, 30),
+            plain:     false,
+        }
+    }
+
+    pub fn plain_dark() -> Self {
+        Self {
+            name:      "Plain dark".into(),
+            bg:        Color::Rgb(0, 0, 0),
+            fg:        Color::Rgb(230, 230, 230),
+            primary:   Color::Rgb(90, 90, 90),
+            secondary: Color::Rgb(122, 122, 122),
+            success:   Color::Rgb(95, 138, 95),
+            warning:   Color::Rgb(176, 138, 64),
+            error:     Color::Rgb(176, 90, 90),
+            plain:     false,
+        }
+    }
+
+    pub fn warm_reading() -> Self {
+        Self {
+            name:      "Warm reading".into(),
+            bg:        Color::Rgb(243, 233, 214),
+            fg:        Color::Rgb(74, 58, 42),
+            primary:   Color::Rgb(156, 90, 50),
+            secondary: Color::Rgb(131, 112, 90),
+            success:   Color::Rgb(91, 122, 74),
+            warning:   Color::Rgb(154, 106, 30),
+            error:     Color::Rgb(176, 74, 58),
             plain:     false,
         }
     }
