@@ -301,6 +301,43 @@ mod tests {
         let mut app = test_app();
         assert!(app.update());
     }
+
+    #[test]
+    fn test_build_view_marks_special_days() {
+        let mut app = test_app();
+        let new_year = app
+            .calendar_rows
+            .iter()
+            .flat_map(|r| &r.cells)
+            .find(|c| c.day == 1)
+            .and_then(|c| c.special);
+        assert_eq!(new_year, Some(crate::calendar::SpecialDay::NepaliNewYear));
+
+        app.view_month = 5;
+        app.build_view();
+        let birthday = app
+            .calendar_rows
+            .iter()
+            .flat_map(|r| &r.cells)
+            .find(|c| c.day == 30)
+            .and_then(|c| c.special);
+        assert_eq!(birthday, Some(crate::calendar::SpecialDay::DeveloperBirthday));
+    }
+
+    #[test]
+    fn test_special_day_popup_only_opens_on_special_days() {
+        let mut app = test_app();
+        app.cursor = true;
+        app.selected_day = Some(1);
+        app.open_special_day();
+        assert_eq!(app.mode, AppMode::SpecialDay);
+        app.close_special_day();
+        assert_eq!(app.mode, AppMode::Normal);
+
+        app.selected_day = Some(2);
+        app.open_special_day();
+        assert_eq!(app.mode, AppMode::Normal);
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -310,6 +347,7 @@ pub enum AppMode {
     Goto,
     Help,
     YearOverview,
+    SpecialDay,
 }
 
 pub struct App {
@@ -351,6 +389,7 @@ pub struct CalendarCell {
     pub is_saturday:    bool,
     pub is_sunday:      bool,
     pub is_goto_target: bool,
+    pub special:        Option<calendar::SpecialDay>,
     pub ad_day:         u32,
 }
 
@@ -772,6 +811,27 @@ impl App {
         self.selected_day.or(self.hover_bs_day)
     }
 
+    pub fn special_day_for(&self, day: u32) -> Option<calendar::SpecialDay> {
+        calendar::special_day(self.view_year, self.view_month, day)
+    }
+
+    pub fn selected_special_day(&self) -> Option<calendar::SpecialDay> {
+        self.selected_day.and_then(|day| self.special_day_for(day))
+    }
+
+    pub fn open_special_day(&mut self) {
+        let Some(special) = self.selected_special_day() else {
+            return;
+        };
+        self.mode = AppMode::SpecialDay;
+        log::Log::info(&format!("Special day opened: {}", special.label()));
+    }
+
+    pub fn close_special_day(&mut self) {
+        self.mode = AppMode::Normal;
+        log::Log::info("Special day closed");
+    }
+
     pub fn prev_month_info(&self) -> (u32, i32) {
         if self.view_month <= 1 {
             (12, self.view_year - 1)
@@ -813,6 +873,7 @@ impl App {
                 is_saturday:    col % 7 == 6,
                 is_sunday:      col.is_multiple_of(7),
                 is_goto_target: false,
+                special:        None,
                 ad_day:         0,
             });
         }
@@ -834,6 +895,7 @@ impl App {
                 is_saturday,
                 is_sunday,
                 is_goto_target,
+                special: calendar::special_day(self.view_year, self.view_month, day),
                 ad_day: ad_date.day(),
             });
 
@@ -851,6 +913,7 @@ impl App {
                     is_saturday:    col % 7 == 6,
                     is_sunday:      col.is_multiple_of(7),
                     is_goto_target: false,
+                    special:        None,
                     ad_day:         0,
                 });
             }

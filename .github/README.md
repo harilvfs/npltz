@@ -36,6 +36,7 @@
 ## Features
 
 - Month view with BS dates and the matching AD dates, navigable with the keyboard.
+- Special-day highlights, including both New Years, with a celebration card on click or Enter.
 - Date conversion both ways: AD → BS and BS → AD, with one-line output for scripts, prompts and notifications.
 - Export BS months as `.ics` for your calendar app.
 - Nine themes: `catppuccin-mocha`, `dracula`, `everforest`, `gruvbox`, `light`, `nord`, `plain-dark`, `rose-pine`, `warm-reading`, with `NO_COLOR` support.

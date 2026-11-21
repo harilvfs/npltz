@@ -1,6 +1,7 @@
 mod calendar_popup;
 mod goto_popup;
 mod help_popup;
+mod special_day_popup;
 mod theme_selector;
 mod year_overview;
 
@@ -148,6 +149,7 @@ pub(crate) enum Popup {
     Goto,
     Help,
     Year,
+    SpecialDay,
 }
 
 pub(crate) fn popup_rect(popup: Popup, mode: Mode, area: Rect) -> Rect {
@@ -162,6 +164,9 @@ pub(crate) fn popup_rect(popup: Popup, mode: Mode, area: Rect) -> Rect {
         (Popup::Help, Mode::Medium) => (80, 80),
         (Popup::Help, _) => (95, 90),
         (Popup::Year, _) => (95, 95),
+        (Popup::SpecialDay, Mode::Wide) => (50, 30),
+        (Popup::SpecialDay, Mode::Medium) => (65, 35),
+        (Popup::SpecialDay, _) => (85, 45),
     };
     centered_rect(w, h, area)
 }
@@ -228,6 +233,10 @@ pub fn render(frame: &mut Frame, app: &mut App) {
         AppMode::YearOverview => {
             let overview_area = popup_rect(Popup::Year, mode, area);
             year_overview::render(frame, overview_area, app);
+        }
+        AppMode::SpecialDay => {
+            let special_area = popup_rect(Popup::SpecialDay, mode, area);
+            special_day_popup::render(frame, special_area, app);
         }
         AppMode::Normal => {}
     }
@@ -387,7 +396,9 @@ mod tests {
 
         for (w, h) in sizes {
             for plain in [false, true] {
-                for mode in [AppMode::Normal, AppMode::Help, AppMode::YearOverview] {
+                for mode in
+                    [AppMode::Normal, AppMode::Help, AppMode::YearOverview, AppMode::SpecialDay]
+                {
                     let label = format!("{mode:?} plain={plain}");
                     let mut terminal = Terminal::new(TestBackend::new(w, h)).unwrap();
                     let mut app = App::new_test("catppuccin-mocha");

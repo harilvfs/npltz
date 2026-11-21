@@ -1,10 +1,68 @@
-use chrono::NaiveDate;
+use chrono::{Datelike, NaiveDate};
 use serde::Deserialize;
 
 const MONTH_NAMES: &[&str] = &[
     "Baisakh", "Jestha", "Ashad", "Shrawan", "Bhadra", "Ashwin", "Kartik", "Mangsir", "Poush",
     "Magh", "Falgun", "Chaitra",
 ];
+
+pub const NEW_YEAR_MONTH: u32 = 1;
+pub const NEW_YEAR_DAY: u32 = 1;
+
+pub const BIRTHDAY_MONTH: u32 = 5;
+pub const BIRTHDAY_DAY: u32 = 30;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SpecialDay {
+    NepaliNewYear,
+    GregorianNewYear,
+    DeveloperBirthday,
+}
+
+impl SpecialDay {
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::NepaliNewYear => "Nepali New Year",
+            Self::GregorianNewYear => "Gregorian New Year",
+            Self::DeveloperBirthday => "Developer's birthday",
+        }
+    }
+
+    pub fn title(self, ad_year: i32) -> String {
+        match self {
+            Self::NepaliNewYear => "Nepali New Year".to_string(),
+            Self::GregorianNewYear => format!("New Year {ad_year}"),
+            Self::DeveloperBirthday => "Developer's birthday".to_string(),
+        }
+    }
+
+    pub fn greeting(self) -> &'static str {
+        match self {
+            Self::NepaliNewYear => "Wishing you a bright new year.",
+            Self::GregorianNewYear => "A brand new year begins. Happy New Year!",
+            Self::DeveloperBirthday => "Happy birthday, Hari! Have a wonderful year.",
+        }
+    }
+}
+
+pub fn is_nepali_new_year(month: u32, day: u32) -> bool {
+    month == NEW_YEAR_MONTH && day == NEW_YEAR_DAY
+}
+
+pub fn is_developer_birthday(month: u32, day: u32) -> bool {
+    month == BIRTHDAY_MONTH && day == BIRTHDAY_DAY
+}
+
+pub fn special_day(bs_year: i32, bs_month: u32, bs_day: u32) -> Option<SpecialDay> {
+    if is_nepali_new_year(bs_month, bs_day) {
+        return Some(SpecialDay::NepaliNewYear);
+    }
+    if is_developer_birthday(bs_month, bs_day) {
+        return Some(SpecialDay::DeveloperBirthday);
+    }
+    let ad = bs_to_ad(bs_year, bs_month, bs_day)?;
+    (ad.month() == 1 && ad.day() == 1).then_some(SpecialDay::GregorianNewYear)
+}
 
 const DAY_NAMES: &[&str] =
     &["Aaitabar", "Sombar", "Mangalbar", "Budhabar", "Bihibar", "Shukrabar", "Shanibar"];
@@ -234,5 +292,24 @@ mod tests {
             let ad = bs_to_ad(nd.year, nd.month, nd.day).unwrap();
             assert_eq!((ad.year(), ad.month(), ad.day()), (*y, *m, *d));
         }
+    }
+
+    #[test]
+    fn test_special_days() {
+        assert_eq!(
+            special_day(2081, NEW_YEAR_MONTH, NEW_YEAR_DAY),
+            Some(SpecialDay::NepaliNewYear)
+        );
+        assert_eq!(
+            special_day(2081, BIRTHDAY_MONTH, BIRTHDAY_DAY),
+            Some(SpecialDay::DeveloperBirthday)
+        );
+        assert_eq!(special_day(2081, 1, 2), None);
+    }
+
+    #[test]
+    fn test_gregorian_new_year_special_day() {
+        let nd = ad_to_bs(2025, 1, 1).unwrap();
+        assert_eq!(special_day(nd.year, nd.month, nd.day), Some(SpecialDay::GregorianNewYear));
     }
 }

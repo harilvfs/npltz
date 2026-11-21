@@ -70,6 +70,7 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, app: &mut App)
                             AppMode::Goto => handle_goto_key(app, key.code),
                             AppMode::Help => handle_help_key(app, key.code),
                             AppMode::YearOverview => handle_year_overview_key(app, key.code),
+                            AppMode::SpecialDay => handle_special_day_key(app, key.code),
                         }
                         dirty = true;
                     }
@@ -137,6 +138,10 @@ fn handle_normal_key(app: &mut App, key: KeyCode) {
                 app.cursor_today();
                 return;
             }
+            KeyCode::Enter => {
+                app.open_special_day();
+                return;
+            }
             _ => {}
         }
     }
@@ -161,6 +166,7 @@ fn handle_normal_key(app: &mut App, key: KeyCode) {
         KeyCode::Char('g') => app.open_goto(),
         KeyCode::Char('?') => app.open_help(),
         KeyCode::Char('y') => app.open_year_overview(),
+        KeyCode::Enter => app.open_special_day(),
         KeyCode::Char('0') => app.month_jump_pending = true,
         KeyCode::Char('1') => app.jump_to_month(1),
         KeyCode::Char('2') => app.jump_to_month(2),
@@ -206,6 +212,15 @@ fn handle_year_overview_key(app: &mut App, key: KeyCode) {
         KeyCode::Char('h') | KeyCode::Left => app.year_prev(),
         KeyCode::Char('l') | KeyCode::Right => app.year_next(),
         KeyCode::Char('t') => app.year_today(),
+        _ => {}
+    }
+}
+
+fn handle_special_day_key(app: &mut App, key: KeyCode) {
+    match key {
+        KeyCode::Esc | KeyCode::Char('q') | KeyCode::Enter | KeyCode::Char(' ') => {
+            app.close_special_day();
+        }
         _ => {}
     }
 }
@@ -275,6 +290,7 @@ fn handle_mouse(app: &mut App, mouse: MouseEvent) {
                         {
                             app.cursor = true;
                             app.selected_day = Some(cell.day);
+                            app.open_special_day();
                         }
                     } else if let Some(nav) = layout.nav
                         && contains(nav, mouse.column, mouse.row)
@@ -357,6 +373,11 @@ fn handle_mouse(app: &mut App, mouse: MouseEvent) {
                     }
                 }
                 _ => {}
+            }
+        }
+        AppMode::SpecialDay => {
+            if let MouseEventKind::Down(crossterm::event::MouseButton::Left) = mouse.kind {
+                app.close_special_day();
             }
         }
         _ => {}

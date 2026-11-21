@@ -97,6 +97,11 @@ fn render_mini_month(
     let sun_style = Style::default().fg(app.theme.warning);
     let sat_style = Style::default().fg(app.theme.error);
     let today_style = app.theme.hl();
+    let special_style = if app.theme.plain {
+        Style::default().add_modifier(Modifier::BOLD | Modifier::UNDERLINED)
+    } else {
+        app.theme.badge(app.theme.warning)
+    };
 
     let mut lines: Vec<Line> = Vec::new();
 
@@ -141,6 +146,8 @@ fn render_mini_month(
 
             let style = if is_today {
                 today_style
+            } else if day > 0 && calendar::special_day(app.view_year, month, day).is_some() {
+                special_style
             } else if i == 0 {
                 sun_style
             } else if i == 6 {
