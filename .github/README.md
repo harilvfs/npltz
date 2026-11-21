@@ -42,6 +42,7 @@
 - Nine themes: `catppuccin-mocha`, `dracula`, `everforest`, `gruvbox`, `light`, `nord`, `plain-dark`, `rose-pine`, `warm-reading`, with `NO_COLOR` support.
 - Shell completions and a man page via `npltz setup`.
 - Works in Termux with a phone-friendly layout and a day cursor for navigation.
+- Interactive [Nepali calendar website](https://harilvfs.github.io/npltz/) in English and Nepali. It uses the same `calendar_data.json` as the TUI and includes nine themes. [Website source](site/).
 
 ## Installation
 
