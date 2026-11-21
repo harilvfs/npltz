@@ -91,3 +91,6 @@ html[lang="ne"] h1{line-height:1.28}
 html[lang="ne"] .intro .eyebrow{font-size:13px;line-height:1.6;letter-spacing:.025em}
 html[lang="ne"] .below .eyebrow{font-size:13px;line-height:1.6;letter-spacing:.025em}
 .year-hint{display:flex;align-items:center;gap:5px}.year-hint>span{margin-left:4px}
+.topbar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 76%,transparent);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+html{scroll-padding-top:88px}
+#calendar,#about,#top{scroll-margin-top:88px}
