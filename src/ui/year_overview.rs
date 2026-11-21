@@ -137,16 +137,17 @@ fn render_mini_month(
         let mut spans = vec![];
 
         for (i, &day) in week.iter().enumerate() {
-            let cell = if day > 0 { format!("{day:2}") } else { "  ".to_string() };
+            let cell = if day > 0 { format!("{day:^3}") } else { "   ".to_string() };
 
             let is_today = app
                 .today
                 .as_ref()
                 .is_some_and(|td| td.year == app.view_year && td.month == month && td.day == day);
 
+            let is_special = day > 0 && calendar::special_day(app.view_year, month, day).is_some();
             let style = if is_today {
                 today_style
-            } else if day > 0 && calendar::special_day(app.view_year, month, day).is_some() {
+            } else if is_special {
                 special_style
             } else if i == 0 {
                 sun_style
@@ -156,7 +157,20 @@ fn render_mini_month(
                 day_style
             };
 
-            spans.push(Span::styled(format!(" {cell}"), style));
+            if is_special {
+                let day_text = day.to_string();
+                let left_pad = (3 - day_text.len()) / 2;
+                let right_pad = 3 - left_pad - day_text.len();
+                if left_pad > 0 {
+                    spans.push(Span::raw(" ".repeat(left_pad)));
+                }
+                spans.push(Span::styled(day_text, style));
+                if right_pad > 0 {
+                    spans.push(Span::raw(" ".repeat(right_pad)));
+                }
+            } else {
+                spans.push(Span::styled(cell, style));
+            }
         }
 
         lines.push(Line::from(spans));
