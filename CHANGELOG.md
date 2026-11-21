@@ -1,4 +1,25 @@
 
+## [2.2.0](https://github.com/harilvfs/npltz/compare/v2.1.0...v2.2.0) - 2026-11-21
+
+
+### 🚀 Features
+
+
+- [134dfc6](https://github.com/harilvfs/npltz/commit/134dfc67a85e71ac194c69699b915a6c4bd850fe)  *(tui)* Add special day highlights and celebrations (#103) by @harilvfs in [#103](https://github.com/harilvfs/npltz/pull/103)
+
+- [44357ff](https://github.com/harilvfs/npltz/commit/44357ff8014f94ab20e533440ce731217d7f5332)  *(web)* Add bilingual Nepali calendar site (#108) by @harilvfs in [#108](https://github.com/harilvfs/npltz/pull/108)
+
+- [d21f76e](https://github.com/harilvfs/npltz/commit/d21f76e9114e36d8480a1485dd9699a52c882bda)  *(web)* Add sticky blurred navigation (#109) by @harilvfs in [#109](https://github.com/harilvfs/npltz/pull/109)
+
+
+
+### 🐛 Bug Fixes
+
+
+- [37660da](https://github.com/harilvfs/npltz/commit/37660daef441ffdab7f46537d146d6cc9e976dac)  *(tui)* Center year overview day highlights by @harilvfs
+
+
+
 ## [2.1.0](https://github.com/harilvfs/npltz/compare/v2.0.0...v2.1.0) - 2026-11-20
 
 
