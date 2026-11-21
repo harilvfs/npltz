@@ -203,6 +203,12 @@ fn render_grid(frame: &mut Frame, area: Rect, app: &App, layout: &super::Calenda
     let sat_style = Style::default().fg(app.theme.error);
     let sun_style = Style::default().fg(app.theme.warning).add_modifier(Modifier::BOLD);
     let plain_style = Style::default().fg(app.theme.fg);
+    let special_style = if app.theme.plain {
+        Style::default().add_modifier(Modifier::BOLD | Modifier::UNDERLINED)
+    } else {
+        app.theme.badge(app.theme.warning)
+    };
+    let special_ad_style = special_style.add_modifier(Modifier::ITALIC);
 
     let mut grid_lines: Vec<Line> = Vec::new();
     for row in &app.calendar_rows {
@@ -210,7 +216,8 @@ fn render_grid(frame: &mut Frame, area: Rect, app: &App, layout: &super::Calenda
         let mut ad_spans = Vec::new();
 
         for cell in &row.cells {
-            let day_s = format!("{:^w$}", cell.day, w = cell_w);
+            let marker = if cell.special.is_some() && cell_w >= 3 { "*" } else { "" };
+            let day_s = format!("{:^w$}", format!("{}{marker}", cell.day), w = cell_w);
             let ad_s = format!("{:^w$}", cell.ad_day, w = cell_w);
 
             if cell.day == 0 {
@@ -229,6 +236,8 @@ fn render_grid(frame: &mut Frame, area: Rect, app: &App, layout: &super::Calenda
                 )
             } else if focus == Some(cell.day) {
                 (app.theme.hl_soft(), app.theme.hl_soft().add_modifier(Modifier::ITALIC))
+            } else if cell.special.is_some() {
+                (special_style, special_ad_style)
             } else if cell.is_saturday {
                 (sat_style, ad_style)
             } else if cell.is_sunday {
@@ -290,6 +299,18 @@ fn detail_line(app: &App, width: u16) -> Line<'static> {
             Style::default().fg(theme.primary).add_modifier(Modifier::BOLD),
         )];
 
+        if let Some(special) = app.special_day_for(day) {
+            let color = match special {
+                calendar::SpecialDay::NepaliNewYear => theme.warning,
+                calendar::SpecialDay::GregorianNewYear => theme.secondary,
+                calendar::SpecialDay::DeveloperBirthday => theme.error,
+            };
+            segs.push((
+                special.label().to_string(),
+                Style::default().fg(color).add_modifier(Modifier::BOLD),
+            ));
+        }
+
         if let Some(ad) = calendar::bs_to_ad(app.view_year, app.view_month, day) {
             if let Some(nepali) = calendar::ad_to_bs(ad.year(), ad.month(), ad.day()) {
                 segs.push((nepali.day_name().to_string(), Style::default().fg(theme.fg)));
@@ -299,6 +320,13 @@ fn detail_line(app: &App, width: u16) -> Line<'static> {
                 Style::default().fg(theme.secondary),
             ));
             segs.push((ad.format("%A").to_string(), Style::default().fg(theme.secondary)));
+        }
+
+        if app.selected_special_day().is_some() {
+            segs.push((
+                "Enter: celebration".to_string(),
+                Style::default().fg(theme.secondary).add_modifier(Modifier::DIM),
+            ));
         }
 
         return Line::from(fit_spans(segs, " \u{b7} ", width));
@@ -411,6 +439,15 @@ mod tests {
         let text = line_text(&detail_line(&app, 120));
         assert!(text.contains("Tab"));
         assert!(text.contains("?"));
+    }
+
+    #[test]
+    fn test_detail_line_labels_special_day() {
+        let mut app = test_app();
+        app.selected_day = Some(1);
+        let text = line_text(&detail_line(&app, 120));
+        assert!(text.contains("Nepali New Year"));
+        assert!(text.contains("Enter: celebration"));
     }
 
     #[test]
