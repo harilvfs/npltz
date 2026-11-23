@@ -108,6 +108,7 @@ html{scroll-padding-top:88px}
 
 .no-flex-gap .brand>span{margin-left:10px}
 a,button,input,[role="button"]{-webkit-tap-highlight-color:transparent}
+.using-touch a:focus,.using-touch button:focus,.using-touch input:focus,.using-touch [role="button"]:focus{outline:none!important}
 .no-flex-gap .side-brand>*+*{margin-left:9px}
 .no-flex-gap .topbar nav>*+*{margin-left:29px}
 .no-flex-gap .intro>*+*{margin-left:40px}

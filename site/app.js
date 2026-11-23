@@ -314,6 +314,8 @@
     if (/Android 5\./.test(navigator.userAgent) || (!('backdropFilter' in style) && !('webkitBackdropFilter' in style))) {
       document.documentElement.classList.add('no-backdrop-filter');
     }
+    document.addEventListener('touchstart', () => document.documentElement.classList.add('using-touch'), {passive:true});
+    document.addEventListener('keydown', () => document.documentElement.classList.remove('using-touch'));
     try{state.lang=localStorage.getItem('npltz-web-lang')==='ne'?'ne':'en';}catch{}
     applyLanguage(state.lang);setupThemeDialog();setupDialogs();setupControls();updateNepalClock();setInterval(updateNepalClock,1000);
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)updateNepalClock();});window.addEventListener('focus',updateNepalClock);
