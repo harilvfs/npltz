@@ -310,6 +310,8 @@
 
   async function init(){
     if (!supportsFlexGap()) document.documentElement.classList.add('no-flex-gap');
+    const style = document.createElement('div').style;
+    if (!('backdropFilter' in style) && !('webkitBackdropFilter' in style)) document.documentElement.classList.add('no-backdrop-filter');
     try{state.lang=localStorage.getItem('npltz-web-lang')==='ne'?'ne':'en';}catch{}
     applyLanguage(state.lang);setupThemeDialog();setupDialogs();setupControls();updateNepalClock();setInterval(updateNepalClock,1000);
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)updateNepalClock();});window.addEventListener('focus',updateNepalClock);
