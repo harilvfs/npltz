@@ -18,7 +18,7 @@
       keyboardFirst:'KEYBOARD FIRST',keyboardHeadline:'Made for the keys. Works with a click.',keyboardCopy:'Move around the calendar with arrow keys, or use the controls. Press',keyboardCopyEnd:'any time for the full guide.',seeShortcuts:'See keyboard shortcuts',builtIn:'BUILT IN',builtInCopy:'Every date is calculated from the same verified year data as the terminal app. No network call needed.',
       aboutEyebrow:'THE TUI, NOW ON THE WEB',aboutTitle:'A Nepali Patro',aboutTitleAccent:'for terminal and browser.',aboutCopy:'npltz is a free, offline Bikram Sambat calendar written in Rust with Ratatui. The TUI and this browser edition share the same calendar data, date rules and themes.',exploreTui:'Explore the TUI',getAndroid:'Get the Android app',footerTagline:'Nepali dates, quietly.',source:'Source',changelog:'Changelog',androidApp:'Android app',license:'MIT License',footerCredit:'Open source - Made in Nepal',
       makeItYours:'MAKE IT YOURS',jumpToDate:'JUMP TO A DATE',goToMonth:'Go to month',bsDate:'Bikram Sambat date',gotoPlaceholder:'2083-06 or 2083-06-15',gotoHint:'Enter year-month, or year-month-day. Years 1975 to 2090.',navigateYourWay:'NAVIGATE YOUR WAY',keyboardShortcuts:'Keyboard shortcuts',previousNextMonth:'Previous / next month',previousNextYear:'Previous / next year',moveSelectedDay:'Move selected day',thenArrows:'then arrows',goToToday:'Go to today',goToADate:'Go to a date',changeTheme:'Change theme',toggleAdDates:'Toggle Gregorian dates',thisHelp:'This help',closeDialog:'Close dialog',wholeYear:'THE WHOLE YEAR',yearHint:'change year - select a month to open it',
-      close:'Close',interactiveCalendar:'Interactive Nepali calendar',calendarGrid:'Month calendar',language:'Language',footerNavigation:'Footer navigation',previousMonth:'Previous month',nextMonth:'Next month',previousMonthTitle:'Previous month (left arrow)',nextMonthTitle:'Next month (right arrow)',todayTitle:'Go to today (t)',yearOverviewTitle:'Year overview (y)',previousYear:'Previous year',nextYear:'Next year',
+      close:'Close',interactiveCalendar:'Interactive Nepali calendar',calendarGrid:'Month calendar',language:'Language',footerNavigation:'Footer navigation',backToTop:'Back to top',previousMonth:'Previous month',nextMonth:'Next month',previousMonthTitle:'Previous month (left arrow)',nextMonthTitle:'Next month (right arrow)',todayTitle:'Go to today (t)',yearOverviewTitle:'Year overview (y)',previousYear:'Previous year',nextYear:'Next year',
       rangeLimit:'Calendar data covers BS 1975-2090.',firstYear:'Reached the first calendar year.',lastYear:'Reached the last calendar year.',
       invalidDateFormat:'Use YYYY-MM or YYYY-MM-DD.',outsideCalendar:'That year or month is outside the calendar data.',monthHasDays:'{month} {year} has {days} days.',
       nepaliNewYear:'Nepali New Year',nepaliNewYearGreeting:'Wishing you a bright new year.',hariBirthday:"Developer's birthday",hariGreeting:'Happy birthday, Hari! Have a wonderful year.',gregorianNewYear:'New Year {year}',gregorianGreeting:'A brand new year begins. Happy New Year!',
@@ -35,7 +35,7 @@
       keyboardFirst:'किबोर्डबाट चलाउनुहोस्',keyboardHeadline:'किबोर्डबाट सजिलै। क्लिक गरेर पनि।',keyboardCopy:'एरो की वा बटनबाट पात्रो चलाउनुहोस्। पूरा सहयोगका लागि',keyboardCopyEnd:'थिच्नुहोस्।',seeShortcuts:'किबोर्ड सर्टकट हेर्नुहोस्',builtIn:'पहिल्यै समावेश',builtInCopy:'टर्मिनल एपमा जस्तै प्रमाणित पात्रो डेटा प्रयोग हुन्छ। इन्टरनेट चाहिँदैन।',
       aboutEyebrow:'TUI अब वेबमा',aboutTitle:'नेपाली पात्रो',aboutTitleAccent:'टर्मिनल र ब्राउजरमा।',aboutCopy:'npltz Rust र Ratatui मा बनेको निःशुल्क, अफलाइन विक्रम संवत् पात्रो हो। TUI र यो वेब संस्करणमा एउटै पात्रो डेटा, मिति नियम र थिम प्रयोग हुन्छन्।',exploreTui:'TUI हेर्नुहोस्',getAndroid:'Android एप लिनुहोस्',footerTagline:'नेपाली मिति, सरल रूपमा।',source:'स्रोत कोड',changelog:'परिवर्तन विवरण',androidApp:'Android एप',license:'MIT इजाजतपत्र',footerCredit:'खुला स्रोत - नेपालमा निर्मित',
       makeItYours:'आफ्नो थिम छान्नुहोस्',jumpToDate:'मितिमा जानुहोस्',goToMonth:'महिना खोल्नुहोस्',bsDate:'विक्रम संवत् मिति',gotoPlaceholder:'२०८३-०६ वा २०८३-०६-१५',gotoHint:'वर्ष-महिना वा वर्ष-महिना-दिन लेख्नुहोस्। वर्ष १९७५ देखि २०९० सम्म।',navigateYourWay:'किबोर्डबाट चलाउनुहोस्',keyboardShortcuts:'किबोर्ड सर्टकट',previousNextMonth:'अघिल्लो / अर्को महिना',previousNextYear:'अघिल्लो / अर्को वर्ष',moveSelectedDay:'छानिएको दिन सार्नुहोस्',thenArrows:'पछि एरो की',goToToday:'आजमा जानुहोस्',goToADate:'मितिमा जानुहोस्',changeTheme:'थिम बदल्नुहोस्',toggleAdDates:'इस्वी मिति देखाउनुहोस् / लुकाउनुहोस्',thisHelp:'यो सहयोग',closeDialog:'झ्याल बन्द गर्नुहोस्',wholeYear:'पूरा वर्ष',yearHint:'वर्ष बदल्नुहोस् - महिना छानेर खोल्नुहोस्',
-      close:'बन्द गर्नुहोस्',interactiveCalendar:'अन्तर्क्रियात्मक नेपाली पात्रो',calendarGrid:'महिनाको पात्रो',language:'भाषा',footerNavigation:'फुटर नेभिगेसन',previousMonth:'अघिल्लो महिना',nextMonth:'अर्को महिना',previousMonthTitle:'अघिल्लो महिना (बायाँ एरो)',nextMonthTitle:'अर्को महिना (दायाँ एरो)',todayTitle:'आजमा जानुहोस् (t)',yearOverviewTitle:'वर्ष दृश्य (y)',previousYear:'अघिल्लो वर्ष',nextYear:'अर्को वर्ष',
+      close:'बन्द गर्नुहोस्',interactiveCalendar:'अन्तर्क्रियात्मक नेपाली पात्रो',calendarGrid:'महिनाको पात्रो',language:'भाषा',footerNavigation:'फुटर नेभिगेसन',backToTop:'माथि जानुहोस्',previousMonth:'अघिल्लो महिना',nextMonth:'अर्को महिना',previousMonthTitle:'अघिल्लो महिना (बायाँ एरो)',nextMonthTitle:'अर्को महिना (दायाँ एरो)',todayTitle:'आजमा जानुहोस् (t)',yearOverviewTitle:'वर्ष दृश्य (y)',previousYear:'अघिल्लो वर्ष',nextYear:'अर्को वर्ष',
       rangeLimit:'पात्रो डेटा वि.सं. १९७५-२०९० सम्म छ।',firstYear:'पात्रोको पहिलो वर्षमा पुग्नुभयो।',lastYear:'पात्रोको अन्तिम वर्षमा पुग्नुभयो।',
       invalidDateFormat:'वर्ष-महिना वा वर्ष-महिना-दिन ढाँचामा लेख्नुहोस्।',outsideCalendar:'यो वर्ष वा महिना पात्रो डेटामा छैन।',monthHasDays:'{year} सालको {month} महिनामा {days} दिन छन्।',
       nepaliNewYear:'नेपाली नयाँ वर्ष',nepaliNewYearGreeting:'नयाँ वर्षको हार्दिक शुभकामना।',hariBirthday:'विकासकर्ताको जन्मदिन',hariGreeting:'हरि, जन्मदिनको हार्दिक शुभकामना!',gregorianNewYear:'नयाँ वर्ष {year}',gregorianGreeting:'नयाँ वर्षको हार्दिक शुभकामना!',
@@ -252,13 +252,27 @@
       box.append(days);root.append(box);
     }
   }
-  function render() {renderMonth();renderDetails();}
+  function render() {renderMonth();renderDetails();updateScrollUI();}
+
+  function updateScrollUI(){
+    const header=document.querySelector('.topbar'),button=$('back-to-top'),doc=document.documentElement;
+    const maxScroll=Math.max(0,doc.scrollHeight-window.innerHeight),top=window.pageYOffset||doc.scrollTop||document.body.scrollTop||0;
+    if(header)header.style.setProperty('--scroll-progress',String(maxScroll?Math.min(1,top/maxScroll):0));
+    if(button)button.classList.toggle('is-visible',top>480);
+  }
+  function setupScrollUI(){
+    let scheduled=false;
+    const update=()=>{if(scheduled)return;scheduled=true;window.requestAnimationFrame(()=>{scheduled=false;updateScrollUI();});};
+    window.addEventListener('scroll',update,{passive:true});window.addEventListener('resize',update);window.addEventListener('load',update);
+    const button=$('back-to-top');if(button)button.addEventListener('click',()=>window.scrollTo(0,0));
+    updateScrollUI();
+  }
 
   function showToast(message){const t=$('toast');t.textContent=message;t.classList.add('show');clearTimeout(state.toastTimer);state.toastTimer=setTimeout(()=>t.classList.remove('show'),2300);}
   function openDialog(id){const d=$(id);if(!d.open)d.showModal();}
   function closeDialog(dialog){if(dialog.open)dialog.close();}
   function setTheme(name){if(!THEMES.some(([id])=>id===name))return;document.documentElement.dataset.theme=name;try{localStorage.setItem('npltz-web-theme',name);}catch{}document.querySelectorAll('.theme-option').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.theme===name)));const meta=document.querySelector('meta[name="theme-color"]');meta.content=getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();}
-  function setupThemeDialog(){const list=$('theme-list');THEMES.forEach(([id,name,colors])=>{const b=document.createElement('button');b.type='button';b.className='theme-option';b.dataset.theme=id;b.setAttribute('aria-pressed',String(document.documentElement.dataset.theme===id));const dots=colors.map(c=>`<i style="background:${c}"></i>`).join('');b.innerHTML=`<span class="swatches" aria-hidden="true">${dots}</span><span>${tr(`theme_${id.replace(/-/g, '_')}`)}</span><span class="theme-check" aria-hidden="true">✓</span>`;b.addEventListener('click',()=>{setTheme(id);closeDialog($('theme-dialog'));});list.append(b);});}
+  function setupThemeDialog(){const list=$('theme-list');THEMES.forEach(([id,name,colors])=>{const b=document.createElement('button');b.type='button';b.className='theme-option';b.dataset.theme=id;b.setAttribute('aria-pressed',String(document.documentElement.dataset.theme===id));const dots=colors.map(c=>`<i style="background:${c}"></i>`).join('');b.innerHTML=`<span class="swatches" aria-hidden="true">${dots}</span><span>${tr(`theme_${id.replace(/-/g, '_')}`)}</span>`;b.addEventListener('click',()=>{setTheme(id);closeDialog($('theme-dialog'));});list.append(b);});}
   function setupDialogs(){
     [['theme-open','theme-dialog'],['help-open','help-dialog']].forEach(([button,dialog])=>$(button).addEventListener('click',()=>openDialog(dialog)));
     $('year-toggle').addEventListener('click',()=>{state.yearView=state.viewYear;renderYear();openDialog('year-dialog');});
@@ -317,7 +331,7 @@
     document.addEventListener('touchstart', () => document.documentElement.classList.add('using-touch'), {passive:true});
     document.addEventListener('keydown', () => document.documentElement.classList.remove('using-touch'));
     try{state.lang=localStorage.getItem('npltz-web-lang')==='ne'?'ne':'en';}catch{}
-    applyLanguage(state.lang);setupThemeDialog();setupDialogs();setupControls();updateNepalClock();setInterval(updateNepalClock,1000);
+    applyLanguage(state.lang);setupThemeDialog();setupDialogs();setupControls();setupScrollUI();updateNepalClock();setInterval(updateNepalClock,1000);
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)updateNepalClock();});window.addEventListener('focus',updateNepalClock);
     try{
       let response=await fetch('../calendar_data.json',{cache:'force-cache'});
