@@ -101,3 +101,31 @@ html[lang="ne"] .below .eyebrow{font-size:13px;line-height:1.6;letter-spacing:.0
 .topbar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 76%,transparent);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
 html{scroll-padding-top:88px}
 #calendar,#about,#top{scroll-margin-top:88px}
+
+.no-flex-gap .brand>span{margin-left:10px}
+.no-flex-gap .side-brand>*+*{margin-left:9px}
+.no-flex-gap .topbar nav>*+*{margin-left:29px}
+.no-flex-gap .intro>*+*{margin-left:40px}
+.no-flex-gap .side-date>*+*{margin-left:11px}
+.no-flex-gap .side-pair strong,.no-flex-gap .progress-label strong{margin-left:4px}
+.no-flex-gap .special-card>*+*{margin-left:9px}
+.no-flex-gap .month-actions>*+*{margin-left:9px}
+.no-flex-gap .nav-group>*+*{margin-left:5px}
+.no-flex-gap .day-cell>*+*{margin-top:5px}
+.no-flex-gap .legend>*+*{margin-left:18px}
+.no-flex-gap .legend span>span{margin-left:6px}
+.no-flex-gap .below-links>*+*{margin-left:23px}
+.no-flex-gap .window-title>*+*{margin-left:8px}
+.no-flex-gap .window-actions>*+*{margin-left:7px}
+.no-flex-gap .kde-controls>*+*{margin-left:2px}
+.no-flex-gap .window-clock>*+*{margin-left:6px}
+.no-flex-gap .footer-links>*+*{margin-left:22px}
+.no-flex-gap .github-link>*+*{margin-left:8px}
+.no-flex-gap .github-link .external-arrow{margin-left:2px}
+.no-flex-gap .theme-option>*+*{margin-left:8px}
+.no-flex-gap .help-item>*+*{margin-left:7px}
+.no-flex-gap .key-group>*+*{margin-left:4px}
+.no-flex-gap .year-hint>*+*{margin-left:5px}
+@media(max-width:720px){.no-flex-gap .topbar nav>*+*{margin-left:17px}.no-flex-gap .intro>*+*{margin-left:0;margin-top:20px}}
+@media(max-width:560px){.no-flex-gap .footer-links>*+*{margin-left:18px}.no-flex-gap .legend>*+*{margin-left:10px}}
+@media(max-width:420px){.no-flex-gap .topbar nav>*+*{margin-left:12px}.no-flex-gap .nav-group>*+*{margin-left:4px}.no-flex-gap .below-links>*+*{margin-left:20px}}

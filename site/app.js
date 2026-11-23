@@ -61,9 +61,23 @@
   const pad = (n) => String(n).padStart(2, '0');
   const dateKey = (y, m, d) => `${y}-${pad(m)}-${pad(d)}`;
   const yearData = (year) => state.yearIndex.get(year);
-  const daysInMonth = (year, month) => yearData(year)?.months[month - 1] || 0;
-  const yearTotal = (year) => yearData(year)?.total_days || 0;
-  const tr = (key) => TEXT[state.lang]?.[key] ?? TEXT.en[key] ?? key;
+  function supportsFlexGap() {
+    const flex = document.createElement('div');
+    flex.style.cssText = 'display:flex;flex-direction:column;position:absolute;top:-1000px;left:-1000px;row-gap:1px';
+    const first = document.createElement('div');
+    const second = document.createElement('div');
+    first.style.height = '1px';
+    second.style.height = '1px';
+    flex.appendChild(first);
+    flex.appendChild(second);
+    document.body.appendChild(flex);
+    const supported = flex.scrollHeight === 3;
+    document.body.removeChild(flex);
+    return supported;
+  }
+  const daysInMonth = (year, month) => { const data = yearData(year); return data ? data.months[month - 1] : 0; };
+  const yearTotal = (year) => { const data = yearData(year); return data ? data.total_days : 0; };
+  const tr = (key) => { const languageText = TEXT[state.lang]; return (languageText && languageText[key]) || TEXT.en[key] || key; };
   const locale = () => state.lang === 'ne' ? 'ne-NP' : 'en-US';
   const toNepaliDigits = (value) => String(value).replace(/[0-9]/g, (digit) => '०१२३४५६७८९'[Number(digit)]);
   const formatNumber = (n) => state.lang === 'ne' ? toNepaliDigits(n) : new Intl.NumberFormat('en-US', {useGrouping:false}).format(n);
@@ -75,7 +89,7 @@
   const normalizeDigits = (value) => value.replace(/[०-९]/g, (digit) => String('०१२३४५६७८९'.indexOf(digit)));
   const monthName = (month) => (state.lang === 'ne' ? MONTHS_NE : MONTHS)[month - 1];
   const weekdayName = (index) => (state.lang === 'ne' ? DAY_NAMES_NE : DAY_NAMES)[index];
-  const interpolate = (value, vars = {}) => value.replace(/\{(\w+)\}/g, (_, key) => vars[key] ?? '');
+  const interpolate = (value, vars = {}) => value.replace(/\{(\w+)\}/g, (_, key) => vars[key] == null ? '' : vars[key]);
 
   function applyLanguage(lang) {
     state.lang = lang === 'ne' ? 'ne' : 'en';
@@ -94,7 +108,8 @@
     if (todayLabel) todayLabel.textContent = todayBs && state.viewYear === todayBs.year && state.viewMonth === todayBs.month && state.selectedDay === todayBs.day ? tr('todayInNepal') : tr('selectedDate');
     updateNepalClock();
     if (state.years.length) render();
-    if ($('year-dialog')?.open) renderYear();
+    const yearDialog = $('year-dialog');
+    if (yearDialog && yearDialog.open) renderYear();
   }
 
   function bsToAd(year, month, day) {
@@ -262,13 +277,13 @@
       if(e.altKey||e.ctrlKey||e.metaKey)return;
       const open=document.querySelector('dialog[open]');
       if(open){if(e.key==='Escape'){closeDialog(open);e.preventDefault();return;}if(open.id==='year-dialog'&&e.key==='ArrowLeft'){e.preventDefault();$('year-prev').click();}if(open.id==='year-dialog'&&e.key==='ArrowRight'){e.preventDefault();$('year-next').click();}return;}
-      const tag=e.target?.tagName;if(tag==='INPUT'||tag==='TEXTAREA'||e.target?.isContentEditable)return;
+      const tag=e.target && e.target.tagName;if(tag==='INPUT'||tag==='TEXTAREA'||(e.target && e.target.isContentEditable))return;
       const key=e.key;
       if(state.cursor&&(key==='ArrowLeft'||key==='h'||key==='ArrowRight'||key==='l'||key==='ArrowUp'||key==='k'||key==='ArrowDown'||key==='j')){
         let step=(key==='ArrowLeft'||key==='h')?-1:(key==='ArrowRight'||key==='l')?1:(key==='ArrowUp'||key==='k')?-7:7;
         let next=state.selectedDay+step,y=state.viewYear,m=state.viewMonth;
         if(next<1){if(--m<1){m=12;y--;}next+=daysInMonth(y,m);}else if(next>daysInMonth(y,m)){next-=daysInMonth(y,m);if(++m>12){m=1;y++;}}
-        if(yearData(y))setSelected(y,m,next);e.preventDefault();document.querySelector('.day-cell.selected')?.focus();
+        if(yearData(y))setSelected(y,m,next);e.preventDefault();const selected=document.querySelector('.day-cell.selected');if(selected)selected.focus();
       }
       else if(key==='ArrowLeft'||key==='h'){navigateMonth(-1);e.preventDefault();}
       else if(key==='ArrowRight'||key==='l'){navigateMonth(1);e.preventDefault();}
@@ -294,6 +309,7 @@
   }
 
   async function init(){
+    if (!supportsFlexGap()) document.documentElement.classList.add('no-flex-gap');
     try{state.lang=localStorage.getItem('npltz-web-lang')==='ne'?'ne':'en';}catch{}
     applyLanguage(state.lang);setupThemeDialog();setupDialogs();setupControls();updateNepalClock();setInterval(updateNepalClock,1000);
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)updateNepalClock();});window.addEventListener('focus',updateNepalClock);
