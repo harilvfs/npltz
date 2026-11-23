@@ -94,7 +94,7 @@ footer{font-size:13px}
 .topbar .theme-trigger{flex:0 0 39px;width:39px;min-width:39px;height:39px;padding:0}
 
 .theme-trigger .theme-icon{display:block;width:19px;height:19px;flex:none}
-.topbar .theme-trigger{display:grid;place-items:center;line-height:0}
+.topbar .theme-trigger{display:flex;align-items:center;justify-content:center;line-height:0}
 html[lang="ne"] h1{line-height:1.28}
 html[lang="ne"] .intro .eyebrow{font-size:13px;line-height:1.6;letter-spacing:.025em}
 html[lang="ne"] .below .eyebrow{font-size:13px;line-height:1.6;letter-spacing:.025em}
@@ -134,4 +134,4 @@ html{scroll-padding-top:88px}
 @media(max-width:560px){.no-flex-gap .footer-links>*+*{margin-left:18px}.no-flex-gap .legend>*+*{margin-left:10px}}
 @media(max-width:420px){.no-flex-gap .topbar nav>*+*{margin-left:12px}.no-flex-gap .nav-group>*+*{margin-left:4px}.no-flex-gap .below-links>*+*{margin-left:20px}}
 .no-flex-gap .language-switch+.theme-trigger{margin-left:12px}
-.no-backdrop-filter .topbar{background:var(--bg)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.no-backdrop-filter .topbar{background:var(--bg)!important;opacity:1;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
