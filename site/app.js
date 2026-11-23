@@ -86,7 +86,7 @@
     document.querySelectorAll('[data-i18n-title]').forEach((el) => { el.title = tr(el.dataset.i18nTitle); });
     document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => { el.placeholder = tr(el.dataset.i18nPlaceholder); });
     document.querySelectorAll('[data-language]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.language === state.lang)));
-    document.querySelectorAll('.theme-option').forEach((button) => { const label=button.querySelector('span:nth-child(2)'); if(label)label.textContent=tr(`theme_${button.dataset.theme.replaceAll('-', '_')}`); });
+    document.querySelectorAll('.theme-option').forEach((button) => { const label=button.querySelector('span:nth-child(2)'); if(label)label.textContent=tr(`theme_${button.dataset.theme.replace(/-/g, '_')}`); });
     document.title = state.lang === 'ne' ? 'npltz - नेपाली पात्रो' : 'npltz - Nepali calendar';
     document.querySelector('meta[name="description"]').content = tr('heroCopy');
     const todayLabel = $('side-label');
@@ -183,7 +183,7 @@
     $('ad-range').textContent = start && end ? `${formatAdDate(start)} - ${formatAdDate(end)}` : '';
     const grid = $('calendar-grid');
     grid.classList.toggle('hide-ad',!state.showAd);
-    grid.replaceChildren();
+    while(grid.firstChild)grid.removeChild(grid.firstChild);
     for (let i=0;i<7;i++) {
       const label=document.createElement('div'); label.className=`weekday${i===0?' sun':i===6?' sat':''}`; label.setAttribute('role','columnheader'); label.textContent=state.lang==='ne'?WEEKDAYS_NE[i]:WEEKDAYS[i]; grid.append(label);
     }
@@ -202,7 +202,7 @@
     const todayBs=getTodayBs();
     if(todayBs && yearData(todayBs.year)){
       const t=bsToAd(todayBs.year,todayBs.month,1), e=bsToAd(todayBs.year,todayBs.month,daysInMonth(todayBs.year,todayBs.month));
-      $('data-range').textContent=`${formatNumber(state.years[0].year)}-${formatNumber(state.years.at(-1).year)}`;
+      $('data-range').textContent=`${formatNumber(state.years[0].year)}-${formatNumber(state.years[state.years.length - 1].year)}`;
     }
   }
 
@@ -220,7 +220,7 @@
   }
   function renderYear() {
     $('year-heading').textContent=state.lang==='ne'?`${formatNumber(state.yearView)} वि.सं.`:`${formatNumber(state.yearView)} BS`;
-    const root=$('year-grid');root.replaceChildren();
+    const root=$('year-grid');while(root.firstChild)root.removeChild(root.firstChild);
     for(let month=1;month<=12;month++){
       const box=document.createElement('section');box.className='mini-month';
       const title=document.createElement('button');title.className='mini-title';title.textContent=monthName(month);title.addEventListener('click',()=>{setSelected(state.yearView,month,1);$('year-dialog').close();});box.append(title);
@@ -243,7 +243,7 @@
   function openDialog(id){const d=$(id);if(!d.open)d.showModal();}
   function closeDialog(dialog){if(dialog.open)dialog.close();}
   function setTheme(name){if(!THEMES.some(([id])=>id===name))return;document.documentElement.dataset.theme=name;try{localStorage.setItem('npltz-web-theme',name);}catch{}document.querySelectorAll('.theme-option').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.theme===name)));const meta=document.querySelector('meta[name="theme-color"]');meta.content=getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();}
-  function setupThemeDialog(){const list=$('theme-list');THEMES.forEach(([id,name,colors])=>{const b=document.createElement('button');b.type='button';b.className='theme-option';b.dataset.theme=id;b.setAttribute('aria-pressed',String(document.documentElement.dataset.theme===id));const dots=colors.map(c=>`<i style="background:${c}"></i>`).join('');b.innerHTML=`<span class="swatches" aria-hidden="true">${dots}</span><span>${tr(`theme_${id.replaceAll('-', '_')}`)}</span><span class="theme-check" aria-hidden="true">✓</span>`;b.addEventListener('click',()=>{setTheme(id);closeDialog($('theme-dialog'));});list.append(b);});}
+  function setupThemeDialog(){const list=$('theme-list');THEMES.forEach(([id,name,colors])=>{const b=document.createElement('button');b.type='button';b.className='theme-option';b.dataset.theme=id;b.setAttribute('aria-pressed',String(document.documentElement.dataset.theme===id));const dots=colors.map(c=>`<i style="background:${c}"></i>`).join('');b.innerHTML=`<span class="swatches" aria-hidden="true">${dots}</span><span>${tr(`theme_${id.replace(/-/g, '_')}`)}</span><span class="theme-check" aria-hidden="true">✓</span>`;b.addEventListener('click',()=>{setTheme(id);closeDialog($('theme-dialog'));});list.append(b);});}
   function setupDialogs(){
     [['theme-open','theme-dialog'],['help-open','help-dialog']].forEach(([button,dialog])=>$(button).addEventListener('click',()=>openDialog(dialog)));
     $('year-toggle').addEventListener('click',()=>{state.yearView=state.viewYear;renderYear();openDialog('year-dialog');});

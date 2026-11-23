@@ -73,6 +73,13 @@ html[lang="ne"] .language-indicator{transform:translateX(100%)}
 @media(max-width:620px){.calendar-footer{padding:7px 0 5px}.help-strip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-content:start;row-gap:8px;column-gap:12px}.help-item{display:flex;align-items:center;gap:6px;min-width:0}.language-switch button{min-width:34px;padding-inline:6px}}
 @media(prefers-reduced-motion:reduce){.language-indicator{transition:none}}
 
+@supports not (background:color-mix(in srgb,black,white)){
+  .special-card,.rail-icon,.day-cell:hover,.day-cell.selected,.day-cell.today,.day-cell.today.selected,.theme-option:hover,.theme-option[aria-pressed=true]{background:var(--surface-2)}
+  .day-cell.outside,.topbar{background:var(--bg)}
+  .special-card{border-color:var(--warning)}
+  .primary-button kbd{border-color:var(--line)}
+}
+
 .legend{align-items:center;font-size:11px}
 .legend>span{display:inline-flex;align-items:center;line-height:1.3}
 .legend .legend-special{display:inline-flex;flex:0 0 13px;width:13px;height:16px;align-items:center;justify-content:center;line-height:1;font-size:13px;vertical-align:middle;transform:none}
