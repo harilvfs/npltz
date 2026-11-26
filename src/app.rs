@@ -397,7 +397,7 @@ pub struct CalendarRow {
     pub cells: Vec<CalendarCell>,
 }
 
-pub const BS_MAX: i32 = 2090;
+pub const BS_MAX: i32 = calendar::BS_MAX_YEAR;
 
 impl App {
     pub fn new(theme_name: &str, no_color: bool) -> Self {
@@ -665,7 +665,7 @@ impl App {
             Some(y) if (calendar::BS_EPOCH_YEAR..=BS_MAX).contains(&y) => y,
             _ => {
                 self.goto_error = Some(format!(
-                    "Year must be {}-{} (AD ~1918-2042)",
+                    "Year must be {}-{} (AD ~1918-2044)",
                     calendar::BS_EPOCH_YEAR,
                     BS_MAX
                 ));

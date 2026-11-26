@@ -218,7 +218,9 @@ See [contrib/termux/README.md](https://github.com/harilvfs/npltz/blob/main/contr
 
 ## How it Works
 
-npltz uses calendar data from the [`bikram-sambat`](https://github.com/medic/bikram-sambat) project by [medic](https://github.com/medic). The data (`calendar_data.json`) is compiled into the binary at build time via `include_str!()`, so no external JSON files are needed at runtime. It contains day counts for each month of each BS year (1975-2090) and is used for converting AD (English) dates to BS (Bikram Sambat/Nepali) and vice versa, as well as knowing how many days to render for a given month in the TUI. Star his repo if you find it useful: <https://github.com/medic/bikram-sambat>.
+npltz uses calendar data compiled into the binary at build time via `include_str!()`, so no external JSON files are needed at runtime. `calendar_data.json` holds the day count of every month for BS 1975-2100 and drives AD (English) ↔ BS (Bikram Sambat/Nepali) conversion as well as the TUI month view.
+
+The 1975-2090 table comes from the [`bikram-sambat`](https://github.com/medic/bikram-sambat) project by [medic](https://github.com/medic) — star his repo if you find it useful: <https://github.com/medic/bikram-sambat>. BS 2091-2100 extends that table from the public [`nepali-datetime`](https://github.com/amitgaru/nepali-datetime) dataset, cross-checked against other published Nepali calendar tables. The extended years are projected data, not officially issued patro dates, so treat them as provisional.
 
 ## Contributing
 

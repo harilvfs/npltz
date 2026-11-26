@@ -22,4 +22,6 @@ sh site/build.sh
 
 This creates `site/dist/` with the page and a copy of the root calendar data. Deploy the contents of `site/dist/` to any static host. The generated folder is ignored by Git.
 
-The site includes English and Nepali UI languages, updates its Nepal time clock every second, uses Nepal Standard Time (Asia/Kathmandu) for today, and supports BS 1975-2090. Its date conversion follows the epoch and year/month day-count rules in `src/calendar.rs`.
+The site includes English and Nepali UI languages, updates its Nepal time clock every second, uses Nepal Standard Time (Asia/Kathmandu) for today, and supports BS 1975-2100. Its date conversion follows the epoch and year/month day-count rules in `src/calendar.rs`.
+
+BS 1975-2090 uses the same data as the terminal app. Years 2091-2100 extend that table from the public [`nepali-datetime`](https://github.com/amitgaru/nepali-datetime) dataset; they are projected calendar data rather than officially published patro years, so treat those dates as provisional.
