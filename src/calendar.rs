@@ -115,6 +115,7 @@ static DATA: std::sync::LazyLock<Vec<YearData>> = std::sync::LazyLock::new(|| {
 
 const AD_EPOCH: (i32, u32, u32) = (1918, 4, 13);
 pub const BS_EPOCH_YEAR: i32 = 1975;
+pub const BS_MAX_YEAR: i32 = 2100;
 
 fn get_year_data(bs_year: i32) -> Option<&'static YearData> {
     DATA.iter().find(|yd| yd.year == bs_year)
@@ -256,6 +257,30 @@ mod tests {
         assert_eq!(nd.month, 3);
         assert_eq!(nd.day, 6);
         assert_eq!(nd.weekday, 6);
+    }
+
+    #[test]
+    fn test_data_range_and_totals() {
+        assert_eq!(DATA.first().unwrap().year, BS_EPOCH_YEAR);
+        assert_eq!(DATA.last().unwrap().year, BS_MAX_YEAR);
+        for (i, yd) in DATA.iter().enumerate() {
+            assert_eq!(yd.year, BS_EPOCH_YEAR + i as i32);
+            assert_eq!(yd.total_days, yd.months.iter().sum::<u32>());
+        }
+    }
+
+    #[test]
+    fn test_last_supported_year_boundary() {
+        let days = get_days_in_month(BS_MAX_YEAR, 12).unwrap();
+        let start = bs_to_ad(BS_MAX_YEAR, 1, 1).unwrap();
+        let end = bs_to_ad(BS_MAX_YEAR, 12, days).unwrap();
+        assert_eq!((start.year(), start.month(), start.day()), (2043, 4, 14));
+        assert_eq!((end.year(), end.month(), end.day()), (2044, 4, 12));
+
+        let nd = ad_to_bs(2044, 4, 12).unwrap();
+        assert_eq!((nd.year, nd.month, nd.day), (BS_MAX_YEAR, 12, days));
+        assert!(ad_to_bs(2044, 4, 13).is_none());
+        assert!(bs_to_ad(BS_MAX_YEAR + 1, 1, 1).is_none());
     }
 
     #[test]

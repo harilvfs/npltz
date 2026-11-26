@@ -217,12 +217,12 @@ pub fn convert_ad_to_bs(date_str: &str) -> Result<()> {
             let _ = writeln!(out, "{}", nd.format_long());
         }
         None => {
-            let bs_end = calendar::BS_EPOCH_YEAR + 124;
+            let bs_end = calendar::BS_MAX_YEAR;
             let _ = writeln!(
                 out,
                 "Date out of range. Supports AD ~{}-{} (BS {}-{})",
                 1918,
-                2042,
+                2044,
                 calendar::BS_EPOCH_YEAR,
                 bs_end
             );
@@ -254,14 +254,14 @@ pub fn convert_bs_to_ad(date_str: &str) -> Result<()> {
             );
         }
         None => {
-            let bs_end = calendar::BS_EPOCH_YEAR + 124;
+            let bs_end = calendar::BS_MAX_YEAR;
             let _ = writeln!(
                 out,
                 "Date out of range. Supports BS {}-{} (AD ~{}-{})",
                 calendar::BS_EPOCH_YEAR,
                 bs_end,
                 1918,
-                2042
+                2044
             );
         }
     }
