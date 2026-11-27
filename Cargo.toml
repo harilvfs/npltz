@@ -4,7 +4,7 @@ resolver = "2"
 default-members = ["."]
 
 [workspace.package]
-version = "2.2.0"
+version = "2.3.0"
 edition = "2024"
 description = "Free and open-source Nepali (Bikram Sambat) calendar for your terminal. Browse BS dates with AD support, fully offline."
 documentation = "https://github.com/harilvfs/npltz/blob/main/.github/README.md"
