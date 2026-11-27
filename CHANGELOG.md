@@ -1,4 +1,54 @@
 
+## [unreleased]
+
+
+### ⚙️ Miscellaneous Tasks
+
+
+- [764b42f](https://github.com/harilvfs/npltz/commit/764b42f87bd4e3da5b8eff0a5424309a17a29a6d)  *(changelog)* Use git-cliff action for changelog by @harilvfs
+
+
+
+## [2.3.0](https://github.com/harilvfs/npltz/compare/v2.2.0...v2.3.0) - 2026-11-27
+
+
+### 🚀 Features
+
+
+- [9bf7a44](https://github.com/harilvfs/npltz/commit/9bf7a449a1d57f7b42487b147a439e1b82085ec9)  *(site)* Add scroll controls and refresh link icons by @harilvfs
+
+- [8678224](https://github.com/harilvfs/npltz/commit/86782249bd0c84643d2ccb59e251709451516a40)  *(calendar)* Extend BS data through 2100 (#112) by @harilvfs in [#112](https://github.com/harilvfs/npltz/pull/112)
+
+
+
+### 🐛 Bug Fixes
+
+
+- [d921e60](https://github.com/harilvfs/npltz/commit/d921e60ba1ecf8d75926e92139f70e5ae1d57a0d)  *(site)* Remove language switch tap effect by @harilvfs
+
+- [6a3fb1e](https://github.com/harilvfs/npltz/commit/6a3fb1ebadf80c953900dcbc092efdd06eadeed5)  *(site)* Support older Chromium browsers by @harilvfs
+
+- [19aaf0f](https://github.com/harilvfs/npltz/commit/19aaf0fac468fc7bb4f5d1ab4993a02f476d7270)  *(site)* Improve Android 5 browser compatibility by @harilvfs
+
+- [94a7522](https://github.com/harilvfs/npltz/commit/94a75225de0602dfb6f986c16f5150a329b66f0b)  *(site)* Refine old browser calendar styling by @harilvfs
+
+- [a036832](https://github.com/harilvfs/npltz/commit/a036832f52dc93fe38a07e18b2ba6bf5be5b70cd)  *(site)* Align legacy tablet header controls by @harilvfs
+
+- [2e83ca3](https://github.com/harilvfs/npltz/commit/2e83ca35ef184a48f1ace64fbd9b6a89590e28cb)  *(site)* Center tablet theme control by @harilvfs
+
+- [9cf89ef](https://github.com/harilvfs/npltz/commit/9cf89eff744b4e175acc29d030aa224bb03678b7)  *(site)* Remove tap highlights from controls by @harilvfs
+
+- [2f1a304](https://github.com/harilvfs/npltz/commit/2f1a3041fec0dca2299cf17589d7f51dacb0646a)  *(site)* Hide focus rings after touch by @harilvfs
+
+
+
+### ⚙️ Miscellaneous Tasks
+
+
+- [3fdba39](https://github.com/harilvfs/npltz/commit/3fdba39375265d4eb6d87122f54a287b33996d08) Add .editorconfig with per-language indentation by @harilvfs
+
+
+
 ## [2.2.0](https://github.com/harilvfs/npltz/compare/v2.1.0...v2.2.0) - 2026-11-21
 
 
