@@ -24,23 +24,15 @@ jobs:
           token: ${{ secrets.PAT_TOKEN }}
           fetch-depth: 0
 
-      - name: Install git-cliff
-        run: |
-          sudo apt-get update && sudo apt-get install -y jq
-          LATEST_TAG=$(curl -s https://api.github.com/repos/orhun/git-cliff/releases/latest | jq -r '.tag_name')
-          FILE="git-cliff-${LATEST_TAG#v}-x86_64-unknown-linux-gnu.tar.gz"
-          curl -sL "https://github.com/orhun/git-cliff/releases/download/${LATEST_TAG}/${FILE}" | tar -xz
-          mv git-cliff-*/git-cliff /usr/local/bin/git-cliff
-          chmod +x /usr/local/bin/git-cliff
-          git-cliff --version
-
       - name: Generate changelog with git-cliff
-        run: git-cliff -o CHANGELOG.md
+        uses: orhun/git-cliff-action@v4
+        with:
+          version: "v2.13.1"
+          config: cliff.toml
+          args: -o CHANGELOG.md
         env:
+          OUTPUT: CHANGELOG.md
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Cleanup git-cliff installation files
-        run: rm -rf git-cliff-*
 
       - name: Create Pull Request
         id: create_changelog_pr
