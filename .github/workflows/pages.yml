@@ -29,7 +29,7 @@ jobs:
       - name: Build static website
         run: sh site/build.sh
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: site/dist
   deploy:
